@@ -56,10 +56,10 @@ jobs:
             --icon-file="d2x-rebirth/d2x-rebirth.png"
 
       - name: Zip AppImages
-        run: zip -r -X DXX-Rebirth-Linux-AppImage.zip . -i '*.AppImage'
+        run: zip -r -X DXX-Rebirth-Linux-AppImage-`uname -m`.zip . -i '*.AppImage'
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: linux-appimage
+          name: linux
           path: '*.zip'
