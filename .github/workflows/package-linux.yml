@@ -27,13 +27,39 @@ jobs:
           CXX: g++-13
 
       - name: Install AppImage Requirements
-        run: sudo apt-get install -y libfuse2 wget curl
+        run: |
+          sudo apt-get install -y libfuse2 wget curl
+          mkdir ~/Applications
+          curl -s -L --output ~/Applications/linuxdeploy-x86_64.AppImage https://github.com/linuxdeploy/linuxdeploy/releases/download/continuous/linuxdeploy-x86_64.AppImage
+          chmod 0755 ~/Applications/linuxdeploy-x86_64.AppImage
 
-      - name: Package
-        run: ./contrib/packaging/linux/build_package.sh
+      - name: Package AppImages D1X-Rebirth
+        env:
+          OUTPUT: D1X-Rebirth-x86_64.AppImage
+        run: |
+          ~/Applications/linuxdeploy-x86_64.AppImage \
+            -oappimage \
+            --appdir="d1x-rebirth.appdir" \
+            --executable="build/d1x-rebirth/d1x-rebirth" \
+            --desktop-file="d1x-rebirth/d1x-rebirth.desktop" \
+            --icon-file="d1x-rebirth/d1x-rebirth.png"
+
+      - name: Package AppImage D2X-Rebirth
+        env:
+          OUTPUT: D2X-Rebirth-x86_64.AppImage
+        run: |
+          ~/Applications/linuxdeploy-x86_64.AppImage \
+            -oappimage \
+            --appdir="d2x-rebirth.appdir" \
+            --executable="build/d2x-rebirth/d2x-rebirth" \
+            --desktop-file="d2x-rebirth/d2x-rebirth.desktop" \
+            --icon-file="d2x-rebirth/d2x-rebirth.png"
+
+      - name: Zip AppImages
+        run: zip -r -X DXX-Rebirth-Linux-AppImage.zip . -i '*.AppImage'
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: linux
+          name: linux-appimage
           path: '*.zip'
