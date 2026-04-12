@@ -86,6 +86,7 @@ COPYRIGHT 1993-1999 PARALLAX SOFTWARE CORPORATION.  ALL RIGHTS RESERVED.
 #include "physfs_list.h"
 
 #include "dsx-ns.h"
+#include "compiler-cf_assert.h"
 #include "compiler-range_for.h"
 #include "d_enumerate.h"
 #include "d_range.h"
@@ -978,12 +979,14 @@ window_event_result do_new_game_menu()
 		{
 			std::array<char, 64> subtitle_text;
 			std::array<char, 68> info_text;
-			std::array<char, 16> level_label;
+			std::array<char, sizeof("Level: NNN  ")> level_label;
 			ntstring<NM_MAX_TEXT_LEN> slider_text;
 			std::array<newmenu_item, 2> m;
 			void update_label()
 			{
-				std::snprintf(std::data(level_label), std::size(level_label), "Level: %d  ", m[1].value + 1);
+				const auto requested_level{m[1].value};
+				cf_assert(requested_level >= 0 && requested_level < MAX_LEVELS_PER_MISSION);
+				std::snprintf(level_label.data(), level_label.size(), "Level: %u  ", requested_level + 1);
 				m[1].text = level_label.data();
 			}
 			items_type(const char *const mission_name, const unsigned last_level, const int clamped_player_highest_level)
