@@ -95,6 +95,9 @@ void kconfig_begin_loop(control_info &);
 
 namespace dsx {
 
+/* These types are defined in the header `kconfig.udlr.h`, which is generated
+ * by the build system using `generate-kconfig-udlr.py`.
+ */
 enum class dxx_kconfig_ui_kc_keyboard : unsigned;
 enum class dxx_kconfig_ui_kc_mouse : unsigned;
 #if DXX_MAX_JOYSTICKS
