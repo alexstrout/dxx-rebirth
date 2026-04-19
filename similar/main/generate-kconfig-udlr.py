@@ -321,7 +321,7 @@ namespace dsx {{
 		if array_name is not None:
 			raise InputException(f'{source}: end of file while array definition open')
 		# Ensure end-of-line at end-of-file.
-		result.append('}')
+		result.append('}\n')
 		return '\n'.join(result)
 
 	@staticmethod
