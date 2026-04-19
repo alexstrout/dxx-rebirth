@@ -40,7 +40,6 @@ COPYRIGHT 1993-1999 PARALLAX SOFTWARE CORPORATION.  ALL RIGHTS RESERVED.
 #define KEY_REPEAT_DELAY 400
 #define KEY_REPEAT_INTERVAL 50
 
-#ifdef __cplusplus
 #include "dxxsconf.h"
 #include "dsx-ns.h"
 #include <array>
@@ -49,10 +48,7 @@ struct SDL_KeyboardEvent;
 
 namespace dcx {
 
-//==========================================================================
-// This installs the int9 vector and initializes the keyboard in buffered
-// ASCII mode. key_close simply undoes that.
-extern void key_init();
+void key_init();
 
 // Time in seconds when last key was pressed...
 extern fix64 keyd_time_when_last_pressed;
@@ -240,5 +236,3 @@ struct key_props
 extern const std::array<key_props, 256> key_properties;
 
 }
-
-#endif
