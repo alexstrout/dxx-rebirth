@@ -193,10 +193,7 @@ public:
 	using vector_type::clear;
 	using vector_type::size;
 	using vector_type::resize;
-	typename vector_type::reference operator[](typename vector_type::size_type s)
-	{
-		return this->at(s);
-	}
+	using vector_type::operator[];
 };
 
 #if DXX_MAX_AXES_PER_JOYSTICK
