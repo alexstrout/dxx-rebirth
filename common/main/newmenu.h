@@ -99,7 +99,7 @@ public:
 	struct imenu_specific_type : input_common_type
 	{
 		static constexpr std::integral_constant<nm_type, nm_type::input_menu> static_type{};
-		imenu_specific_type(input_common_type n, ntstring<NM_MAX_TEXT_LEN> &t) :
+		constexpr imenu_specific_type(input_common_type n, ntstring<NM_MAX_TEXT_LEN> &t) :
 			input_common_type{n},
 			saved_text{t}
 		{
@@ -109,7 +109,7 @@ public:
 	struct slider_specific_type : number_slider_common_type
 	{
 		static constexpr std::integral_constant<nm_type, nm_type::slider> static_type{};
-		slider_specific_type(number_slider_common_type n, ntstring<NM_MAX_TEXT_LEN> &t) :
+		constexpr slider_specific_type(number_slider_common_type n, ntstring<NM_MAX_TEXT_LEN> &t) :
 			number_slider_common_type{n},
 			saved_text{t}
 		{
@@ -154,13 +154,13 @@ public:
 		const uint16_t size;
 		template <std::size_t len>
 			requires(len > 1 && std::in_range<uint16_t>(len))
-			nm_item_input(std::array<char, len> &text, const char *const allowed_chars = nullptr) :
+			constexpr nm_item_input(std::array<char, len> &text, const char *const allowed_chars = nullptr) :
 				allowed_chars{allowed_chars}, text{text.data()}, size{len}
 		{
 		}
 		template <std::size_t len>
 			requires(len != std::dynamic_extent && std::in_range<uint16_t>(len))
-			nm_item_input(const std::span<char, len> text) :
+			constexpr nm_item_input(const std::span<char, len> text) :
 				allowed_chars{nullptr}, text{text.data()}, size{len}
 		{
 		}
@@ -172,17 +172,17 @@ public:
 		ntstring<NM_MAX_TEXT_LEN> &saved_text;
 	};
 	newmenu_item() = default;
-	newmenu_item(nm_item_text text) :
+	constexpr newmenu_item(nm_item_text text) :
 		text(const_cast<char *>(text.text)),
 		type(nm_type::text)
 	{
 	}
-	newmenu_item(nm_item_menu menu) :
+	constexpr newmenu_item(nm_item_menu menu) :
 		text(const_cast<char *>(menu.text)),
 		type(nm_type::menu)
 	{
 	}
-	newmenu_item(nm_item_input input) :
+	constexpr newmenu_item(nm_item_input input) :
 		text{input.text},
 		type(nm_type::input),
 		nm_private(input)
@@ -233,15 +233,15 @@ public:
 #endif
 		;           // What kind of item this is, see NM_TYPE_????? defines
 	union nm_type_specific_data {
-		nm_type_specific_data() :
+		constexpr nm_type_specific_data() :
 			input{{nullptr, 0, 0}}
 		{
 		}
-		nm_type_specific_data(const nm_item_input &input) :
+		constexpr nm_type_specific_data(const nm_item_input &input) :
 			input{{input.allowed_chars, input.size, 0}}
 		{
 		}
-		nm_type_specific_data(const nm_item_slider &slider) :
+		constexpr nm_type_specific_data(const nm_item_slider &slider) :
 			slider{{slider.min_value, slider.max_value}, slider.saved_text}
 		{
 		}
