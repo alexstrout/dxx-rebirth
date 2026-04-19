@@ -219,7 +219,11 @@ public:
 	}
 	char    *text
 #ifndef NDEBUG
-		= reinterpret_cast<char *>(UINTPTR_MAX);
+		/* In debug builds, default-initialize to an always-invalid pointer, to
+		 * ensure a trap if the caller does not provide a real value before
+		 * use.
+		 */
+	{reinterpret_cast<char *>(UINTPTR_MAX)}
 #endif
 		;          // The text associated with this item.
 	int     value;          // For checkboxes and radio buttons, this is 1 if marked initially, else 0
