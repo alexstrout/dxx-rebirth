@@ -186,7 +186,7 @@ extern void reset_cruise(void);
 namespace dcx {
 
 template <std::size_t N>
-class joystick_text_t : std::vector<std::array<char, N>>
+class joystick_text_vector : std::vector<std::array<char, N>>
 {
 	using vector_type = std::vector<std::array<char, N>>;
 public:
@@ -200,12 +200,12 @@ public:
 };
 
 #if DXX_MAX_AXES_PER_JOYSTICK
-using joyaxis_text_t = joystick_text_t<sizeof("J A") + number_to_text_length<DXX_MAX_JOYSTICKS> + number_to_text_length<DXX_MAX_AXES_PER_JOYSTICK>>;
+using joyaxis_text_t = joystick_text_vector<sizeof("J A") + number_to_text_length<DXX_MAX_JOYSTICKS> + number_to_text_length<DXX_MAX_AXES_PER_JOYSTICK>>;
 extern joyaxis_text_t joyaxis_text;
 #endif
 
 #define DXX_JOY_MAX(A,B)	((A) < (B) ? (B) : (A))
-using joybutton_text_t = joystick_text_t<number_to_text_length<DXX_MAX_JOYSTICKS> + DXX_JOY_MAX(DXX_JOY_MAX(sizeof("J H ") + number_to_text_length<DXX_MAX_HATS_PER_JOYSTICK>, sizeof("J B") + number_to_text_length<DXX_MAX_BUTTONS_PER_JOYSTICK>), sizeof("J -A") + number_to_text_length<DXX_MAX_AXES_PER_JOYSTICK>)>;
+using joybutton_text_t = joystick_text_vector<number_to_text_length<DXX_MAX_JOYSTICKS> + DXX_JOY_MAX(DXX_JOY_MAX(sizeof("J H ") + number_to_text_length<DXX_MAX_HATS_PER_JOYSTICK>, sizeof("J B") + number_to_text_length<DXX_MAX_BUTTONS_PER_JOYSTICK>), sizeof("J -A") + number_to_text_length<DXX_MAX_AXES_PER_JOYSTICK>)>;
 #undef DXX_JOY_MAX
 extern joybutton_text_t joybutton_text;
 
