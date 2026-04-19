@@ -16,7 +16,6 @@
 #include <SDL_video.h>
 #endif
 
-#ifdef __cplusplus
 namespace dcx {
 
 enum class event_type : uint8_t
@@ -103,7 +102,7 @@ struct d_change_event : d_event
 
 struct d_select_event : d_event
 {
-	int citem;
+	const int citem;
 	d_select_event(const int c) :
 		d_event{event_type::newmenu_selected}, citem{c}
 	{
@@ -151,4 +150,3 @@ static inline void event_process_all(void)
 }
 
 }
-#endif
