@@ -155,13 +155,13 @@ public:
 		template <std::size_t len>
 			requires(len > 1 && std::in_range<uint16_t>(len))
 			constexpr nm_item_input(std::array<char, len> &text, const char *const allowed_chars = nullptr) :
-				allowed_chars{allowed_chars}, text{text.data()}, size{len}
+				allowed_chars{allowed_chars}, text{text.data()}, size{len - 1u}
 		{
 		}
 		template <std::size_t len>
-			requires(len != std::dynamic_extent && std::in_range<uint16_t>(len))
+			requires(len != std::dynamic_extent && len > 1 && std::in_range<uint16_t>(len - 1u))
 			constexpr nm_item_input(const std::span<char, len> text) :
-				allowed_chars{nullptr}, text{text.data()}, size{len}
+				allowed_chars{nullptr}, text{text.data()}, size{len - 1u}
 		{
 		}
 	};
