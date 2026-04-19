@@ -12,7 +12,7 @@ DESCRIPTION="Descent Rebirth - enhanced Descent 1 & 2 engine"
 
 # Python is only used to execute SCons.  It is not used by any of the installed
 # components.
-PYTHON_COMPAT=( python3_11 python3_12 )
+PYTHON_COMPAT=( python3_13 )
 
 inherit desktop eutils python-any-r1 scons-utils toolchain-funcs xdg
 if [[ "$PV" = 9999 ]]; then
