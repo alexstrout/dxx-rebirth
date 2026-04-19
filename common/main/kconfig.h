@@ -34,6 +34,7 @@ COPYRIGHT 1993-1999 PARALLAX SOFTWARE CORPORATION.  ALL RIGHTS RESERVED.
 #include "fwd-event.h"
 #include "strutil.h"
 #include <array>
+#include "fwd-d_array.h"
 
 #ifdef DXX_BUILD_DESCENT
 namespace dcx {
@@ -161,7 +162,7 @@ namespace dcx {
 extern fix Cruise_speed;
 
 constexpr std::integral_constant<unsigned, 30> MAX_DXX_REBIRTH_CONTROLS{};
-extern const std::array<uint8_t, MAX_DXX_REBIRTH_CONTROLS> DefaultKeySettingsRebirth;
+extern const enumerated_array<uint8_t, MAX_DXX_REBIRTH_CONTROLS, dxx_kconfig_ui_kc_rebirth> DefaultKeySettingsRebirth;
 }
 #endif
 

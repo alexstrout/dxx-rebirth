@@ -451,17 +451,32 @@ static void read_player_dxx(const char *filename)
 				const char *value=splitword(line,'=');
 				if (!value)
 					continue;
-				unsigned int kc1=0,kc2=0,kc3=0;
-				int i=atoi(line);
-				
-				if(i==0) i=10;
-					i=(i-1)*3;
-		
-				if (sscanf(value,WEAPON_KEYv2_VALUE_TEXT,&kc1,&kc2,&kc3) != 3)
+				unsigned weapon_text_key, weapon_value[3];
+				if (sscanf(value, "%d=" WEAPON_KEYv2_VALUE_TEXT, &weapon_text_key, &weapon_value[0], &weapon_value[1], &weapon_value[2]) != 4)
 					continue;
-				PlayerCfg.KeySettingsRebirth[i]   = kc1;
-				PlayerCfg.KeySettingsRebirth[i+1] = kc2;
-				PlayerCfg.KeySettingsRebirth[i+2] = kc3;
+				dxx_kconfig_ui_kc_rebirth weapon_key_settings_index;
+				switch (weapon_text_key)
+				{
+					case 0:
+						weapon_key_settings_index = dxx_kconfig_ui_kc_rebirth{27};
+						break;
+					case 1:
+					case 2:
+					case 3:
+					case 4:
+					case 5:
+					case 6:
+					case 7:
+					case 8:
+					case 9:
+						weapon_key_settings_index = dxx_kconfig_ui_kc_rebirth{(weapon_text_key - 1u) * 3u};
+						break;
+					default:
+						continue;
+				}
+				PlayerCfg.KeySettingsRebirth[weapon_key_settings_index] = weapon_value[0];
+				PlayerCfg.KeySettingsRebirth[(dxx_kconfig_ui_kc_rebirth{static_cast<unsigned>(weapon_key_settings_index) + 1u})] = weapon_value[1];
+				PlayerCfg.KeySettingsRebirth[(dxx_kconfig_ui_kc_rebirth{static_cast<unsigned>(weapon_key_settings_index) + 2u})] = weapon_value[2];
 			}
 		}
 		else if (!strcmp(line,COCKPIT_HEADER_TEXT))
@@ -827,16 +842,26 @@ static int write_player_dxx(const char *filename)
 							END_TEXT "\n"
 							WEAPON_KEYv2_HEADER_TEXT "\n"
 							);
-		PHYSFSX_printf(fout,"1=" WEAPON_KEYv2_VALUE_TEXT "\n",PlayerCfg.KeySettingsRebirth[0],PlayerCfg.KeySettingsRebirth[1],PlayerCfg.KeySettingsRebirth[2]);
-		PHYSFSX_printf(fout,"2=" WEAPON_KEYv2_VALUE_TEXT "\n",PlayerCfg.KeySettingsRebirth[3],PlayerCfg.KeySettingsRebirth[4],PlayerCfg.KeySettingsRebirth[5]);
-		PHYSFSX_printf(fout,"3=" WEAPON_KEYv2_VALUE_TEXT "\n",PlayerCfg.KeySettingsRebirth[6],PlayerCfg.KeySettingsRebirth[7],PlayerCfg.KeySettingsRebirth[8]);
-		PHYSFSX_printf(fout,"4=" WEAPON_KEYv2_VALUE_TEXT "\n",PlayerCfg.KeySettingsRebirth[9],PlayerCfg.KeySettingsRebirth[10],PlayerCfg.KeySettingsRebirth[11]);
-		PHYSFSX_printf(fout,"5=" WEAPON_KEYv2_VALUE_TEXT "\n",PlayerCfg.KeySettingsRebirth[12],PlayerCfg.KeySettingsRebirth[13],PlayerCfg.KeySettingsRebirth[14]);
-		PHYSFSX_printf(fout,"6=" WEAPON_KEYv2_VALUE_TEXT "\n",PlayerCfg.KeySettingsRebirth[15],PlayerCfg.KeySettingsRebirth[16],PlayerCfg.KeySettingsRebirth[17]);
-		PHYSFSX_printf(fout,"7=" WEAPON_KEYv2_VALUE_TEXT "\n",PlayerCfg.KeySettingsRebirth[18],PlayerCfg.KeySettingsRebirth[19],PlayerCfg.KeySettingsRebirth[20]);
-		PHYSFSX_printf(fout,"8=" WEAPON_KEYv2_VALUE_TEXT "\n",PlayerCfg.KeySettingsRebirth[21],PlayerCfg.KeySettingsRebirth[22],PlayerCfg.KeySettingsRebirth[23]);
-		PHYSFSX_printf(fout,"9=" WEAPON_KEYv2_VALUE_TEXT "\n",PlayerCfg.KeySettingsRebirth[24],PlayerCfg.KeySettingsRebirth[25],PlayerCfg.KeySettingsRebirth[26]);
-		PHYSFSX_printf(fout,"0=" WEAPON_KEYv2_VALUE_TEXT "\n",PlayerCfg.KeySettingsRebirth[27],PlayerCfg.KeySettingsRebirth[28],PlayerCfg.KeySettingsRebirth[29]);
+		PHYSFSX_printf(fout,"1=" WEAPON_KEYv2_VALUE_TEXT "\n"
+			"2=" WEAPON_KEYv2_VALUE_TEXT "\n"
+			"3=" WEAPON_KEYv2_VALUE_TEXT "\n"
+			"4=" WEAPON_KEYv2_VALUE_TEXT "\n"
+			"5=" WEAPON_KEYv2_VALUE_TEXT "\n"
+			"6=" WEAPON_KEYv2_VALUE_TEXT "\n"
+			"7=" WEAPON_KEYv2_VALUE_TEXT "\n"
+			"8=" WEAPON_KEYv2_VALUE_TEXT "\n"
+			"9=" WEAPON_KEYv2_VALUE_TEXT "\n"
+			"0=" WEAPON_KEYv2_VALUE_TEXT "\n",
+			PlayerCfg.KeySettingsRebirth[(dxx_kconfig_ui_kc_rebirth{0})], PlayerCfg.KeySettingsRebirth[(dxx_kconfig_ui_kc_rebirth{1})], PlayerCfg.KeySettingsRebirth[(dxx_kconfig_ui_kc_rebirth{2})],
+			PlayerCfg.KeySettingsRebirth[(dxx_kconfig_ui_kc_rebirth{3})], PlayerCfg.KeySettingsRebirth[(dxx_kconfig_ui_kc_rebirth{4})], PlayerCfg.KeySettingsRebirth[(dxx_kconfig_ui_kc_rebirth{5})],
+			PlayerCfg.KeySettingsRebirth[(dxx_kconfig_ui_kc_rebirth{6})], PlayerCfg.KeySettingsRebirth[(dxx_kconfig_ui_kc_rebirth{7})], PlayerCfg.KeySettingsRebirth[(dxx_kconfig_ui_kc_rebirth{8})],
+			PlayerCfg.KeySettingsRebirth[(dxx_kconfig_ui_kc_rebirth{9})], PlayerCfg.KeySettingsRebirth[(dxx_kconfig_ui_kc_rebirth{10})], PlayerCfg.KeySettingsRebirth[(dxx_kconfig_ui_kc_rebirth{11})],
+			PlayerCfg.KeySettingsRebirth[(dxx_kconfig_ui_kc_rebirth{12})], PlayerCfg.KeySettingsRebirth[(dxx_kconfig_ui_kc_rebirth{13})], PlayerCfg.KeySettingsRebirth[(dxx_kconfig_ui_kc_rebirth{14})],
+			PlayerCfg.KeySettingsRebirth[(dxx_kconfig_ui_kc_rebirth{15})], PlayerCfg.KeySettingsRebirth[(dxx_kconfig_ui_kc_rebirth{16})], PlayerCfg.KeySettingsRebirth[(dxx_kconfig_ui_kc_rebirth{17})],
+			PlayerCfg.KeySettingsRebirth[(dxx_kconfig_ui_kc_rebirth{18})], PlayerCfg.KeySettingsRebirth[(dxx_kconfig_ui_kc_rebirth{19})], PlayerCfg.KeySettingsRebirth[(dxx_kconfig_ui_kc_rebirth{20})],
+			PlayerCfg.KeySettingsRebirth[(dxx_kconfig_ui_kc_rebirth{21})], PlayerCfg.KeySettingsRebirth[(dxx_kconfig_ui_kc_rebirth{22})], PlayerCfg.KeySettingsRebirth[(dxx_kconfig_ui_kc_rebirth{23})],
+			PlayerCfg.KeySettingsRebirth[(dxx_kconfig_ui_kc_rebirth{24})], PlayerCfg.KeySettingsRebirth[(dxx_kconfig_ui_kc_rebirth{25})], PlayerCfg.KeySettingsRebirth[(dxx_kconfig_ui_kc_rebirth{26})],
+			PlayerCfg.KeySettingsRebirth[(dxx_kconfig_ui_kc_rebirth{27})], PlayerCfg.KeySettingsRebirth[(dxx_kconfig_ui_kc_rebirth{28})], PlayerCfg.KeySettingsRebirth[(dxx_kconfig_ui_kc_rebirth{29})]);
 		PHYSFSX_puts_literal(fout,
 							END_TEXT "\n"
 							COCKPIT_HEADER_TEXT "\n"

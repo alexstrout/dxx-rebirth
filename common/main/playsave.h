@@ -174,7 +174,7 @@ struct player_config : prohibit_void_ptr<player_config>
 #endif
 		enumerated_array<uint8_t, MAX_CONTROLS, dxx_kconfig_ui_kc_mouse> Mouse;
 	} KeySettings;
-	std::array<uint8_t, MAX_DXX_REBIRTH_CONTROLS> KeySettingsRebirth;
+	enumerated_array<uint8_t, MAX_DXX_REBIRTH_CONTROLS, dxx_kconfig_ui_kc_rebirth> KeySettingsRebirth;
 	Difficulty_level_type DefaultDifficulty;
 	int AutoLeveling;
 	uint16_t NHighestLevels;
