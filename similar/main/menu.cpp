@@ -978,7 +978,7 @@ window_event_result do_new_game_menu()
 		struct items_type
 		{
 			std::array<char, 64> subtitle_text;
-			std::array<char, 68> info_text;
+			const std::array<char, 68> info_text;
 			std::array<char, sizeof("Level: NNN  ")> level_label;
 			ntstring<NM_MAX_TEXT_LEN> slider_text;
 			std::array<newmenu_item, 2> m;
@@ -988,17 +988,21 @@ window_event_result do_new_game_menu()
 				std::snprintf(level_label.data(), level_label.size(), "Level: %u  ", requested_level + 1);
 			}
 			items_type(const char *const mission_name, const int last_level, const int clamped_player_highest_level) :
+				info_text{[last_level, clamped_player_highest_level]() {
+					std::array<char, 68> r;
+					char buf[28];
+					std::snprintf(r.data(), r.size(), "This mission has %u levels.\n\nYou have %s.",
+						last_level,
+						(clamped_player_highest_level ? (std::snprintf(buf, std::size(buf), "finished level %d", clamped_player_highest_level), buf) : "not finished any level")
+					);
+					return r;
+				}()},
 				m{{
 					newmenu_item::nm_item_text{info_text.data()},
 					{(update_label(0), level_label.data()), 0, newmenu_item::nm_item_slider{0, last_level - 1, slider_text}},
 				}}
 			{
-				char buf[28];
 				std::snprintf(std::data(subtitle_text), std::size(subtitle_text), "%s\n\n%s", TXT_SELECT_START_LEV, mission_name);
-				const auto trailer = clamped_player_highest_level
-					? (std::snprintf(buf, std::size(buf), "finished level %d", clamped_player_highest_level), buf)
-					: "not finished any level";
-				std::snprintf(std::data(info_text), std::size(info_text), "This mission has %u levels.\n\nYou have %s.", last_level, trailer);
 			}
 		};
 		items_type menu_items{Current_mission->mission_name, last_level, clamped_player_highest_level};
