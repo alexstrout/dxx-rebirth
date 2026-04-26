@@ -43,21 +43,20 @@ Add versions as needed.
 -->
 
 * Debian
-  * [ ] Debian Bookworm
   * [ ] Debian Trixie
+  * [ ] Debian Forky
   * [ ] Debian Sid
 * Fedora
-  * [ ] Fedora 36
-  * [ ] Fedora 37
-  * [ ] Fedora 38
-  * [ ] Fedora 39
   * [ ] Fedora 40
+  * [ ] Fedora 41
+  * [ ] Fedora 42
+  * [ ] Fedora 43
+  * [ ] Fedora 44
   * [ ] Rawhide
 * Ubuntu
-  * [ ] Ubuntu 20.04 LTS (Focal Fossa)
-  * [ ] Ubuntu 22.04 LTS (Jammy Jellyfish)
-  * [ ] Ubuntu 23.10 (Mantic Minotaur)
   * [ ] Ubuntu 24.04 LTS (Noble Numbat)
+  * [ ] Ubuntu 25.10 (Questing Quokka)
+  * [ ] Ubuntu 26.04 LTS (Resolute Raccoon)
 
 * [ ] Arch
 * [ ] Gentoo

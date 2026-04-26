@@ -33,23 +33,17 @@ State what platform (Microsoft Windows, Mac OS X, or Linux, *BSD) you used.  If 
 For Windows, if readily available, also state the installed Service Pack.
 -->
 * Microsoft Windows
-  * [ ] Microsoft Windows XP
-  * [ ] Microsoft Windows Vista
-  * [ ] Microsoft Windows 7
-  * [ ] Microsoft Windows 8
-  * [ ] Microsoft Windows 8.1
   * [ ] Microsoft Windows 10
+  * [ ] Microsoft Windows 11
 
 <!--
 Mac OS X.  Add versions as needed.
 -->
-* Mac OS X
-  * [ ] Mac OS X 10.10
-  * [ ] Mac OS X 10.11
-  * [ ] Mac OS X 10.12
-  * [ ] Mac OS X 10.13
-  * [ ] Mac OS X 10.14
-  * [ ] Mac OS X 10.15
+* Apple macOS
+  * [ ] macOS 13 (Ventura)
+  * [ ] macOS 14 (Sonoma)
+  * [ ] macOS 15 (Sequoia)
+  * [ ] macOS 26 (Tahoe)
 
 <!--
 * For Linux, give the name of the distribution.
@@ -60,21 +54,20 @@ Add versions as needed.
 -->
 
 * Debian
-  * [ ] Debian Bookworm
   * [ ] Debian Trixie
+  * [ ] Debian Forky
   * [ ] Debian Sid
 * Fedora
-  * [ ] Fedora 36
-  * [ ] Fedora 37
-  * [ ] Fedora 38
-  * [ ] Fedora 39
   * [ ] Fedora 40
+  * [ ] Fedora 41
+  * [ ] Fedora 42
+  * [ ] Fedora 43
+  * [ ] Fedora 44
   * [ ] Rawhide
 * Ubuntu
-  * [ ] Ubuntu 20.04 LTS (Focal Fossa)
-  * [ ] Ubuntu 22.04 LTS (Jammy Jellyfish)
-  * [ ] Ubuntu 23.10 (Mantic Minotaur)
   * [ ] Ubuntu 24.04 LTS (Noble Numbat)
+  * [ ] Ubuntu 25.10 (Questing Quokka)
+  * [ ] Ubuntu 26.04 LTS (Resolute Raccoon)
 
 * [ ] Arch
 * [ ] Gentoo
