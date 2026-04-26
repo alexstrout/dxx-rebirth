@@ -260,6 +260,74 @@ static window_event_result get_absolute_path(ntstring<PATH_MAX - 1> &full_path, 
 #define SELECT_SONG(t, s)	select_file_recursive(t, CGameCfg.CMMiscMusic[s], jukebox_exts, select_dir_flag::files_only, CGameCfg.CMMiscMusic[s])
 #endif
 
+struct start_new_game_menu_items
+{
+	const std::array<char, 64> subtitle_text;
+	const std::array<char, 68> info_text;
+	const bool use_text_level_input;
+	union text_buffer_type {
+		std::array<char, sizeof("NNN")> user_entered_level_number;
+		struct {
+			std::array<char, sizeof("Level: NNN  ")> slider_level_label;
+			ntstring<NM_MAX_TEXT_LEN> slider_text;
+		};
+	} text_buffer;
+	int &user_chosen_level;
+	const int last_level;
+	std::array<newmenu_item, 2> m;
+	void update_label(const int requested_level)
+	{
+		cf_assert(requested_level >= 0 && requested_level < MAX_LEVELS_PER_MISSION);
+		std::snprintf(text_buffer.slider_level_label.data(), text_buffer.slider_level_label.size(), "Level: %u  ", requested_level + 1);
+	}
+	start_new_game_menu_items(const char *const mission_name, const int last_level, const int clamped_player_highest_level, const bool use_text_level_input, int &user_chosen_level) :
+		subtitle_text{[mission_name]() {
+			std::array<char, 64> r;
+			std::snprintf(r.data(), r.size(), "%s\n\n%s", TXT_SELECT_START_LEV, mission_name);
+			return r;
+		}()},
+		info_text{[last_level, clamped_player_highest_level]() {
+			std::array<char, 68> r;
+			char buf[28];
+			std::snprintf(r.data(), r.size(), "This mission has %u levels.\n\nYou have %s.",
+				last_level,
+				(clamped_player_highest_level ? (std::snprintf(buf, std::size(buf), "finished level %d", clamped_player_highest_level), buf) : "not finished any level")
+			);
+			return r;
+		}()},
+		use_text_level_input{use_text_level_input},
+		text_buffer{[](const bool use_text_level_input) {
+			text_buffer_type result;
+			if (use_text_level_input)
+				/* When taking text entry, initialize the array to "1". and
+				 * constrain the user's input to decimal digits.
+				 */
+				result.user_entered_level_number = {"1"};
+			else
+				/* When taking slider input, include the caption "Level" so the
+				 * user can understand the meaning of the number.
+				 */
+				result.slider_level_label = {"Level: 1  "};
+			return result;
+		}(use_text_level_input)},
+		user_chosen_level{user_chosen_level},
+		last_level{last_level},
+		m{{
+			newmenu_item::nm_item_text{info_text.data()},
+			use_text_level_input
+				/* When taking text entry, constrain the user's input to
+				 * decimal digits.
+				 */
+				? newmenu_item{newmenu_item::nm_item_input{text_buffer.user_entered_level_number, "09"}}
+				/* When taking slider input, rely on the slider input rules to
+				 * constrain input.
+				 */
+				: newmenu_item{text_buffer.slider_level_label.data(), 0, newmenu_item::nm_item_slider{0, last_level - 1, text_buffer.slider_text}},
+		}}
+	{
+	}
+};
+
 }
 
 human_readable_mmss_time<uint16_t> build_human_readable_time(const std::chrono::duration<uint16_t, std::chrono::seconds::period> duration)
@@ -972,77 +1040,11 @@ window_event_result do_new_game_menu(const d_select_event &select_event)
 	const auto clamped_player_highest_level = std::min<decltype(recorded_player_highest_level)>(recorded_player_highest_level, last_level);
 	if (last_level > 1)
 	{
-		struct items_type
 		{
-			const std::array<char, 64> subtitle_text;
-			const std::array<char, 68> info_text;
-			const bool use_text_level_input;
-			union text_buffer_type {
-				std::array<char, sizeof("NNN")> user_entered_level_number;
-				struct {
-					std::array<char, sizeof("Level: NNN  ")> slider_level_label;
-					ntstring<NM_MAX_TEXT_LEN> slider_text;
-				};
-			} text_buffer;
-			int &user_chosen_level;
-			const int last_level;
-			std::array<newmenu_item, 2> m;
-			void update_label(const int requested_level)
-			{
-				cf_assert(requested_level >= 0 && requested_level < MAX_LEVELS_PER_MISSION);
-				std::snprintf(text_buffer.slider_level_label.data(), text_buffer.slider_level_label.size(), "Level: %u  ", requested_level + 1);
-			}
-			items_type(const char *const mission_name, const int last_level, const int clamped_player_highest_level, const bool use_text_level_input, int &user_chosen_level) :
-				subtitle_text{[mission_name]() {
-					std::array<char, 64> r;
-					std::snprintf(r.data(), r.size(), "%s\n\n%s", TXT_SELECT_START_LEV, mission_name);
-					return r;
-				}()},
-				info_text{[last_level, clamped_player_highest_level]() {
-					std::array<char, 68> r;
-					char buf[28];
-					std::snprintf(r.data(), r.size(), "This mission has %u levels.\n\nYou have %s.",
-						last_level,
-						(clamped_player_highest_level ? (std::snprintf(buf, std::size(buf), "finished level %d", clamped_player_highest_level), buf) : "not finished any level")
-					);
-					return r;
-				}()},
-				use_text_level_input{use_text_level_input},
-				text_buffer{[](const bool use_text_level_input) {
-					text_buffer_type result;
-					if (use_text_level_input)
-						/* When taking text entry, initialize the array to "1".
-						 */
-						result.user_entered_level_number = {"1"};
-					else
-						/* When taking slider input, include the caption
-						 * "Level" so the user can understand the meaning of
-						 * the number.
-						 */
-						result.slider_level_label = {"Level: 1  "};
-					return result;
-				}(use_text_level_input)},
-				user_chosen_level{user_chosen_level},
-				last_level{last_level},
-				m{{
-					newmenu_item::nm_item_text{info_text.data()},
-					use_text_level_input
-						/* When taking text entry, constrain the user's input
-						 * to decimal digits.
-						 */
-						? newmenu_item{newmenu_item::nm_item_input{text_buffer.user_entered_level_number, "09"}}
-						/* Rely on the slider input rules to constrain input.
-						 */
-						: newmenu_item{text_buffer.slider_level_label.data(), 0, newmenu_item::nm_item_slider{0, last_level - 1, text_buffer.slider_text}},
-				}}
-			{
-			}
-		};
-		{
-			struct select_start_level_menu : items_type, newmenu
+			struct select_start_level_menu : start_new_game_menu_items, newmenu
 			{
 				select_start_level_menu(const char *const mission_name, const int last_level, const int clamped_player_highest_level, const bool use_text_level_input, int &user_chosen_level) :
-					items_type{mission_name, last_level, clamped_player_highest_level, use_text_level_input, user_chosen_level},
+					start_new_game_menu_items{mission_name, last_level, clamped_player_highest_level, use_text_level_input, user_chosen_level},
 					newmenu{menu_title{nullptr}, menu_subtitle{subtitle_text.data()}, menu_filename{nullptr}, tiny_mode_flag::normal, tab_processing_flag::ignore, adjusted_citem::create(m, 1), grd_curscreen->sc_canvas}
 				{
 				}
