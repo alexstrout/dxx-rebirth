@@ -188,6 +188,13 @@ public:
 		nm_private(input)
 	{
 	}
+	constexpr newmenu_item(char *text, int value, nm_item_slider slider) :
+		text{text},
+		value{value},
+		type{nm_type::slider},
+		nm_private{slider}
+	{
+	}
 	input_specific_type &input() {
 		return get_union_member(nm_private.input);
 	}
