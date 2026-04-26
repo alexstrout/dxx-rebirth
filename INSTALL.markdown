@@ -1,17 +1,17 @@
 # Installing D1X-Rebirth and D2X-Rebirth
 ## Building
 
-D1X-Rebirth and D2X-Rebirth (generically DXX-Rebirth) are built by an SConstruct script.  DXX-Rebirth runs on Windows (XP and later), Linux (x86 and amd64), recent Mac OS X, and Raspberry Pi.  Other targets may also work, but are not tracked by the core team.  If you maintain a working target not listed here, please file an issue to have it included in this list.
+D1X-Rebirth and D2X-Rebirth (generically DXX-Rebirth) are built by an SConstruct script.  DXX-Rebirth runs on Windows (XP and later), Linux (x86, amd64, and arm64), recent Mac OS X, and Raspberry Pi.  Other targets may also work, but are not tracked by the core team.  If you maintain a working target not listed here, please file an issue to have it included in this list.
 
 The DXX-Rebirth maintainers have no control over the sites linked below.  The maintainers are not responsible for the safety or correct operation of the prerequisites listed below.  Unless specified otherwise, the maintainers of DXX-Rebirth have not verified that the links are current, safe, or produce a working environment.
 
 ### Prerequisites
 
 * [Python 3.x](https://www.python.org/) to run [scons](https://www.scons.org/), the processor for SConstruct scripts.
-[Python 3.12](https://www.python.org/downloads/release/python-3127/) is recommended.
-* C++ compiler with support for selected C++20 features.  One of:
-    * [gcc](https://gcc.gnu.org/) 12, 13, or 14
-    * [clang](https://clang.llvm.org/) 16.0 or later
+[Python 3.13](https://www.python.org/downloads/release/python-31313/) is recommended.
+* C++ compiler with support for selected C++23 features.  One of:
+    * [gcc](https://gcc.gnu.org/) 14, 15, or 16
+    * [clang](https://clang.llvm.org/) 21.0 or later
     * Microsoft Visual Studio is **not** supported at this time.
 	  Visual Studio 2022 release notes indicate it has sufficient C++ support
 	  that it should be able to compile Rebirth.  However, due to limitations
@@ -28,7 +28,7 @@ Optional, but recommended:
 * [SDL\_mixer 1.2](https://www.libsdl.org/projects/SDL_mixer/).
 * [libpng](http://www.libpng.org/).
 
-Unless otherwise noted, using the newest release available is recommended.  For example, prefer gcc-13 to gcc-12, even though both should work.
+Unless otherwise noted, using the newest release available is recommended.  For example, prefer gcc-16 to gcc-15, even though both should work.
 
 DXX-Rebirth can be built on one system to run on a different system, such as using Linux to build for Windows (a "cross-compiled build").  The sections below specify where to get prerequisites for a build meant to run on the system where it is built (a "native build").
 
@@ -51,9 +51,9 @@ Where possible, Windows users should try to obtain a compiled package, rather th
 
 If you are not sure whether your system is Windows x86 or Windows x64, use the packages for Windows x86.  Systems running Windows x64 support running Windows x86 programs, but Windows x86 systems do not run Windows x64 programs.
 
-* [Python x86 installer](https://www.python.org/ftp/python/3.11.7/python-3.11.7.exe) |
-[Python x64 installer](https://www.python.org/ftp/python/3.11.7/python-3.11.7-amd64.exe)
-* [SCons](http://prdownloads.sourceforge.net/scons/scons-4.2.0.zip)
+* [Python x86 installer](https://www.python.org/ftp/python/3.13.13/python-3.13.13.exe) |
+[Python x64 installer](https://www.python.org/ftp/python/3.13.13/python-3.13.13-amd64.exe)
+* [SCons](https://github.com/SCons/scons/archive/refs/tags/4.10.1.zip)
 * C++ compiler
     * mingw-gcc: [Getting Started](http://www.mingw.org/wiki/Getting_Started) |
 	[Direct download](https://sourceforge.net/projects/mingw/files/latest/download)
@@ -61,7 +61,7 @@ If you are not sure whether your system is Windows x86 or Windows x64, use the p
 [SDL 1.2 x64 zip](https://www.libsdl.org/release/SDL-1.2.15-win32-x64.zip)
 * No published PhysFS package for Windows is known.
 You must [build it](https://hg.icculus.org/icculus/physfs/raw-file/bf155bd2127b/INSTALL.txt)
-from [source](https://icculus.org/physfs/downloads/physfs-3.0.2.tar.bz2).
+from [source](https://github.com/icculus/physfs/archive/refs/tags/release-3.2.0.zip).
 You may be able avoid building from source by copying PhysFS DLLs from a
 previous Rebirth release and installing current PhysFS headers.
 However, building from source is recommended to ensure a consistent
@@ -159,28 +159,28 @@ Packaging scripts should use **builddir** with manually chosen directories.
 
 The build system supports building multiple targets in parallel.  This is primarily useful for developers, but can also be used by packagers to create secondary builds with different features enabled.  To use it, run **scons** *game*=*profile[,profile...]*.  **SConstruct** will search each profile for the known options.  The first match wins.  For example:
 
-        scons dxx=gcc13,e, d2x=gcc12,sdl2, \
-            gcc13_CXX=/path/to/gcc-13 \
-            gcc12_CXX=/path/to/gcc-12 \
+        scons dxx=gcc16,e, d2x=gcc15,sdl2, \
+            gcc16_CXX=/path/to/gcc-13 \
+            gcc15_CXX=/path/to/gcc-12 \
             e_editor=1 sdl2_sdl2=1
 
-This tells **SConstruct** to build both games (**dxx**) with the profiles **gcc13**, **e**, *empty* and also to build D2X-Rebirth (**d2x**) with the profiles **gcc12**, **sdl2**, *empty*.  Profiles **gcc13** and **gcc12** define private values for **CXX**, so the default value of **CXX** is ignored.  Profile **e** enables the **editor** option, which builds features used by players who want to create their own levels.  Profile **sdl2** sets the **sdl2** option to true, which produces a build that uses libSDL2 instead of libSDL.  Profile *empty* is the default namespace, so CPPFLAGS, CXXFLAGS, etc. are found when it is searched.  Since these values were not assigned, they are drawn from the corresponding environment variables.
+This tells **SConstruct** to build both games (**dxx**) with the profiles **gcc16**, **e**, *empty* and also to build D2X-Rebirth (**d2x**) with the profiles **gcc15**, **sdl2**, *empty*.  Profiles **gcc16** and **gcc15** define private values for **CXX**, so the default value of **CXX** is ignored.  Profile **e** enables the **editor** option, which builds features used by players who want to create their own levels.  Profile **sdl2** sets the **sdl2** option to true, which produces a build that uses libSDL2 instead of libSDL.  Profile *empty* is the default namespace, so CPPFLAGS, CXXFLAGS, etc. are found when it is searched.  Since these values were not assigned, they are drawn from the corresponding environment variables.
 
 The build system supports specifying a group of closely related targets.  This is mostly redundant on shells with brace expansion support, but can be easier to type.  For example:
 
         scons builddir_prefix=build/ \
-			dxx=gcc12+gcc13,prof1,prof2,prof3,
+			dxx=gcc15+gcc16,prof1,prof2,prof3,
 
 This is equivalent to the shell brace expansion:
 
         scons builddir_prefix=build/ \
-			dxx={gcc12,gcc13},prof1,prof2,prof3,
+			dxx={gcc15,gcc16},prof1,prof2,prof3,
 
 or
 
         scons builddir_prefix=build/ \
-			dxx=gcc12,prof1,prof2,prof3, \
-			dxx=gcc13,prof1,prof2,prof3,
+			dxx=gcc15,prof1,prof2,prof3, \
+			dxx=gcc16,prof1,prof2,prof3,
 
 Profile addition can be stacked: **scons dxx=a+b,c+d,e+f** is equivalent to **scons dxx=a,c,e dxx=a,d,e dxx=b,c,e dxx=b,d,e dxx=a,c,f dxx=a,d,f dxx=b,c,f dxx=b,d,f**.
 
@@ -233,4 +233,4 @@ For Windows and Linux, DXX-Rebirth installs only the main game binary.  The bina
 
 As a convenience, if **register\_install\_target=True**, **SConstruct** registers a pseudo-target named **install** which copies the compiled files to *BINDIR*, as modified by the SCons option **--install-sandbox**.  By default, **register\_install\_target=True**, the sandbox prefix path is empty, and *BINDIR* is *PREFIX*__/bin__, which expands to **/usr/local/bin**.
 
-DXX-Rebirth [requires game data](https://www.dxx-rebirth.com/game-content/) to play.  The build system has no support for interacting with game data.  You can get [Descent 1 PC shareware data](https://www.dxx-rebirth.com/download/dxx/content/descent-pc-shareware.zip) and [Descent 2 PC demo data](https://www.dxx-rebirth.com/download/dxx/content/descent2-pc-demo.zip) from the DXX-Rebirth website.  Full game data is supported (and recommended), but is not freely available.  You can [buy full Descent 1 game data](https://www.gog.com/game/descent) and/or [buy full Descent 2 game data](https://www.gog.com/game/descent_2) from GOG.com.  Historically, both Descent 1 and Descent 2 were sold as a single unit.  After a nearly two-year hiatus from sale, the games returned to GOG.com in November 2017 as separate units.  DXX-Rebirth contains engines for both games.  Each engine works for its respective game without the data from the other, so players who wish to purchase only one game may do so.
+DXX-Rebirth requires game data to play.  The build system has no support for interacting with game data.  You can download [Descent 1 PC shareware data](https://icculus.org/d2x/data/desc14sw.tar.gz), [Descent 1 Mac shareware data](https://icculus.org/d2x/data/descent.tar.gz), [Descent 2 PC demo data](https://icculus.org/d2x/data/d2shar10.tar.gz), or [Descent 2 Mac demo data](https://icculus.org/d2x/data/descent2preview.tar.gz) for free from [icculus.org/d2x/](https://icculus.org/d2x/).  You only need PC data or Mac data, but not both, to play a game.  Links to both are provided because some people prefer some of the supporting assets from the Mac data.  You can use PC or Mac data without regard to what system you will use to play Rebirth.  Full game data is supported and recommended.  You can [buy full Descent 1 game data](https://www.gog.com/game/descent) and/or [buy full Descent 2 game data](https://www.gog.com/game/descent_2) from GOG.com.  DXX-Rebirth contains engines for both games.  Each engine works for its respective game without the data from the other, so players who wish to purchase only one game may do so.
