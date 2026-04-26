@@ -358,8 +358,12 @@ static const char *get_item_text(const kc_item &item, const kc_mitem &mitem, cha
 			case kc_type::key:
 				return key_properties[mitem.value].key_text;
 			case kc_type::mouse_button:
+				if (mitem.value >= std::size(mousebutton_text)) [[unlikely]]
+					return nullptr;
 				return mousebutton_text[mitem.value];
 			case kc_type::mouse_axis:
+				if (mitem.value >= std::size(mouseaxis_text)) [[unlikely]]
+					return nullptr;
 				return mouseaxis_text[mitem.value];
 #if DXX_MAX_BUTTONS_PER_JOYSTICK || DXX_MAX_HATS_PER_JOYSTICK
 			case kc_type::joy_button:
@@ -388,6 +392,8 @@ static const char *get_item_text(const kc_item &item, const kc_mitem &mitem, cha
 				(void)buf;
 #endif
 			case kc_type::invert:
+				if (mitem.value >= invert_text.size()) [[unlikely]]
+					return nullptr;
 				return invert_text[mitem.value];
 			default:
 				return NULL;
