@@ -4827,7 +4827,6 @@ class DXXArchive(DXXCommon):
 'common/3d/rod.cpp',
 'common/3d/setup.cpp',
 'common/arch/sdl/event.cpp',
-'common/arch/sdl/joy.cpp',
 'common/arch/sdl/key.cpp',
 'common/arch/sdl/mouse.cpp',
 'common/arch/sdl/timer.cpp',
@@ -4852,6 +4851,9 @@ class DXXArchive(DXXCommon):
 		__get_objects_use_adlmidi=DXXCommon.create_lazy_object_getter((
 'common/music/adlmidi_dynamic.cpp',
 )),
+		__get_objects_use_joystick=DXXCommon.create_lazy_object_getter((
+'common/arch/sdl/joy.cpp',
+)),
 		__get_objects_use_sdl1=DXXCommon.create_lazy_object_getter((
 'common/arch/sdl/rbaudio.cpp',
 ))
@@ -4862,6 +4864,8 @@ class DXXArchive(DXXCommon):
 		user_settings = self.user_settings
 		if user_settings._enable_adlmidi():
 			extend(__get_objects_use_adlmidi(self))
+		if user_settings.max_joysticks:
+			extend(__get_objects_use_joystick(self))
 		if not user_settings.sdl2:
 			extend(__get_objects_use_sdl1(self))
 		extend(self.platform_settings.get_platform_objects())
