@@ -11,7 +11,8 @@ jobs:
         MACOSX_DEPLOYMENT_TARGET: 14
     steps:
       - name: Clone Repository
-        uses: actions/checkout@v4
+        # checkout@v6.0.2
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
         with:
           path: src
 
