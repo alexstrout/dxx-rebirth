@@ -297,7 +297,7 @@ struct main_menu : main_menu_items, newmenu
 	virtual window_event_result event_handler(const d_event &event) override;
 };
 
-static window_event_result do_new_game_menu();
+static window_event_result do_new_game_menu(const d_select_event &);
 #ifndef RELEASE
 void do_sandbox_menu();
 #endif
@@ -649,12 +649,12 @@ static void draw_copyright(grs_canvas &canvas, grs_font &game_font)
 }
 
 //returns flag, true means quit menu
-window_event_result dispatch_menu_option(const main_menu_item_index select)
+window_event_result dispatch_main_menu_option(const d_select_event &select_event)
 {
-	switch (select)
+	switch (static_cast<main_menu_item_index>(select_event.citem))
 	{
 		case main_menu_item_index::start_new_singleplayer_game:
-			select_mission(mission_filter_mode::exclude_anarchy, menu_title{"New Game\n\nSelect mission"}, do_new_game_menu);
+			select_mission(mission_filter_mode::exclude_anarchy, menu_title{"New Game\n\nSelect mission"}, do_new_game_menu, select_event);
 			break;
 		case main_menu_item_index::open_pick_recorded_demo_submenu:
 			select_demo();
@@ -713,12 +713,12 @@ window_event_result dispatch_menu_option(const main_menu_item_index select)
 }
 
 #if DXX_USE_UDP
-window_event_result dispatch_menu_option(const netgame_menu_item_index select)
+window_event_result dispatch_multiplayer_menu_option(const d_select_event &select_event)
 {
-	switch (select)
+	switch (static_cast<netgame_menu_item_index>(select_event.citem))
 	{
 		case netgame_menu_item_index::start_new_multiplayer_game:
-			select_mission(mission_filter_mode::include_anarchy, menu_title{TXT_MULTI_MISSION}, net_udp_setup_game);
+			select_mission(mission_filter_mode::include_anarchy, menu_title{TXT_MULTI_MISSION}, net_udp_setup_game, select_event);
 			break;
 		case netgame_menu_item_index::join_multiplayer_game:
 			net_udp_manual_join_game();
@@ -797,10 +797,7 @@ window_event_result main_menu::event_handler(const d_event &event)
 			break;
 
 		case event_type::newmenu_selected:
-		{
-			auto &citem = static_cast<const d_select_event &>(event).citem;
-			return dispatch_menu_option(static_cast<main_menu_item_index>(citem));
-		}
+			return dispatch_main_menu_option(static_cast<const d_select_event &>(event));
 
 		default:
 			break;
@@ -965,7 +962,7 @@ static int do_difficulty_menu()
 	return 0;
 }
 
-window_event_result do_new_game_menu()
+window_event_result do_new_game_menu(const d_select_event &select_event)
 {
 	int new_level_num;
 
@@ -979,15 +976,23 @@ window_event_result do_new_game_menu()
 		{
 			const std::array<char, 64> subtitle_text;
 			const std::array<char, 68> info_text;
-			std::array<char, sizeof("Level: NNN  ")> level_label;
-			ntstring<NM_MAX_TEXT_LEN> slider_text;
+			const bool use_text_level_input;
+			union text_buffer_type {
+				std::array<char, sizeof("NNN")> user_entered_level_number;
+				struct {
+					std::array<char, sizeof("Level: NNN  ")> slider_level_label;
+					ntstring<NM_MAX_TEXT_LEN> slider_text;
+				};
+			} text_buffer;
+			int &user_chosen_level;
+			const int last_level;
 			std::array<newmenu_item, 2> m;
 			void update_label(const int requested_level)
 			{
 				cf_assert(requested_level >= 0 && requested_level < MAX_LEVELS_PER_MISSION);
-				std::snprintf(level_label.data(), level_label.size(), "Level: %u  ", requested_level + 1);
+				std::snprintf(text_buffer.slider_level_label.data(), text_buffer.slider_level_label.size(), "Level: %u  ", requested_level + 1);
 			}
-			items_type(const char *const mission_name, const int last_level, const int clamped_player_highest_level) :
+			items_type(const char *const mission_name, const int last_level, const int clamped_player_highest_level, const bool use_text_level_input, int &user_chosen_level) :
 				subtitle_text{[mission_name]() {
 					std::array<char, 64> r;
 					std::snprintf(r.data(), r.size(), "%s\n\n%s", TXT_SELECT_START_LEV, mission_name);
@@ -1002,36 +1007,81 @@ window_event_result do_new_game_menu()
 					);
 					return r;
 				}()},
+				use_text_level_input{use_text_level_input},
+				text_buffer{[](const bool use_text_level_input) {
+					text_buffer_type result;
+					if (use_text_level_input)
+						/* When taking text entry, initialize the array to "1".
+						 */
+						result.user_entered_level_number = {"1"};
+					else
+						/* When taking slider input, include the caption
+						 * "Level" so the user can understand the meaning of
+						 * the number.
+						 */
+						result.slider_level_label = {"Level: 1  "};
+					return result;
+				}(use_text_level_input)},
+				user_chosen_level{user_chosen_level},
+				last_level{last_level},
 				m{{
 					newmenu_item::nm_item_text{info_text.data()},
-					{(update_label(0), level_label.data()), 0, newmenu_item::nm_item_slider{0, last_level - 1, slider_text}},
+					use_text_level_input
+						/* When taking text entry, constrain the user's input
+						 * to decimal digits.
+						 */
+						? newmenu_item{newmenu_item::nm_item_input{text_buffer.user_entered_level_number, "09"}}
+						/* Rely on the slider input rules to constrain input.
+						 */
+						: newmenu_item{text_buffer.slider_level_label.data(), 0, newmenu_item::nm_item_slider{0, last_level - 1, text_buffer.slider_text}},
 				}}
 			{
 			}
 		};
-		items_type menu_items{Current_mission->mission_name, last_level, clamped_player_highest_level};
 		{
-			struct select_start_level_menu : newmenu
+			struct select_start_level_menu : items_type, newmenu
 			{
-				items_type &items;
-				select_start_level_menu(items_type &i) :
-					newmenu(menu_title{nullptr}, menu_subtitle{i.subtitle_text.data()}, menu_filename{nullptr}, tiny_mode_flag::normal, tab_processing_flag::ignore, adjusted_citem::create(i.m, 1), grd_curscreen->sc_canvas),
-					items{i}
+				select_start_level_menu(const char *const mission_name, const int last_level, const int clamped_player_highest_level, const bool use_text_level_input, int &user_chosen_level) :
+					items_type{mission_name, last_level, clamped_player_highest_level, use_text_level_input, user_chosen_level},
+					newmenu{menu_title{nullptr}, menu_subtitle{subtitle_text.data()}, menu_filename{nullptr}, tiny_mode_flag::normal, tab_processing_flag::ignore, adjusted_citem::create(m, 1), grd_curscreen->sc_canvas}
 				{
 				}
 				virtual window_event_result event_handler(const d_event &event) override
 				{
-					auto result = newmenu::event_handler(event);
-					items.update_label(items.m[1].value);
-					return result;
+					switch (event.type)
+					{
+						case event_type::newmenu_changed:
+							if (static_cast<const d_change_event &>(event).citem == 1 && !use_text_level_input)
+								update_label(m[1].value);
+							return window_event_result::handled;
+						case event_type::newmenu_selected:
+							if (use_text_level_input)
+							{
+								const auto new_level_num{strtoul(text_buffer.user_entered_level_number.data(), nullptr, 10)};
+								if (new_level_num == 0 || new_level_num > last_level)
+								{
+									nm_messagebox(menu_title{TXT_INVALID_LEVEL}, {TXT_OK}, "You must enter a\npositive level number\nless than or\nequal to %u.\n", static_cast<unsigned>(last_level));
+									/* Prevent closing the input dialog. */
+									return window_event_result::handled;
+								}
+								user_chosen_level = new_level_num;
+							}
+							else
+							{
+								/* Slider logic prevents the user from picking an invalid value. */
+								user_chosen_level = m[1].value + 1;
+							}
+							return window_event_result::ignored;
+						default:
+							return newmenu::event_handler(event);
+					}
 				}
 			};
-			const int choice = run_blocking_newmenu<select_start_level_menu>(menu_items);
+			new_level_num = -1;
+			const int choice = run_blocking_newmenu<select_start_level_menu>(Current_mission->mission_name, last_level, clamped_player_highest_level, event_key_get_source(select_event) == d_event::source::keyboard, new_level_num);
 
-			if (choice == -1)
+			if (choice == -1 || new_level_num == -1)
 				return window_event_result::handled;
-
-			new_level_num = menu_items.m[1].value + 1;
 		}
 	}
 
@@ -2855,11 +2905,8 @@ window_event_result netgame_menu::event_handler(const d_event &event)
 	switch (event.type)
 	{
 		case event_type::newmenu_selected:
-		{
-			auto &citem = static_cast<const d_select_event &>(event).citem;
 			// stay in multiplayer menu, even after having played a game
-			return dispatch_menu_option(static_cast<netgame_menu_item_index>(citem));
-		}
+			return dispatch_multiplayer_menu_option(static_cast<const d_select_event &>(event));
 		default:
 			break;
 	}

@@ -1246,7 +1246,7 @@ public:
 struct mission_menu : listbox
 {
 	static constexpr char listbox_go_up[] = "<..>";
-	using callback_type = window_event_result (*)(void);
+	using callback_type = window_event_result (*)(const d_select_event &);
 	/* The top level menu stores the mission data in a member variable.
 	 * When this class is the base of toplevel_mission_menu, this
 	 * reference points to that member variable in
@@ -1349,7 +1349,8 @@ window_event_result mission_menu::callback_handler(const d_event &event, window_
 			break;
 		case event_type::newmenu_selected:
 		{
-			const auto raw_citem = static_cast<const d_select_event &>(event).citem;
+			auto &select_event{static_cast<const d_select_event &>(event)};
+			const auto raw_citem{select_event.citem};
 			auto citem = raw_citem;
 			if (parent)
 			{
@@ -1392,7 +1393,7 @@ window_event_result mission_menu::callback_handler(const d_event &event, window_
 				}
 				CGameCfg.LastMission.copy_if(listbox_strings[raw_citem]);
 			}
-			return (*when_selected)();
+			return (*when_selected)(select_event);
 		}
 		case event_type::window_close:
 			/* If the user dismisses the listbox by pressing ESCAPE,
@@ -1465,7 +1466,7 @@ static std::unique_ptr<mission_menu_create_state> prepare_mission_menu_state(con
 
 namespace dsx {
 
-void select_mission(const mission_filter_mode mission_filter, const menu_title message, window_event_result (*when_selected)(void))
+void select_mission(const mission_filter_mode mission_filter, const menu_title message, window_event_result (*when_selected)(const d_select_event &), const d_select_event &select_event)
 {
 	auto &&mission_list = build_mission_list(mission_filter);
 
@@ -1474,7 +1475,7 @@ void select_mission(const mission_filter_mode mission_filter, const menu_title m
     if (mission_list.size() <= 1)
 	{
         load_mission(&mission_list.front());
-		(*when_selected)();
+		(*when_selected)(select_event);
     }
 	else
 	{

@@ -491,7 +491,7 @@ namespace dsx {
 
 //Handles creating and selecting from the mission list.
 //Returns 1 if a mission was loaded.
-void select_mission (mission_filter_mode anarchy_mode, menu_title message, window_event_result (*when_selected)(void));
+void select_mission (mission_filter_mode anarchy_mode, menu_title message, window_event_result (*when_selected)(const d_select_event &), const d_select_event &select_event);
 
 }
 

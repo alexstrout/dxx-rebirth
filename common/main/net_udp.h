@@ -50,7 +50,7 @@ void leave_game();
 using udp::dispatch;
 }
 
-window_event_result net_udp_setup_game(void);
+window_event_result net_udp_setup_game(const d_select_event &);
 }
 #endif
 void net_udp_manual_join_game();

@@ -34,7 +34,7 @@ COPYRIGHT 1993-1999 PARALLAX SOFTWARE CORPORATION.  ALL RIGHTS RESERVED.
 #endif
 #include "pstypes.h"
 #include "maths.h"
-#include "fwd-event.h"
+#include "event.h"
 
 #define KEY_BUFFER_SIZE 16
 #define KEY_REPEAT_DELAY 400
@@ -63,6 +63,7 @@ extern std::array<unsigned char, KEY_BUFFER_SIZE> unicode_frame_buffer;
 extern void key_flush();    // Clears the 256 char buffer
 extern void event_keycommand_send(unsigned key); // synthesize a key command event from a keycode
 int event_key_get(const d_event &event);	// Get the keycode from the event_type::key_command event
+d_event::source event_key_get_source(const d_event &);
 extern int event_key_get_raw(const d_event &event);	// same as above but without mod states
 unsigned char key_ascii();
 
