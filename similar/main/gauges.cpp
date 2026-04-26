@@ -482,22 +482,22 @@ public:
 	}
 };
 
-static hud_x_scale_float HUD_SCALE_X(const unsigned screen_width, const local_multires_gauge_graphic multires_gauge_graphic)
+constexpr hud_x_scale_float HUD_SCALE_X(const unsigned screen_width, const local_multires_gauge_graphic multires_gauge_graphic)
 {
 	return static_cast<double>(screen_width) / BASE_WIDTH(multires_gauge_graphic);
 }
 
-static hud_y_scale_float HUD_SCALE_Y(const unsigned screen_height, const local_multires_gauge_graphic multires_gauge_graphic)
+constexpr hud_y_scale_float HUD_SCALE_Y(const unsigned screen_height, const local_multires_gauge_graphic multires_gauge_graphic)
 {
 	return static_cast<double>(screen_height) / BASE_HEIGHT(multires_gauge_graphic);
 }
 
-static hud_ar_scale_float HUD_SCALE_AR(const hud_x_scale_float x, const hud_y_scale_float y)
+constexpr hud_ar_scale_float HUD_SCALE_AR(const hud_x_scale_float x, const hud_y_scale_float y)
 {
 	return std::min(x.get(), y.get());
 }
 
-static hud_ar_scale_float HUD_SCALE_AR(const unsigned screen_width, const unsigned screen_height, const local_multires_gauge_graphic multires_gauge_graphic)
+constexpr hud_ar_scale_float HUD_SCALE_AR(const unsigned screen_width, const unsigned screen_height, const local_multires_gauge_graphic multires_gauge_graphic)
 {
 	return HUD_SCALE_AR(HUD_SCALE_X(screen_width, multires_gauge_graphic), HUD_SCALE_Y(screen_height, multires_gauge_graphic));
 }
@@ -523,12 +523,12 @@ class hud_scale_float : public base_hud_scale_float
 {
 };
 
-static hud_ar_scale_float HUD_SCALE_AR(hud_x_scale_float, hud_y_scale_float)
+constexpr hud_ar_scale_float HUD_SCALE_AR(hud_x_scale_float, hud_y_scale_float)
 {
 	return {};
 }
 
-static hud_ar_scale_float HUD_SCALE_AR(unsigned, unsigned, local_multires_gauge_graphic)
+constexpr hud_ar_scale_float HUD_SCALE_AR(unsigned, unsigned, local_multires_gauge_graphic)
 {
 	return {};
 }
