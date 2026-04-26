@@ -30,9 +30,9 @@ For example:
 * Besides MIDI and CD-Audio (Redbook), you can play your own custom Music from your hard drive or a separate AddOn.
 * Both games can utilize special AddOn packs to replace or expand the original game content.
 * Multiplayer via UDP protocol provides a fast and easy-to-use LAN and Online action. This includes reliable communication causing less glitches due to lost packets.
-* The ingame Demo-recording system has been improved. Demos are less glitchy and smaller while still still being backwards-compatible to earlier versions of the games.
+* The ingame Demo-recording system has been improved. Demos are less glitchy and smaller while still being backwards-compatible to earlier versions of the games.
 * Higher game speed will not cause glitches such as unacceptable fast homing projectiles, incredible high damage caused by several collisions or Fusion cannon, etc.
-* Player files, Savegames, Demos and Missions from DOS-Versions of the games can freely be used in DXX-Rebirth and vice versa.
+* Player files, Savegames, Demos and Missions from DOS-Versions of the games can freely be used in DXX-Rebirth.
 * Mac Command keys are now working - see F1 Help. Command-Q works much like a normal Mac program
 * Even more ...
 
@@ -44,7 +44,7 @@ See [INSTALL.markdown](INSTALL.markdown).
 
 ## 3. Multiplayer:
 
-DXX-Rebirth supports Multiplayer over UDP/IP.Using UDP/IP works over LAN and Internet. 
+DXX-Rebirth supports Multiplayer over UDP/IP.  Using UDP/IP works over LAN and Internet. 
 
 By default, each game communicates over UDP-Port 42424. This can be changed via the menus, command-line argument or .ini files. 
 
