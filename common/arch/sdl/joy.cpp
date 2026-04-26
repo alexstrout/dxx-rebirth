@@ -258,7 +258,7 @@ namespace {
 
 static window_event_result send_axis_button_event(unsigned button, event_type e)
 {
-	Joystick.button_state[button] = (e == event_type::joystick_button_up) ? 0 : 1;
+	Joystick.button_state[button] = (e == event_type::joystick_button_up) ? SDL_RELEASED : SDL_PRESSED;
 	const d_event_joystickbutton event{ e, button };
 	con_printf(CON_DEBUG, "Sending event %s, button %d", (e == event_type::joystick_button_up) ? "event_type::joystick_button_up" : "event_type::joystick_button_down", event.button);
 	return event_send(event);
