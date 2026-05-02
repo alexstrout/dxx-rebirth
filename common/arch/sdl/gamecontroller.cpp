@@ -174,7 +174,7 @@ static void gc_load_controller_db()
 	{
 		std::array<char, PATH_MAX> path;
 		snprintf(path.data(), path.size(), "%sgamecontrollerdb.txt", base);
-		SDL_free(const_cast<char *>(base));
+		SDL_free(base);
 		const auto n = SDL_GameControllerAddMappingsFromFile(path.data());
 		if (n >= 0)
 		{
