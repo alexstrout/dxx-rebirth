@@ -24,7 +24,7 @@ build_appimage() {
     # Copy gamecontrollerdb.txt into AppDir if available
     if [ -f "contrib/gamecontrollerdb.txt" ]; then
         mkdir -p "${name}.appdir/usr/share/${name}"
-        cp "contrib/gamecontrollerdb.txt" "${name}.appdir/usr/share/${name}/"
+        cp --link "contrib/gamecontrollerdb.txt" "${name}.appdir/usr/share/${name}/"
     fi
 
     # Package!
