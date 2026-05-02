@@ -128,7 +128,7 @@ static const char *gc_axis_name(int axis)
 
 #if DXX_MAX_BUTTONS_PER_JOYSTICK
 constexpr auto gc_key_map{[]() {
-	std::array<unsigned, GC_NUM_VIRTUAL_BUTTONS> gc_key_map{};
+	std::array<unsigned, 1 + (GC_AXIS_BUTTON_START + (SDL_CONTROLLER_AXIS_LEFTY * 2) + 1)> gc_key_map{};
 	// Standard menu key mappings using GameController button names
 	gc_key_map[SDL_CONTROLLER_BUTTON_A] = KEY_ENTER;
 	gc_key_map[SDL_CONTROLLER_BUTTON_B] = KEY_ESC;
