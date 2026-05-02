@@ -59,8 +59,6 @@ static struct gc_joyinfo {
 #endif
 } GC_Joystick;
 
-static std::vector<unsigned> gc_key_map;
-
 struct d_event_joystickbutton : d_event
 {
 	const unsigned button;
@@ -127,6 +125,30 @@ static const char *gc_axis_name(int axis)
 		default: return "?";
 	}
 }
+
+#if DXX_MAX_BUTTONS_PER_JOYSTICK
+constexpr auto gc_key_map{[]() {
+	std::array<unsigned, GC_NUM_VIRTUAL_BUTTONS> gc_key_map{};
+	// Standard menu key mappings using GameController button names
+	gc_key_map[SDL_CONTROLLER_BUTTON_A] = KEY_ENTER;
+	gc_key_map[SDL_CONTROLLER_BUTTON_B] = KEY_ESC;
+	gc_key_map[SDL_CONTROLLER_BUTTON_X] = KEY_SPACEBAR;
+	gc_key_map[SDL_CONTROLLER_BUTTON_Y] = KEY_DELETE;
+	gc_key_map[SDL_CONTROLLER_BUTTON_DPAD_UP] = KEY_UP;
+	gc_key_map[SDL_CONTROLLER_BUTTON_DPAD_DOWN] = KEY_DOWN;
+	gc_key_map[SDL_CONTROLLER_BUTTON_DPAD_LEFT] = KEY_LEFT;
+	gc_key_map[SDL_CONTROLLER_BUTTON_DPAD_RIGHT] = KEY_RIGHT;
+	gc_key_map[SDL_CONTROLLER_BUTTON_START] = KEY_PAUSE;
+	gc_key_map[SDL_CONTROLLER_BUTTON_BACK] = KEY_ESC;
+	gc_key_map[SDL_CONTROLLER_BUTTON_LEFTSTICK] = KEY_F4 + KEY_SHIFTED; // Guidebot menu (D2)
+	// Left stick axis-buttons map to arrows for menu navigation
+	gc_key_map[GC_AXIS_BUTTON_START + (SDL_CONTROLLER_AXIS_LEFTX * 2)] = KEY_RIGHT;      // +LX = right
+	gc_key_map[GC_AXIS_BUTTON_START + (SDL_CONTROLLER_AXIS_LEFTX * 2) + 1] = KEY_LEFT;   // -LX = left
+	gc_key_map[GC_AXIS_BUTTON_START + (SDL_CONTROLLER_AXIS_LEFTY * 2)] = KEY_DOWN;       // +LY = down
+	gc_key_map[GC_AXIS_BUTTON_START + (SDL_CONTROLLER_AXIS_LEFTY * 2) + 1] = KEY_UP;     // -LY = up
+	return gc_key_map;
+}()};
+#endif
 
 static std::array<int, GC_NUM_AXES> gc_axis_values{};
 
@@ -227,7 +249,6 @@ void joy_init()
 	joyaxis_text.clear();
 #endif
 	joybutton_text.clear();
-	gc_key_map.clear();
 	num_controllers = 0;
 
 	// Load external controller database
@@ -238,7 +259,6 @@ void joy_init()
 
 	// Set up fixed button/axis text and key mappings
 	joybutton_text.resize(GC_NUM_VIRTUAL_BUTTONS);
-	gc_key_map.resize(GC_NUM_VIRTUAL_BUTTONS, 0);
 
 	// Button text and key mappings
 	for (unsigned i = 0; i < GC_NUM_BUTTONS; i++)
@@ -246,18 +266,6 @@ void joy_init()
 		auto &text = joybutton_text[i];
 		snprintf(text.data(), text.size(), "%s", gc_button_name(i));
 	}
-	// Standard menu key mappings using GameController button names
-	gc_key_map[SDL_CONTROLLER_BUTTON_A] = KEY_ENTER;
-	gc_key_map[SDL_CONTROLLER_BUTTON_B] = KEY_ESC;
-	gc_key_map[SDL_CONTROLLER_BUTTON_X] = KEY_SPACEBAR;
-	gc_key_map[SDL_CONTROLLER_BUTTON_Y] = KEY_DELETE;
-	gc_key_map[SDL_CONTROLLER_BUTTON_DPAD_UP] = KEY_UP;
-	gc_key_map[SDL_CONTROLLER_BUTTON_DPAD_DOWN] = KEY_DOWN;
-	gc_key_map[SDL_CONTROLLER_BUTTON_DPAD_LEFT] = KEY_LEFT;
-	gc_key_map[SDL_CONTROLLER_BUTTON_DPAD_RIGHT] = KEY_RIGHT;
-	gc_key_map[SDL_CONTROLLER_BUTTON_START] = KEY_PAUSE;
-	gc_key_map[SDL_CONTROLLER_BUTTON_BACK] = KEY_ESC;
-	gc_key_map[SDL_CONTROLLER_BUTTON_LEFTSTICK] = KEY_F4 + KEY_SHIFTED; // Guidebot menu (D2)
 
 	// Axis-as-button text and key mappings
 	for (unsigned i = 0; i < GC_NUM_AXES; i++)
@@ -268,11 +276,6 @@ void joy_init()
 		snprintf(text_pos.data(), text_pos.size(), "+%s", gc_axis_name(i));
 		snprintf(text_neg.data(), text_neg.size(), "-%s", gc_axis_name(i));
 	}
-	// Left stick axis-buttons map to arrows for menu navigation
-	gc_key_map[GC_AXIS_BUTTON_START + (SDL_CONTROLLER_AXIS_LEFTX * 2)] = KEY_RIGHT;      // +LX = right
-	gc_key_map[GC_AXIS_BUTTON_START + (SDL_CONTROLLER_AXIS_LEFTX * 2) + 1] = KEY_LEFT;   // -LX = left
-	gc_key_map[GC_AXIS_BUTTON_START + (SDL_CONTROLLER_AXIS_LEFTY * 2)] = KEY_DOWN;        // +LY = down
-	gc_key_map[GC_AXIS_BUTTON_START + (SDL_CONTROLLER_AXIS_LEFTY * 2) + 1] = KEY_UP;     // -LY = up
 
 #if DXX_MAX_AXES_PER_JOYSTICK
 	// Axis text
