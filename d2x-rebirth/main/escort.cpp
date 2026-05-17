@@ -176,46 +176,42 @@ struct escort_menu_items
 {
 	std::array<char, 300> msg;
 	const unsigned border_x, border_y;
-	escort_menu_items(int next_goal, const char *Buddy_messages_suppressed, grs_canvas &src, gr_string_size &);
+	escort_menu_items(escort_goal_t next_goal, const char *Buddy_messages_suppressed, grs_canvas &src, gr_string_size &);
 };
 
 struct escort_menu : escort_menu_items, window
 {
-	escort_menu(int next_goal, const char *Buddy_messages_suppressed, grs_canvas &src, gr_string_size = {});
+	escort_menu(escort_goal_t next_goal, const char *Buddy_messages_suppressed, grs_canvas &src, gr_string_size = {});
 	virtual window_event_result event_handler(const d_event &) override;
 	static window_event_result event_key_command(const d_event &event);
 	void show_escort_menu();
 };
 
-escort_menu_items::escort_menu_items(const int next_goal, const char *Buddy_messages_suppressed, grs_canvas &src, gr_string_size &text_size) :
-	border_x(get_border_x(src)), border_y(get_border_y(src))
+/* Return a terse player-readable description of the escort goal `goal`.  For
+ * goals with constant text, return a pointer to the description, and ignore
+ * `buf`.  For goals with variadic text, write the description into `buf`, then
+ * return a pointer to `buf`.
+ */
+const char *get_goal_text(const escort_goal_t goal, std::array<char, 12> &buf)
 {
-	std::array<char, 12> goal_str;
-	const char *goal_txt;
-	switch (next_goal) {
+	switch (goal) {
 		default:
 		case ESCORT_GOAL_UNSPECIFIED:
-			Int3();
-			goal_txt = "ERROR";
-			break;
+			// Impossible.  Players should never see this goal.
+			[[unlikely]];
+			return "ERROR";
 		case ESCORT_GOAL_BLUE_KEY:
-			goal_txt = "blue key";
-			break;
+			return "blue key";
 		case ESCORT_GOAL_GOLD_KEY:
-			goal_txt = "yellow key";
-			break;
+			return "yellow key";
 		case ESCORT_GOAL_RED_KEY:
-			goal_txt = "red key";
-			break;
+			return "red key";
 		case ESCORT_GOAL_CONTROLCEN:
-			goal_txt = "reactor";
-			break;
+			return "reactor";
 		case ESCORT_GOAL_BOSS:
-			goal_txt = "boss";
-			break;
+			return "boss";
 		case ESCORT_GOAL_EXIT:
-			goal_txt = "exit";
-			break;
+			return "exit";
 		case ESCORT_GOAL_MARKER1:
 		case ESCORT_GOAL_MARKER2:
 		case ESCORT_GOAL_MARKER3:
@@ -225,10 +221,19 @@ escort_menu_items::escort_menu_items(const int next_goal, const char *Buddy_mess
 		case ESCORT_GOAL_MARKER7:
 		case ESCORT_GOAL_MARKER8:
 		case ESCORT_GOAL_MARKER9:
-			goal_txt = goal_str.data();
-			std::snprintf(goal_str.data(), goal_str.size(), "marker %i", next_goal - ESCORT_GOAL_MARKER1 + 1);
-			break;
+			{
+				const auto goal_txt{buf.data()};
+				std::snprintf(goal_txt, buf.size(), "marker %i", goal - ESCORT_GOAL_MARKER1 + 1);
+				return goal_txt;
+			}
 	}
+}
+
+escort_menu_items::escort_menu_items(const escort_goal_t next_goal, const char *Buddy_messages_suppressed, grs_canvas &src, gr_string_size &text_size) :
+	border_x(get_border_x(src)), border_y(get_border_y(src))
+{
+	std::array<char, 12> goal_str;
+	const auto goal_txt{get_goal_text(next_goal, goal_str)};
 	snprintf(msg.data(), msg.size(), "Select Guide-Bot Command:\n\n\n"
 						"0.  Next Goal: %s" CC_LSPACING_S "3\n\n"
 						"\x84.  Find Energy Powerup" CC_LSPACING_S "3\n\n"
@@ -246,7 +251,7 @@ escort_menu_items::escort_menu_items(const int next_goal, const char *Buddy_mess
 	text_size = gr_get_string_size(*GAME_FONT, msg.data());
 }
 
-escort_menu::escort_menu(int next_goal, const char *Buddy_messages_suppressed, grs_canvas &src, gr_string_size text_size) :
+escort_menu::escort_menu(const escort_goal_t next_goal, const char *Buddy_messages_suppressed, grs_canvas &src, gr_string_size text_size) :
 	escort_menu_items(next_goal, Buddy_messages_suppressed, src, text_size),
 	window(src, ((src.cv_bitmap.bm_w - text_size.width) / 2) - border_x, ((src.cv_bitmap.bm_h - text_size.height) / 2) - border_y, text_size.width + (border_x * 2), text_size.height + (border_y * 2))
 {
@@ -2060,7 +2065,6 @@ void do_escort_menu(const escort_menu_style style)
 	auto &vcobjptr = Objects.vcptr;
 	auto &vmobjptr = Objects.vmptr;
 	auto &vmobjptridx = Objects.vmptridx;
-	int	next_goal;
 
 #if DXX_USE_MULTIPLAYER
 	if (+(Game_mode & GM_MULTI)) {
@@ -2083,6 +2087,7 @@ void do_escort_menu(const escort_menu_style style)
 	}
 
 	auto &plrobj = get_local_plrobj();
+	escort_goal_t next_goal;
 	//	This prevents the buddy from coming back if you've told him to scram.
 	//	If we don't set next_goal, we get garbage there.
 	if (BuddyState.Escort_special_goal == ESCORT_GOAL_SCRAM) {
@@ -2108,28 +2113,10 @@ void do_escort_menu(const escort_menu_style style)
 		? "Enable Messages"
 		: "Suppress Messages";
 
-	std::array<char, 40> next_goal_text;
+	std::array<char, sizeof("Next Goal: ") + 12> next_goal_text;
 	{
 		std::array<char, 12> goal_str;
-		const char *goal_txt;
-		switch (next_goal) {
-			default:
-			case ESCORT_GOAL_UNSPECIFIED: goal_txt = "ERROR"; break;
-			case ESCORT_GOAL_BLUE_KEY: goal_txt = "blue key"; break;
-			case ESCORT_GOAL_GOLD_KEY: goal_txt = "yellow key"; break;
-			case ESCORT_GOAL_RED_KEY: goal_txt = "red key"; break;
-			case ESCORT_GOAL_CONTROLCEN: goal_txt = "reactor"; break;
-			case ESCORT_GOAL_BOSS: goal_txt = "boss"; break;
-			case ESCORT_GOAL_EXIT: goal_txt = "exit"; break;
-			case ESCORT_GOAL_MARKER1: case ESCORT_GOAL_MARKER2:
-			case ESCORT_GOAL_MARKER3: case ESCORT_GOAL_MARKER4:
-			case ESCORT_GOAL_MARKER5: case ESCORT_GOAL_MARKER6:
-			case ESCORT_GOAL_MARKER7: case ESCORT_GOAL_MARKER8:
-			case ESCORT_GOAL_MARKER9:
-				goal_txt = goal_str.data();
-				std::snprintf(goal_str.data(), goal_str.size(), "marker %i", next_goal - ESCORT_GOAL_MARKER1 + 1);
-				break;
-		}
+		const auto goal_txt{get_goal_text(next_goal, goal_str)};
 		std::snprintf(next_goal_text.data(), next_goal_text.size(), "Next Goal: %s", goal_txt);
 	}
 
