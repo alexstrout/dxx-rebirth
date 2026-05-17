@@ -84,6 +84,8 @@ void gamecontroller_init();
 void gamecontroller_flush();
 void gamecontroller_close();
 bool gamecontroller_translate_menu_key(unsigned button);
+
+extern int num_controllers;
 #endif
 
 }

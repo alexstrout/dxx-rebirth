@@ -217,6 +217,9 @@ extern const gamecontroller_axis_text_array gamecontroller_axis_text;
 #define DXX_JOY_MAX(A,B)	((A) < (B) ? (B) : (A))
 using joybutton_text_t = joystick_text_t<number_to_text_length<DXX_MAX_JOYSTICKS> + DXX_JOY_MAX(DXX_JOY_MAX(sizeof("J H ") + number_to_text_length<DXX_MAX_HATS_PER_JOYSTICK>, sizeof("J B") + number_to_text_length<DXX_MAX_BUTTONS_PER_JOYSTICK>), sizeof("J -A") + number_to_text_length<DXX_MAX_AXES_PER_JOYSTICK>)>;
 #undef DXX_JOY_MAX
+#if SDL_MAJOR_VERSION == 2
+extern joybutton_text_t gcbutton_text;
+#endif
 extern joybutton_text_t joybutton_text;
 
 }

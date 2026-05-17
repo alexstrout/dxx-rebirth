@@ -33,6 +33,9 @@
 
 namespace dcx {
 
+int num_controllers{};
+joybutton_text_t gcbutton_text;
+
 namespace {
 
 struct SDL_GameController_deleter
@@ -50,7 +53,6 @@ struct d_gamecontroller
 };
 
 static std::array<d_gamecontroller, DXX_MAX_JOYSTICKS> GameControllers;
-static int num_controllers{0};
 
 // Virtual joystick state
 static struct gc_joyinfo {
@@ -271,7 +273,7 @@ void gamecontroller_init()
 
 	GC_Joystick = {};
 	gc_axis_values = {};
-	joybutton_text.clear();
+	gcbutton_text.clear();
 	num_controllers = 0;
 
 	// Load external controller database
@@ -281,12 +283,12 @@ void gamecontroller_init()
 	SDL_GameControllerEventState(SDL_ENABLE);
 
 	// Set up fixed button/axis text and key mappings
-	joybutton_text.resize(GC_NUM_VIRTUAL_BUTTONS);
+	gcbutton_text.resize(GC_NUM_VIRTUAL_BUTTONS);
 
 	// Button text and key mappings
 	for (unsigned i = 0; i < GC_NUM_BUTTONS; i++)
 	{
-		auto &text = joybutton_text[i];
+		auto &text = gcbutton_text[i];
 		snprintf(text.data(), text.size(), "%s", gc_button_name(i));
 	}
 
@@ -294,8 +296,8 @@ void gamecontroller_init()
 	for (unsigned i = 0; i < GC_NUM_AXES; i++)
 	{
 		const auto base = GC_AXIS_BUTTON_START + (i * 2);
-		auto &text_pos = joybutton_text[base];
-		auto &text_neg = joybutton_text[base + 1];
+		auto &text_pos = gcbutton_text[base];
+		auto &text_neg = gcbutton_text[base + 1];
 		auto &&name{gc_axis_name(static_cast<SDL_GameControllerAxis>(i))};
 		snprintf(text_pos.data(), text_pos.size(), "+%s", name.data());
 		snprintf(text_neg.data(), text_neg.size(), "-%s", name.data());
@@ -311,7 +313,7 @@ void gamecontroller_close()
 	for (auto &gc : GameControllers)
 		gc.handle.reset();
 	num_controllers = 0;
-	joybutton_text.clear();
+	gcbutton_text.clear();
 }
 
 void gamecontroller_flush()

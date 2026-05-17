@@ -273,8 +273,11 @@ const struct player_config::KeySettings DefaultKeySettings{
 	}}},
 #if DXX_MAX_JOYSTICKS
 	{{{
-#if SDL_MAJOR_VERSION == 1
-	/* SDL1 raw joystick defaults (hardware-dependent button indices) */
+		/* SDL raw joystick defaults (hardware-dependent button indices).  This
+		 * is used if the player has a joystick that is not considered a
+		 * gamecontroller.  For gamecontrollers, this will be ignored, and the
+		 * settings in `DefaultKeySettingsGameController` used instead.
+		 */
 		// Fire primary
 		0x0,
 		// Fire secondary
@@ -406,7 +409,127 @@ const struct player_config::KeySettings DefaultKeySettings{
 #endif
 		// Menu
 		0xff, 0xff
-#elif SDL_MAJOR_VERSION == 2
+	}}},
+#endif
+	/* Mouse */ {{{
+		// Fire primary
+		0x0,
+		// Fire secondary
+		0x1,
+		// Accelerate
+		0xff,
+		// Reverse
+		0xff,
+		// Fire flare
+		0xff,
+		// Slide on
+		0xff,
+		// Slide left
+		0xff,
+		// Slide right
+		0xff,
+		// Slide up
+		0xff,
+		// Slide down
+		0xff,
+		// Bank on
+		0xff,
+		// Bank left
+		0xff,
+		// Bank right
+		0xff,
+		// Pitch up/down
+		0x1,
+		// Invert pitch
+		0x0,
+		// Turn left/right
+		0x0,
+		// Invert turn
+		0x0,
+		// Slide left/right
+		0xff,
+		// Invert slide left/right
+		0x0,
+		// Slide up/down
+		0xff,
+		// Invert slide up/down
+		0x0,
+		// Bank left/right
+		0xff,
+		// Invert bank left/right
+		0x0,
+		// Throttle
+		0xff,
+		// Invert throttle
+		0x0,
+		// Rear view
+		0xff,
+		// Drop bomb
+		0xff,
+#if DXX_BUILD_DESCENT == 2
+		// Afterburner
+		0xff,
+#endif
+		// Cycle primary
+		0xff,
+		// Cycle secondary
+		0xff,
+#if DXX_BUILD_DESCENT == 1
+		0x0,
+		0x0,
+		0x0,
+		0x0,
+		0x0,
+		0x0,
+		0x0,
+		0x0,
+		0x0,
+		0x0,
+		0x0,
+		0x0,
+		0x0,
+		0x0,
+		0x0,
+		0x0,
+		0x0,
+		0x0,
+		0x0,
+#elif DXX_BUILD_DESCENT == 2
+		/* unused */
+		0xff,
+		0xff,
+		0xff,
+		0xff,
+		0xff,
+		0xff,
+		0xff,
+		0xff,
+		0xff,
+		0xff,
+		0xff,
+		0xff,
+		0xff,
+		0xff,
+		0xff,
+		0xff,
+		0xff,
+		0xff,
+		0xff,
+		0xff,
+		0xff,
+		0xff,
+		0xff,
+		0xff,
+		0xff,
+		0x0,
+		0x0,
+		0x0,
+#endif
+	}}}
+};
+
+#if SDL_MAJOR_VERSION == 2
+constexpr enumerated_array<uint8_t, MAX_CONTROLS, dxx_kconfig_ui_kc_joystick> DefaultKeySettingsGameController{{{
 	/* SDL2 GameController defaults (standardized button indices)
 	 *  D-pad pitch/turn handled via keyboard key mapping
 	 *
@@ -530,125 +653,8 @@ const struct player_config::KeySettings DefaultKeySettings{
 		// Remaining (unbound)
 		0xff, 0xff, 0xff, 0xff, 0xff
 #endif
+}}};
 #endif
-	}}},
-#endif
-	/* Mouse */ {{{
-		// Fire primary
-		0x0,
-		// Fire secondary
-		0x1,
-		// Accelerate
-		0xff,
-		// Reverse
-		0xff,
-		// Fire flare
-		0xff,
-		// Slide on
-		0xff,
-		// Slide left
-		0xff,
-		// Slide right
-		0xff,
-		// Slide up
-		0xff,
-		// Slide down
-		0xff,
-		// Bank on
-		0xff,
-		// Bank left
-		0xff,
-		// Bank right
-		0xff,
-		// Pitch up/down
-		0x1,
-		// Invert pitch
-		0x0,
-		// Turn left/right
-		0x0,
-		// Invert turn
-		0x0,
-		// Slide left/right
-		0xff,
-		// Invert slide left/right
-		0x0,
-		// Slide up/down
-		0xff,
-		// Invert slide up/down
-		0x0,
-		// Bank left/right
-		0xff,
-		// Invert bank left/right
-		0x0,
-		// Throttle
-		0xff,
-		// Invert throttle
-		0x0,
-		// Rear view
-		0xff,
-		// Drop bomb
-		0xff,
-#if DXX_BUILD_DESCENT == 2
-		// Afterburner
-		0xff,
-#endif
-		// Cycle primary
-		0xff,
-		// Cycle secondary
-		0xff,
-#if DXX_BUILD_DESCENT == 1
-		0x0,
-		0x0,
-		0x0,
-		0x0,
-		0x0,
-		0x0,
-		0x0,
-		0x0,
-		0x0,
-		0x0,
-		0x0,
-		0x0,
-		0x0,
-		0x0,
-		0x0,
-		0x0,
-		0x0,
-		0x0,
-		0x0,
-#elif DXX_BUILD_DESCENT == 2
-		/* unused */
-		0xff,
-		0xff,
-		0xff,
-		0xff,
-		0xff,
-		0xff,
-		0xff,
-		0xff,
-		0xff,
-		0xff,
-		0xff,
-		0xff,
-		0xff,
-		0xff,
-		0xff,
-		0xff,
-		0xff,
-		0xff,
-		0xff,
-		0xff,
-		0xff,
-		0xff,
-		0xff,
-		0xff,
-		0xff,
-		0x0,
-		0x0,
-		0x0,
-#endif
-	}}}
-};
 
 namespace {
 
@@ -785,27 +791,42 @@ static const char *get_item_text(const kc_item &item, const kc_mitem &mitem, cha
 				return mouseaxis_text[mitem.value];
 #if DXX_MAX_BUTTONS_PER_JOYSTICK || DXX_MAX_HATS_PER_JOYSTICK
 			case kc_type::joy_button:
-				if (joybutton_text.size() > mitem.value)
-					return &joybutton_text[mitem.value][0];
-				else
+#if SDL_MAJOR_VERSION == 2
+				if (num_controllers)
 				{
-					snprintf(buf, sizeof(buf), "BTN%2d", mitem.value + 1);
-					return buf;
+					if (mitem.value < gcbutton_text.size()) [[likely]]
+						return &gcbutton_text[mitem.value][0];
 				}
-				break;
+				else
+#endif
+				{
+					if (mitem.value < joybutton_text.size()) [[likely]]
+						return &joybutton_text[mitem.value][0];
+				}
+				/* If the value is out of range, show a generic label instead
+				 * of indexing outside the container.
+				 */
+				snprintf(buf, sizeof(buf), "BTN%2d", mitem.value + 1);
+				return buf;
 #else
 				(void)buf;
 #endif
 #if DXX_MAX_AXES_PER_JOYSTICK
 			case kc_type::joy_axis:
-				if (joyaxis_text.size() > mitem.value)
-					return &joyaxis_text[mitem.value][0];
-				else
+#if SDL_MAJOR_VERSION == 2
+				if (num_controllers)
 				{
-					snprintf(buf, sizeof(buf), "AXIS%2d", mitem.value + 1);
-					return buf;
+					if (mitem.value < gamecontroller_axis_text.size()) [[likely]]
+						return &gamecontroller_axis_text[mitem.value][0];
 				}
-				break;
+				else
+#endif
+				{
+					if (mitem.value < joyaxis_text.size()) [[likely]]
+						return &joyaxis_text[mitem.value][0];
+				}
+				snprintf(buf, sizeof(buf), "AXIS%2d", mitem.value + 1);
+				return buf;
 #else
 				(void)buf;
 #endif
@@ -856,11 +877,14 @@ static void kconfig_draw(kc_menu &menu)
 
 	auto &game_font = *GAME_FONT;
 	gr_set_fontcolor(canvas, BM_XRGB(28, 28, 28), -1);
+	gr_string(canvas, game_font, 0x8000, fspacy(21),
 #if SDL_MAJOR_VERSION == 2
-	gr_string(canvas, game_font, 0x8000, fspacy(21), "Enter/A changes, ctrl-d/R3 deletes, ctrl-r/Start(hold) resets, ESC/B exits");
-#else
-	gr_string(canvas, game_font, 0x8000, fspacy(21), "Enter changes, ctrl-d deletes, ctrl-r resets defaults, ESC exits");
+		num_controllers
+		? "Enter/A changes, ctrl-d/R3 deletes, ctrl-r/Start(hold) resets, ESC/B exits"
+		:
 #endif
+		"Enter changes, ctrl-d deletes, ctrl-r resets defaults, ESC exits"
+	);
 
 	if (menu.items == kc_keyboard)
 	{
@@ -1104,7 +1128,16 @@ static void kc_reset_to_defaults(kc_menu &menu)
 		reset_mitem_values(kcm_keyboard, DefaultKeySettings.Keyboard);
 #if DXX_MAX_JOYSTICKS
 	else if (menu.items == kc_joystick)
+	{
+#if SDL_MAJOR_VERSION == 2
+		if (num_controllers)
+		{
+			reset_mitem_values(kcm_joystick, DefaultKeySettingsGameController);
+			return;
+		}
+#endif
 		reset_mitem_values(kcm_joystick, DefaultKeySettings.Joystick);
+	}
 #endif
 	else if (menu.items == kc_mouse)
 		reset_mitem_values(kcm_mouse, DefaultKeySettings.Mouse);
