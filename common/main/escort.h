@@ -28,8 +28,13 @@ static inline void detect_escort_goal_accomplished(const vmobjptridx_t &)
 }
 #elif DXX_BUILD_DESCENT == 2
 #define GUIDEBOT_NAME_LEN 9
+enum class escort_menu_style : bool
+{
+	traditional,
+	gamecontroller,
+};
 extern void change_guidebot_name(void);
-extern void do_escort_menu(void);
+void do_escort_menu(escort_menu_style);
 void detect_escort_goal_accomplished(vmobjptridx_t index);
 void detect_escort_goal_fuelcen_accomplished();
 void set_escort_special_goal(d_unique_buddy_state &BuddyState, int key);
