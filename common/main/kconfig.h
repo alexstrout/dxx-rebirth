@@ -202,6 +202,16 @@ public:
 #if DXX_MAX_AXES_PER_JOYSTICK
 using joyaxis_text_t = joystick_text_t<sizeof("J A") + number_to_text_length<DXX_MAX_JOYSTICKS> + number_to_text_length<DXX_MAX_AXES_PER_JOYSTICK>>;
 extern joyaxis_text_t joyaxis_text;
+#if SDL_MAJOR_VERSION == 2
+class gamecontroller_axis_text_array : std::array<std::array<char, 3>, SDL_CONTROLLER_AXIS_MAX>
+{
+	using array_type = std::array<std::array<char, 3>, SDL_CONTROLLER_AXIS_MAX>;
+public:
+	using array_type::size;
+	using array_type::operator[];
+};
+extern const gamecontroller_axis_text_array gamecontroller_axis_text;
+#endif
 #endif
 
 #define DXX_JOY_MAX(A,B)	((A) < (B) ? (B) : (A))

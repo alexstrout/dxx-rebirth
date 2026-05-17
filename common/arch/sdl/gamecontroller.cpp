@@ -112,17 +112,25 @@ static const char *gc_button_name(int button)
 	}
 }
 
-static const char *gc_axis_name(int axis)
+constexpr std::array<char, 3> gc_axis_name(const SDL_GameControllerAxis axis)
 {
 	switch (axis)
 	{
-		case SDL_CONTROLLER_AXIS_LEFTX: return "LX";
-		case SDL_CONTROLLER_AXIS_LEFTY: return "LY";
-		case SDL_CONTROLLER_AXIS_RIGHTX: return "RX";
-		case SDL_CONTROLLER_AXIS_RIGHTY: return "RY";
-		case SDL_CONTROLLER_AXIS_TRIGGERLEFT: return "LT";
-		case SDL_CONTROLLER_AXIS_TRIGGERRIGHT: return "RT";
-		default: return "?";
+		case SDL_CONTROLLER_AXIS_LEFTX:
+			return {"LX"};
+		case SDL_CONTROLLER_AXIS_LEFTY:
+			return {"LY"};
+		case SDL_CONTROLLER_AXIS_RIGHTX:
+			return {"RX"};
+		case SDL_CONTROLLER_AXIS_RIGHTY:
+			return {"RY"};
+		case SDL_CONTROLLER_AXIS_TRIGGERLEFT:
+			return {"LT"};
+		case SDL_CONTROLLER_AXIS_TRIGGERRIGHT:
+			return {"RT"};
+		default:
+			[[unlikely]];
+			return {"?\0"};
 	}
 }
 
@@ -236,6 +244,24 @@ static void gc_close_controller(SDL_JoystickID instance_id)
 
 } // end anonymous namespace
 
+#if DXX_MAX_AXES_PER_JOYSTICK
+constexpr gamecontroller_axis_text_array gamecontroller_axis_text{
+	[]() {
+		gamecontroller_axis_text_array r;
+		for (const auto i : {
+			SDL_CONTROLLER_AXIS_LEFTX,
+			SDL_CONTROLLER_AXIS_LEFTY,
+			SDL_CONTROLLER_AXIS_RIGHTX,
+			SDL_CONTROLLER_AXIS_RIGHTY,
+			SDL_CONTROLLER_AXIS_TRIGGERLEFT,
+			SDL_CONTROLLER_AXIS_TRIGGERRIGHT
+			})
+			r[i] = gc_axis_name(i);
+		return r;
+	}()
+};
+#endif
+
 void gamecontroller_init()
 {
 	if (SDL_Init(SDL_INIT_GAMECONTROLLER) < 0) {
@@ -245,9 +271,6 @@ void gamecontroller_init()
 
 	GC_Joystick = {};
 	gc_axis_values = {};
-#if DXX_MAX_AXES_PER_JOYSTICK
-	joyaxis_text.clear();
-#endif
 	joybutton_text.clear();
 	num_controllers = 0;
 
@@ -273,19 +296,10 @@ void gamecontroller_init()
 		const auto base = GC_AXIS_BUTTON_START + (i * 2);
 		auto &text_pos = joybutton_text[base];
 		auto &text_neg = joybutton_text[base + 1];
-		snprintf(text_pos.data(), text_pos.size(), "+%s", gc_axis_name(i));
-		snprintf(text_neg.data(), text_neg.size(), "-%s", gc_axis_name(i));
+		auto &&name{gc_axis_name(static_cast<SDL_GameControllerAxis>(i))};
+		snprintf(text_pos.data(), text_pos.size(), "+%s", name.data());
+		snprintf(text_neg.data(), text_neg.size(), "-%s", name.data());
 	}
-
-#if DXX_MAX_AXES_PER_JOYSTICK
-	// Axis text
-	joyaxis_text.resize(GC_NUM_AXES);
-	for (unsigned i = 0; i < GC_NUM_AXES; i++)
-	{
-		auto &text = joyaxis_text[i];
-		snprintf(text.data(), text.size(), "%s", gc_axis_name(i));
-	}
-#endif
 
 	// Controllers will be opened via SDL_CONTROLLERDEVICEADDED events
 	// which SDL2 fires for already-connected devices on first pump
@@ -297,9 +311,6 @@ void gamecontroller_close()
 	for (auto &gc : GameControllers)
 		gc.handle.reset();
 	num_controllers = 0;
-#if DXX_MAX_AXES_PER_JOYSTICK
-	joyaxis_text.clear();
-#endif
 	joybutton_text.clear();
 }
 
