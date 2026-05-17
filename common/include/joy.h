@@ -39,7 +39,6 @@ extern int apply_deadzone(int value, int deadzone);
 
 }
 #else
-#define joy_init()	static_cast<void>(0)
 #define joy_flush()
 #define joy_close()	static_cast<void>(0)
 #endif
@@ -71,6 +70,25 @@ window_event_result joy_axis_handler(const SDL_JoyAxisEvent *jae);
 window_event_result joy_axisbutton_handler(const SDL_JoyAxisEvent *jae);
 #else
 #define joy_axisbutton_handler(jbe) (static_cast<const SDL_JoyAxisEvent *const &>(jbe), window_event_result::ignored)
+#endif
+
+#if DXX_MAX_JOYSTICKS
+#if SDL_MAJOR_VERSION == 2
+
+window_event_result gc_button_handler(const SDL_ControllerButtonEvent *cbe);
+window_event_result gc_axis_handler(const SDL_ControllerAxisEvent *cae);
+window_event_result gc_axisbutton_handler(const SDL_ControllerAxisEvent *cae);
+window_event_result gc_device_added(const SDL_ControllerDeviceEvent *cde);
+window_event_result gc_device_removed(const SDL_ControllerDeviceEvent *cde);
+
+void gamecontroller_init();
+void gamecontroller_flush();
+void gamecontroller_close();
+bool gamecontroller_translate_menu_key(unsigned button);
+
+extern int num_controllers;
+#endif
+
 #endif
 
 }

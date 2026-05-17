@@ -94,7 +94,7 @@ const std::array<uint8_t, 19> system_keys{{
 
 fix Cruise_speed{0};
 
-#define INFO_Y (188)
+#define INFO_Y (214)
 
 constexpr enumerated_array<uint8_t, MAX_DXX_REBIRTH_CONTROLS, dxx_kconfig_ui_kc_rebirth> DefaultKeySettingsRebirth{{{
 	0x2, 0xff, 0xff,
@@ -115,6 +115,14 @@ void kconfig_begin_loop(control_info &Controls)
 }
 
 namespace {
+
+#if DXX_MAX_JOYSTICKS
+#if SDL_MAJOR_VERSION == 2
+// GameController axis-as-button indices for use in default key settings
+constexpr unsigned GC_AXIS_BUTTON(unsigned axis_id) { return SDL_CONTROLLER_BUTTON_MAX + (axis_id * 2); }
+constexpr unsigned GC_AXIS_BUTTON_NEG(unsigned axis_id) { return SDL_CONTROLLER_BUTTON_MAX + (axis_id * 2) + 1; }
+#endif
+#endif
 
 struct kc_mitem {
 	uint8_t oldvalue;
@@ -197,6 +205,11 @@ struct kc_menu : window
 #if DXX_MAX_AXES_PER_JOYSTICK
 	std::array<int, JOY_MAX_AXES>	old_jaxis;
 #endif
+#if DXX_MAX_BUTTONS_PER_JOYSTICK || DXX_MAX_HATS_PER_JOYSTICK
+#if SDL_MAJOR_VERSION == 2
+	fix64 start_press_time{0};	// timestamp of Start button press for long-press detection
+#endif
+#endif
 	virtual window_event_result event_handler(const d_event &) override;
 };
 
@@ -204,29 +217,459 @@ struct kc_menu : window
 
 constexpr struct player_config::KeySettings DefaultKeySettings{
 	/* Keyboard */ {{{
+		// Pitch forward
+		KEY_UP, KEY_PAD8,
+		// Pitch backward
+		KEY_DOWN, KEY_PAD2,
+		// Turn left
+		KEY_LEFT, KEY_PAD4,
+		// Turn right
+		KEY_RIGHT, KEY_PAD6,
+		// Slide on
+		KEY_LALT, 0xff,
+		// Slide left
+		KEY_A, KEY_PAD1,
+		// Slide right
+		KEY_D, KEY_PAD3,
+		// Slide up
+		KEY_C, KEY_PADMINUS,
+		// Slide down
+		KEY_X, KEY_PADPLUS,
+		// Bank on
+		0xff, 0xff,
+		// Bank left
+		KEY_Q, KEY_PAD7,
+		// Bank right
+		KEY_E, KEY_PAD9,
+		// Fire primary
+		KEY_LCTRL, KEY_RCTRL,
+		// Fire secondary
+		KEY_SPACEBAR, 0xff,
+		// Fire flare
+		KEY_F, 0xff,
+		// Accelerate
+		KEY_W, 0xff,
+		// Reverse
+		KEY_S, 0xff,
+		// Drop bomb
+		KEY_B, 0xff,
+		// Rear view
+		KEY_R, 0xff,
+		// Cruise plus
+		0xff, 0xff,
+		// Cruise minus
+		0xff, 0xff,
+		// Cruise off
+		0xff, 0xff,
+		// Automap
+		KEY_TAB, 0xff,
 #if DXX_BUILD_DESCENT == 1
-		KEY_UP, KEY_PAD8, KEY_DOWN, KEY_PAD2, KEY_LEFT, KEY_PAD4, KEY_RIGHT, KEY_PAD6, KEY_LALT, 0xff, KEY_A, KEY_PAD1, KEY_D, KEY_PAD3, KEY_C, KEY_PADMINUS, KEY_X, KEY_PADPLUS, 0xff, 0xff, KEY_Q, KEY_PAD7, KEY_E, KEY_PAD9, KEY_LCTRL, KEY_RCTRL, KEY_SPACEBAR, 0xff, KEY_F, 0xff, KEY_W, 0xff, KEY_S, 0xff, KEY_B, 0xff, KEY_R, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, KEY_TAB, 0xff, KEY_COMMA, 0x0, KEY_PERIOD, 0x0
+		// Cycle primary
+		KEY_COMMA, 0x0,
+		// Cycle secondary
+		KEY_PERIOD, 0x0,
 #elif DXX_BUILD_DESCENT == 2
-		KEY_UP, KEY_PAD8, KEY_DOWN, KEY_PAD2, KEY_LEFT, KEY_PAD4, KEY_RIGHT, KEY_PAD6, KEY_LALT, 0xff, KEY_A, KEY_PAD1, KEY_D, KEY_PAD3, KEY_C, KEY_PADMINUS, KEY_X, KEY_PADPLUS, 0xff, 0xff, KEY_Q, KEY_PAD7, KEY_E, KEY_PAD9, KEY_LCTRL, KEY_RCTRL, KEY_SPACEBAR, 0xff, KEY_F, 0xff, KEY_W, 0xff, KEY_S, 0xff, KEY_B, 0xff, KEY_R, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, KEY_TAB, 0xff, KEY_LSHIFT, 0xff, KEY_COMMA, 0xff, KEY_PERIOD, 0xff, KEY_H, 0xff, KEY_T, 0xff, 0xff, 0xff, 0x0, 0x0
+		// Afterburner
+		KEY_LSHIFT, 0xff,
+		// Cycle primary
+		KEY_COMMA, 0xff,
+		// Cycle secondary
+		KEY_PERIOD, 0xff,
+		// Headlight
+		KEY_H, 0xff,
+		// Converter
+		KEY_T, 0xff,
+		// Toggle bomb
+		0xff, 0xff,
+		0x0, 0x0
 #endif
 	}}},
 #if DXX_MAX_JOYSTICKS
 	{{{
+		/* SDL raw joystick defaults (hardware-dependent button indices).  This
+		 * is used if the player has a joystick that is not considered a
+		 * gamecontroller.  For gamecontrollers, this will be ignored, and the
+		 * settings in `DefaultKeySettingsGameController` used instead.
+		 */
+		// Fire primary
+		0x0,
+		// Fire secondary
+		0x1,
+		// Accelerate
+		0xff,
+		// Reverse
+		0xff,
+		// Fire flare
+		0xff,
+		// Slide on
+		0xff,
+		// Slide left
+		0xff,
+		// Slide right
+		0xff,
+		// Slide up
+		0xff,
+		// Slide down
+		0xff,
+		// Bank on
+		0xff,
+		// Bank left
+		0xff,
+		// Bank right
+		0xff,
+		/* Begin axis+invert block.  Axes are indexed separately from buttons,
+		 * so button 0 above and axis 0 here are not the same input on the
+		 * device.
+		 *
+		 * Invert entries are true/false whether to invert the sense of the
+		 * corresponding axis, rather than being an index into the buttons or
+		 * the axes.
+		 */
+		// Pitch up/down
+		0x1,
+		// Invert pitch
+		0x0,
+		// Turn left/right
+		0x0,
+		// Invert turn
+		0x0,
+		// Slide left/right
+		0xff,
+		// Invert slide left/right
+		0x0,
+		// Slide up/down
+		0xff,
+		// Invert slide up/down
+		0x0,
+		// Bank left/right
+		0xff,
+		// Invert bank left/right
+		0x0,
+		// Throttle
+		0xff,
+		// Invert throttle
+		0x0,
+		/* End axis+invert block. */
+		// Rear view
+		0xff,
+		// Drop bomb
+		0xff,
 #if DXX_BUILD_DESCENT == 1
-		0x0, 0x1, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x1, 0x0, 0x0, 0x0, 0xff, 0x0, 0xff, 0x0, 0xff, 0x0, 0xff, 0x0, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff
+		// Automap
+		0xff, 0xff,
 #elif DXX_BUILD_DESCENT == 2
-		0x0, 0x1, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x1, 0x0, 0x0, 0x0, 0xff, 0x0, 0xff, 0x0, 0xff, 0x0, 0xff, 0x0, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff
+		// Afterburner
+		0xff,
+		// Cycle primary
+		0xff,
+		// Cycle secondary
+		0xff,
+		// Headlight
+		0xff,
 #endif
+		// Fire primary (second binding)
+		0xff,
+		// Fire secondary (second binding)
+		0xff,
+		// Accelerate (second binding)
+		0xff,
+		// Reverse (second binding)
+		0xff,
+		// Fire flare (second binding)
+		0xff,
+		// Slide on (second binding)
+		0xff,
+		// Slide left (second binding)
+		0xff,
+		// Slide right (second binding)
+		0xff,
+		// Slide up (second binding)
+		0xff,
+		// Slide down (second binding)
+		0xff,
+		// Bank on (second binding)
+		0xff,
+		// Bank left (second binding)
+		0xff,
+		// Bank right (second binding)
+		0xff,
+		// Rear view (second binding)
+		0xff,
+		// Drop bomb (second binding)
+		0xff,
+#if DXX_BUILD_DESCENT == 1
+		// Cycle primary
+		0xff,
+		// Cycle secondary
+		0xff,
+#elif DXX_BUILD_DESCENT == 2
+		// Afterburner (second binding)
+		0xff,
+#endif
+		// Cycle primary (second binding)
+		0xff,
+		// Cycle secondary (second binding)
+		0xff,
+#if DXX_BUILD_DESCENT == 2
+		// Headlight (second binding)
+		0xff,
+		// Automap
+		0xff, 0xff,
+		// Converter
+		0xff, 0xff,
+		// Toggle bomb
+		0xff, 0xff,
+#endif
+		// Menu
+		0xff, 0xff
 	}}},
 #endif
 	/* Mouse */ {{{
+		// Fire primary
+		0x0,
+		// Fire secondary
+		0x1,
+		// Accelerate
+		0xff,
+		// Reverse
+		0xff,
+		// Fire flare
+		0xff,
+		// Slide on
+		0xff,
+		// Slide left
+		0xff,
+		// Slide right
+		0xff,
+		// Slide up
+		0xff,
+		// Slide down
+		0xff,
+		// Bank on
+		0xff,
+		// Bank left
+		0xff,
+		// Bank right
+		0xff,
+		// Pitch up/down
+		0x1,
+		// Invert pitch
+		0x0,
+		// Turn left/right
+		0x0,
+		// Invert turn
+		0x0,
+		// Slide left/right
+		0xff,
+		// Invert slide left/right
+		0x0,
+		// Slide up/down
+		0xff,
+		// Invert slide up/down
+		0x0,
+		// Bank left/right
+		0xff,
+		// Invert bank left/right
+		0x0,
+		// Throttle
+		0xff,
+		// Invert throttle
+		0x0,
+		// Rear view
+		0xff,
+		// Drop bomb
+		0xff,
+#if DXX_BUILD_DESCENT == 2
+		// Afterburner
+		0xff,
+#endif
+		// Cycle primary
+		0xff,
+		// Cycle secondary
+		0xff,
 #if DXX_BUILD_DESCENT == 1
-	0x0, 0x1, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x1, 0x0, 0x0, 0x0, 0xff, 0x0, 0xff, 0x0, 0xff, 0x0, 0xff, 0x0, 0xff, 0xff, 0xff, 0xff, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0
+		0x0,
+		0x0,
+		0x0,
+		0x0,
+		0x0,
+		0x0,
+		0x0,
+		0x0,
+		0x0,
+		0x0,
+		0x0,
+		0x0,
+		0x0,
+		0x0,
+		0x0,
+		0x0,
+		0x0,
+		0x0,
+		0x0,
 #elif DXX_BUILD_DESCENT == 2
-	0x0, 0x1, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x1, 0x0, 0x0, 0x0, 0xff, 0x0, 0xff, 0x0, 0xff, 0x0, 0xff, 0x0, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x0, 0x0, 0x0, 0x0, 0x0
+		/* unused */
+		0xff,
+		0xff,
+		0xff,
+		0xff,
+		0xff,
+		0xff,
+		0xff,
+		0xff,
+		0xff,
+		0xff,
+		0xff,
+		0xff,
+		0xff,
+		0xff,
+		0xff,
+		0xff,
+		0xff,
+		0xff,
+		0xff,
+		0xff,
+		0xff,
+		0xff,
+		0xff,
+		0xff,
+		0xff,
+		0x0,
+		0x0,
+		0x0,
 #endif
 	}}}
 };
+
+#if DXX_MAX_JOYSTICKS
+#if SDL_MAJOR_VERSION == 2
+constexpr enumerated_array<uint8_t, MAX_CONTROLS, dxx_kconfig_ui_kc_joystick> DefaultKeySettingsGameController{{{
+	/* SDL2 GameController defaults (standardized button indices)
+	 *  D-pad pitch/turn handled via keyboard key mapping
+	 *
+	 *  Button indices use SDL_CONTROLLER_BUTTON_* constants.
+	 *  Axis-as-button indices use GC_AXIS_BUTTON() / GC_AXIS_BUTTON_NEG().
+	 *  Axis assignments use SDL_CONTROLLER_AXIS_* constants.
+	 */
+#if DXX_BUILD_DESCENT == 1
+		// Fire primary
+		GC_AXIS_BUTTON(SDL_CONTROLLER_AXIS_TRIGGERRIGHT),
+		// Fire secondary
+		GC_AXIS_BUTTON(SDL_CONTROLLER_AXIS_TRIGGERLEFT),
+		// Accelerate (unbound, using throttle axis)
+		0xff,
+		// Reverse (unbound, using throttle axis)
+		0xff,
+		// Fire flare
+		SDL_CONTROLLER_BUTTON_Y,
+		// Slide on (unbound)
+		0xff,
+		// Slide left (unbound)
+		0xff,
+		// Slide right (unbound)
+		0xff,
+		// Slide up (unbound)
+		0xff,
+		// Slide down (unbound)
+		0xff,
+		// Bank on (unbound)
+		0xff,
+		// Bank left
+		SDL_CONTROLLER_BUTTON_LEFTSHOULDER,
+		// Bank right
+		SDL_CONTROLLER_BUTTON_RIGHTSHOULDER,
+		// Pitch U/D (inverted)
+		SDL_CONTROLLER_AXIS_RIGHTY, 1,
+		// Turn L/R
+		SDL_CONTROLLER_AXIS_RIGHTX, 0,
+		// Slide L/R
+		SDL_CONTROLLER_AXIS_LEFTX, 0,
+		// Slide U/D (unbound)
+		0xff, 0,
+		// Bank L/R (unbound)
+		0xff, 0,
+		// Throttle
+		SDL_CONTROLLER_AXIS_LEFTY, 0,
+		// Rear view
+		SDL_CONTROLLER_BUTTON_X,
+		// Drop bomb
+		SDL_CONTROLLER_BUTTON_B,
+		// Automap
+		SDL_CONTROLLER_BUTTON_DPAD_DOWN, 0xff,
+		// OR column (unbound)
+		0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
+		0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
+		// Cycle primary
+		SDL_CONTROLLER_BUTTON_DPAD_LEFT,
+		// Cycle secondary
+		SDL_CONTROLLER_BUTTON_DPAD_RIGHT,
+		// OR / remaining (unbound)
+		0xff, 0xff, 0xff, 0xff
+#elif DXX_BUILD_DESCENT == 2
+		// Fire primary
+		GC_AXIS_BUTTON(SDL_CONTROLLER_AXIS_TRIGGERRIGHT),
+		// Fire secondary
+		GC_AXIS_BUTTON(SDL_CONTROLLER_AXIS_TRIGGERLEFT),
+		// Accelerate (unbound, using throttle axis)
+		0xff,
+		// Reverse (unbound, using throttle axis)
+		0xff,
+		// Fire flare
+		SDL_CONTROLLER_BUTTON_Y,
+		// Slide on (unbound)
+		0xff,
+		// Slide left (unbound)
+		0xff,
+		// Slide right (unbound)
+		0xff,
+		// Slide up (unbound)
+		0xff,
+		// Slide down (unbound)
+		0xff,
+		// Bank on (unbound)
+		0xff,
+		// Bank left
+		SDL_CONTROLLER_BUTTON_LEFTSHOULDER,
+		// Bank right
+		SDL_CONTROLLER_BUTTON_RIGHTSHOULDER,
+		// Pitch U/D (inverted)
+		SDL_CONTROLLER_AXIS_RIGHTY, 1,
+		// Turn L/R
+		SDL_CONTROLLER_AXIS_RIGHTX, 0,
+		// Slide L/R
+		SDL_CONTROLLER_AXIS_LEFTX, 0,
+		// Slide U/D (unbound)
+		0xff, 0,
+		// Bank L/R (unbound)
+		0xff, 0,
+		// Throttle
+		SDL_CONTROLLER_AXIS_LEFTY, 0,
+		// Rear view
+		SDL_CONTROLLER_BUTTON_X,
+		// Drop bomb
+		SDL_CONTROLLER_BUTTON_B,
+		// Afterburner
+		SDL_CONTROLLER_BUTTON_A,
+		// Cycle primary
+		SDL_CONTROLLER_BUTTON_DPAD_LEFT,
+		// Cycle secondary
+		SDL_CONTROLLER_BUTTON_DPAD_RIGHT,
+		// Headlight
+		SDL_CONTROLLER_BUTTON_DPAD_UP,
+		// OR column (unbound)
+		0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
+		0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
+		0xff, 0xff, 0xff,
+		// Automap
+		SDL_CONTROLLER_BUTTON_DPAD_DOWN, 0xff,
+		// Energy->Shield (unbound)
+		0xff, 0xff,
+		// Remaining (unbound)
+		0xff, 0xff, 0xff, 0xff, 0xff
+#endif
+}}};
+#endif
+#endif
 
 namespace {
 
@@ -367,27 +810,42 @@ static const char *get_item_text(const kc_item &item, const kc_mitem &mitem, cha
 				return mouseaxis_text[mitem.value];
 #if DXX_MAX_BUTTONS_PER_JOYSTICK || DXX_MAX_HATS_PER_JOYSTICK
 			case kc_type::joy_button:
-				if (joybutton_text.size() > mitem.value)
-					return &joybutton_text[mitem.value][0];
-				else
+#if SDL_MAJOR_VERSION == 2
+				if (num_controllers)
 				{
-					snprintf(buf, sizeof(buf), "BTN%2d", mitem.value + 1);
-					return buf;
+					if (mitem.value < gcbutton_text.size()) [[likely]]
+						return &gcbutton_text[mitem.value][0];
 				}
-				break;
+				else
+#endif
+				{
+					if (mitem.value < joybutton_text.size()) [[likely]]
+						return &joybutton_text[mitem.value][0];
+				}
+				/* If the value is out of range, show a generic label instead
+				 * of indexing outside the container.
+				 */
+				snprintf(buf, sizeof(buf), "BTN%2d", mitem.value + 1);
+				return buf;
 #else
 				(void)buf;
 #endif
 #if DXX_MAX_AXES_PER_JOYSTICK
 			case kc_type::joy_axis:
-				if (joyaxis_text.size() > mitem.value)
-					return &joyaxis_text[mitem.value][0];
-				else
+#if SDL_MAJOR_VERSION == 2
+				if (num_controllers)
 				{
-					snprintf(buf, sizeof(buf), "AXIS%2d", mitem.value + 1);
-					return buf;
+					if (mitem.value < gamecontroller_axis_text.size()) [[likely]]
+						return &gamecontroller_axis_text[mitem.value][0];
 				}
-				break;
+				else
+#endif
+				{
+					if (mitem.value < joyaxis_text.size()) [[likely]]
+						return &joyaxis_text[mitem.value][0];
+				}
+				snprintf(buf, sizeof(buf), "AXIS%2d", mitem.value + 1);
+				return buf;
 #else
 				(void)buf;
 #endif
@@ -440,7 +898,16 @@ static void kconfig_draw(kc_menu &menu)
 
 	auto &game_font = *GAME_FONT;
 	gr_set_fontcolor(canvas, BM_XRGB(28, 28, 28), -1);
-	gr_string(canvas, game_font, 0x8000, fspacy(21), "Enter changes, ctrl-d deletes, ctrl-r resets defaults, ESC exits");
+	gr_string(canvas, game_font, 0x8000, fspacy(21),
+#if DXX_MAX_JOYSTICKS
+#if SDL_MAJOR_VERSION == 2
+		num_controllers
+		? "Enter/A changes, ctrl-d/R3 deletes, ctrl-r/Start(hold) resets, ESC/B exits"
+		:
+#endif
+#endif
+		"Enter changes, ctrl-d deletes, ctrl-r resets defaults, ESC exits"
+	);
 
 	if (menu.items == kc_keyboard)
 	{
@@ -678,6 +1145,29 @@ static void step_citem_past_empty_cell(unsigned &citem, const kc_item *const ite
 	} while (!items[citem].w2);
 }
 
+static void kc_reset_to_defaults(kc_menu &menu)
+{
+	if (menu.items == kc_keyboard)
+		reset_mitem_values(kcm_keyboard, DefaultKeySettings.Keyboard);
+#if DXX_MAX_JOYSTICKS
+	else if (menu.items == kc_joystick)
+	{
+#if SDL_MAJOR_VERSION == 2
+		if (num_controllers)
+		{
+			reset_mitem_values(kcm_joystick, DefaultKeySettingsGameController);
+			return;
+		}
+#endif
+		reset_mitem_values(kcm_joystick, DefaultKeySettings.Joystick);
+	}
+#endif
+	else if (menu.items == kc_mouse)
+		reset_mitem_values(kcm_mouse, DefaultKeySettings.Mouse);
+	else if (menu.items == kc_rebirth)
+		reset_mitem_values(kcm_rebirth, DefaultKeySettingsRebirth);
+}
+
 static window_event_result kconfig_key_command(kc_menu &menu, const d_event &event)
 {
 	auto k = event_key_get(event);
@@ -690,17 +1180,8 @@ static window_event_result kconfig_key_command(kc_menu &menu, const d_event &eve
 		case KEY_CTRLED+KEY_D:
 			menu.mitems[menu.citem].value = 255;
 			return window_event_result::handled;
-		case KEY_CTRLED+KEY_R:	
-			if (menu.items==kc_keyboard)
-				reset_mitem_values(kcm_keyboard, DefaultKeySettings.Keyboard);
-#if DXX_MAX_JOYSTICKS
-			else if (menu.items == kc_joystick)
-				reset_mitem_values(kcm_joystick, DefaultKeySettings.Joystick);
-#endif
-			else if (menu.items == kc_mouse)
-				reset_mitem_values(kcm_mouse, DefaultKeySettings.Mouse);
-			else if (menu.items == kc_rebirth)
-				reset_mitem_values(kcm_rebirth, DefaultKeySettingsRebirth);
+		case KEY_CTRLED+KEY_R:
+			kc_reset_to_defaults(menu);
 			return window_event_result::handled;
 		case KEY_DELETE:
 			menu.mitems[menu.citem].value = 255;
@@ -751,6 +1232,15 @@ namespace {
 window_event_result kc_menu::event_handler(const d_event &event)
 {
 #if DXX_MAX_BUTTONS_PER_JOYSTICK
+	// In the kconfig menu, intercept Start (long-press reset) and R3 (delete binding)
+	// before joy_translate_menu_key would consume them via gc_key_map.
+#if SDL_MAJOR_VERSION == 2
+	const bool skip_translate = !changing &&
+		(event.type == event_type::joystick_button_down || event.type == event_type::joystick_button_up) &&
+		(event_joystick_get_button(event) == SDL_CONTROLLER_BUTTON_START ||
+		 event_joystick_get_button(event) == SDL_CONTROLLER_BUTTON_RIGHTSTICK);
+	if (!skip_translate)
+#endif
 	if (!changing && joy_translate_menu_key(event))
 		return window_event_result::handled;
 #endif
@@ -797,7 +1287,38 @@ window_event_result kc_menu::event_handler(const d_event &event)
 		case event_type::joystick_button_down:
 			if (changing && items[citem].type == kc_type::joy_button)
 				kc_change_joybutton(*this, event, mitems[citem]);
+#if SDL_MAJOR_VERSION == 2
+			else if (!changing)
+			{
+				const auto button = event_joystick_get_button(event);
+				if (button == SDL_CONTROLLER_BUTTON_RIGHTSTICK)
+				{
+					mitems[citem].value = 255;
+					return window_event_result::handled;
+				}
+				if (button == SDL_CONTROLLER_BUTTON_START)
+				{
+					start_press_time = timer_query();
+					return window_event_result::handled;
+				}
+			}
+#endif
 			break;
+#if SDL_MAJOR_VERSION == 2
+		case event_type::joystick_button_up:
+			if (!changing && event_joystick_get_button(event) == SDL_CONTROLLER_BUTTON_START && start_press_time)
+			{
+				const auto held = timer_query() - start_press_time;
+				start_press_time = 0;
+				if (held >= F1_0)	// 1 second long-press
+				{
+					if (nm_messagebox_str(menu_title{nullptr}, nm_messagebox_tie(TXT_YES, TXT_NO), menu_subtitle{"Reset all bindings to defaults?"}) == 0)
+						kc_reset_to_defaults(*this);
+				}
+				return window_event_result::handled;
+			}
+			break;
+#endif
 #endif
 
 #if DXX_MAX_AXES_PER_JOYSTICK

@@ -254,6 +254,9 @@ extern struct player_config PlayerCfg;
 namespace dsx {
 
 extern const struct player_config::KeySettings DefaultKeySettings;
+#if DXX_MAX_JOYSTICKS
+extern const enumerated_array<uint8_t, MAX_CONTROLS, dxx_kconfig_ui_kc_joystick> DefaultKeySettingsGameController;
+#endif
 
 void write_player_file();
 

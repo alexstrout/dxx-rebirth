@@ -76,6 +76,12 @@ enum class window_event_result : uint8_t
 // A vanilla event. Cast to the correct type of event according to 'type'.
 struct d_event
 {
+	enum class source : uint8_t
+	{
+		keyboard,
+		mouse,
+		joystick,
+	};
 	const event_type type;
 	constexpr d_event(const event_type t) :
 		type{t}
@@ -103,8 +109,9 @@ struct d_change_event : d_event
 struct d_select_event : d_event
 {
 	const int citem;
-	d_select_event(const int c) :
-		d_event{event_type::newmenu_selected}, citem{c}
+	const source src;
+	d_select_event(const int c, const source src) :
+		d_event{event_type::newmenu_selected}, citem{c}, src{src}
 	{
 	}
 };

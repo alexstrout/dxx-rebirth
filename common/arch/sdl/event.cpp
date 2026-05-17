@@ -147,6 +147,33 @@ void event_poll_state::process_event_batch(const std::ranges::subrange<const SDL
 					continue;
 				result = mouse_motion_handler(&event.motion);
 				break;
+#if DXX_MAX_JOYSTICKS
+#if SDL_MAJOR_VERSION == 2
+#if DXX_MAX_BUTTONS_PER_JOYSTICK
+			case SDL_CONTROLLERBUTTONDOWN:
+			case SDL_CONTROLLERBUTTONUP:
+				if (CGameArg.CtlNoJoystick)
+					continue;
+				result = gc_button_handler(&event.cbutton);
+				break;
+#endif
+#if DXX_MAX_AXES_PER_JOYSTICK
+			case SDL_CONTROLLERAXISMOTION:
+				if (CGameArg.CtlNoJoystick)
+					continue;
+#if (DXX_MAX_BUTTONS_PER_JOYSTICK || DXX_MAX_HATS_PER_JOYSTICK)
+				highest_result = std::max(gc_axisbutton_handler(&event.caxis), highest_result);
+#endif
+				result = gc_axis_handler(&event.caxis);
+				break;
+#endif
+			case SDL_CONTROLLERDEVICEADDED:
+				result = gc_device_added(&event.cdevice);
+				break;
+			case SDL_CONTROLLERDEVICEREMOVED:
+				result = gc_device_removed(&event.cdevice);
+				break;
+#endif
 			case SDL_JOYBUTTONDOWN:
 			case SDL_JOYBUTTONUP:
 				if (CGameArg.CtlNoJoystick)
@@ -168,6 +195,7 @@ void event_poll_state::process_event_batch(const std::ranges::subrange<const SDL
 				break;
 			case SDL_JOYBALLMOTION:
 				continue;
+#endif
 			case SDL_QUIT: {
 				result = call_default_handler(d_event{event_type::quit});
 				break;

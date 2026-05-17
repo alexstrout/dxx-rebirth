@@ -4856,6 +4856,9 @@ class DXXArchive(DXXCommon):
 )),
 		__get_objects_use_sdl1=DXXCommon.create_lazy_object_getter((
 'common/arch/sdl/rbaudio.cpp',
+)),
+		__get_objects_use_joystick_sdl2=DXXCommon.create_lazy_object_getter((
+'common/arch/sdl/gamecontroller.cpp',
 ))
 		):
 		value = list(__get_objects_common(self))
@@ -4868,6 +4871,9 @@ class DXXArchive(DXXCommon):
 			extend(__get_objects_use_joystick(self))
 		if not user_settings.sdl2:
 			extend(__get_objects_use_sdl1(self))
+		else:
+			if user_settings.max_joysticks:
+				extend(__get_objects_use_joystick_sdl2(self))
 		extend(self.platform_settings.get_platform_objects())
 		return value
 

@@ -4413,7 +4413,7 @@ static int net_udp_game_param_handler( newmenu *menu,const d_event &event, param
 
 namespace dsx {
 
-window_event_result net_udp_setup_game()
+window_event_result net_udp_setup_game(const d_select_event &)
 {
 	param_opt opt;
 	auto &m = opt.m;

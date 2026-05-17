@@ -384,8 +384,9 @@ namespace {
 struct d_event_keycommand : d_event
 {
 	const unsigned keycode;
-	constexpr d_event_keycommand(const event_type t, const unsigned k) :
-		d_event{t}, keycode{k}
+	const source src;
+	constexpr d_event_keycommand(const event_type t, const unsigned keycode, const source src) :
+		d_event{t}, keycode{keycode}, src{src}
 	{
 	}
 };
@@ -535,7 +536,7 @@ window_event_result key_handler(const SDL_KeyboardEvent *const kevent)
 
 		// We allowed the key to be added to the queue for now,
 		// because there are still input loops without associated windows
-		const d_event_keycommand event{key_state ? event_type::key_command : event_type::key_release, keycode};
+		const d_event_keycommand event{key_state ? event_type::key_command : event_type::key_release, keycode, d_event_keycommand::source::keyboard};
 		con_printf(CON_DEBUG, "Sending event event_type::key_%s: %s %s %s %s %s %s",
 				(key_state)                  ? "command": "release",
 				(keycode & KEY_METAED)	? "META" : "",
@@ -597,7 +598,10 @@ void key_flush()
 }
 
 void event_keycommand_send(unsigned key) {
-	event_send(d_event_keycommand{event_type::key_command, key});
+	/* This function is only used for synthesizing keypresses via joystick
+	 * input.
+	 */
+	event_send(d_event_keycommand{event_type::key_command, key, d_event_keycommand::source::joystick});
 }
 
 int event_key_get(const d_event &event)
@@ -605,6 +609,11 @@ int event_key_get(const d_event &event)
 	auto &e = static_cast<const d_event_keycommand &>(event);
 	assert(e.type == event_type::key_command || e.type == event_type::key_release);
 	return e.keycode;
+}
+
+d_event::source event_key_get_source(const d_event &event)
+{
+	return static_cast<const d_event_keycommand &>(event).src;
 }
 
 // same as above but without mod states

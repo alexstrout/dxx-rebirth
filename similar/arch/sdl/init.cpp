@@ -31,8 +31,15 @@ static void arch_close(void)
 
 	gr_close();
 
+#if DXX_MAX_JOYSTICKS
 	if (!CGameArg.CtlNoJoystick)
+	{
 		joy_close();
+#if SDL_MAJOR_VERSION == 2
+		gamecontroller_close();
+#endif
+	}
+#endif
 
 	if (!CGameArg.CtlNoMouse)
 		mouse_close();
@@ -92,8 +99,15 @@ arch_atexit arch_init()
 	if (!CGameArg.CtlNoMouse)
 		mouse_init();
 
+#if DXX_MAX_JOYSTICKS
 	if (!CGameArg.CtlNoJoystick)
+	{
 		joy_init();
+#if SDL_MAJOR_VERSION == 2
+		gamecontroller_init();
+#endif
+	}
+#endif
 
 	if ((t = gr_init()) != 0)
 		Error(TXT_CANT_INIT_GFX,t);

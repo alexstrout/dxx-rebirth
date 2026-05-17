@@ -354,6 +354,13 @@ void joy_init()
 	unsigned joystick_n_buttons{0}, joystick_n_axes = 0;
 	range_for (const unsigned i, xrange(n))
 	{
+#if SDL_MAJOR_VERSION == 2
+		if (SDL_IsGameController(i))
+		{
+			con_printf(CON_NORMAL, "sdl-gamecontroller: joystick #%d is a gamecontroller", i);
+			continue;
+		}
+#endif
 		auto &joystick = SDL_Joysticks[num_joysticks];
 		const auto handle = SDL_JoystickOpen(i);
 		joystick.handle().reset(handle);
@@ -506,7 +513,11 @@ bool joy_translate_menu_key(const d_event &event) {
 		event_keycommand_send(key);
 		return true;
 	}
+#if SDL_MAJOR_VERSION == 2
+	return gamecontroller_translate_menu_key(e.button);
+#else
 	return false;
+#endif
 }
 #endif
 

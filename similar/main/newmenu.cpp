@@ -998,7 +998,7 @@ static window_event_result newmenu_mouse(const d_event &event, newmenu *menu, co
 					y2 = y1 + iitem.h;
 					if (((mx > x1) && (mx < x2)) && ((my > y1) && (my < y2))) {
 							// Tell callback, allow staying in menu
-							if (const auto r = menu->event_handler(d_select_event{menu->citem}); r == window_event_result::handled)
+							if (const auto r{menu->event_handler(d_select_event{menu->citem, d_event::source::mouse})}; r == window_event_result::handled)
 								return r;
 
 							if (menu->rval)
@@ -1179,7 +1179,7 @@ static window_event_result newmenu_key_command(const d_event &event, newmenu *co
 					citem.imenu().group = 0;	// go out of editing mode
 
 				// Tell callback, allow staying in menu
-				if (const auto r = menu->event_handler(d_select_event{menu->citem}); r == window_event_result::handled)
+				if (const auto r{menu->event_handler(d_select_event{menu->citem, event_key_get_source(event)})}; r == window_event_result::handled)
 					return r;
 
 				if (menu->rval)
@@ -1844,8 +1844,7 @@ static window_event_result listbox_mouse(const d_event &event, listbox *lb, cons
 				if ( ((mx > x1) && (mx < x2)) && ((my > y1) && (my < y2)) )
 				{
 					// Tell callback, if it wants to close it will return window_event_result::close
-					const d_select_event selected{lb->citem};
-					return lb->callback_handler(selected, window_event_result::close);
+					return lb->callback_handler(d_select_event{lb->citem, d_event::source::mouse}, window_event_result::close);
 				}
 			}
 			break;
@@ -1923,8 +1922,7 @@ static window_event_result listbox_key_command(const d_event &event, listbox *lb
 		case KEY_PADENTER:
 			// Tell callback, if it wants to close it will return window_event_result::close
 			{
-				const d_select_event selected{lb->citem};
-				return lb->callback_handler(selected, window_event_result::close);
+				return lb->callback_handler(d_select_event{lb->citem, event_key_get_source(event)}, window_event_result::close);
 			}
 		default:
 		{

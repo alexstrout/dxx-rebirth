@@ -465,6 +465,12 @@ window_event_result pause_window::event_handler(const d_event &event)
 			game_flush_inputs(Controls);
 			break;
 
+#if DXX_MAX_BUTTONS_PER_JOYSTICK
+		case event_type::joystick_button_down:
+			joy_translate_menu_key(event);
+			return window_event_result::handled;
+#endif
+
 		case event_type::key_command:
 			switch (event_key_get(event))
 			{
@@ -800,8 +806,11 @@ static int select_next_window_function(const gauge_inset_window_view w)
 
 //this is for system-level keys, such as help, etc.
 //returns 1 if screen changed
-static window_event_result HandleSystemKey(int key)
+static window_event_result HandleSystemKey(const int key, const d_event::source source)
 {
+#if DXX_BUILD_DESCENT == 1
+	static_cast<void>(source);
+#endif
 	if (Player_dead_state == player_dead_state::no)
 		switch (key)
 		{
@@ -814,11 +823,11 @@ static window_event_result HandleSystemKey(int key)
 					case 0:
 						return window_event_result::close;
 					case 1:
-						return HandleSystemKey(KEY_F2);
+						return HandleSystemKey(KEY_F2, {});
 					case 2:
-						return HandleSystemKey(KEY_ALTED | KEY_F2);
+						return HandleSystemKey(KEY_ALTED | KEY_F2, {});
 					case 3:
-						return HandleSystemKey(KEY_ALTED | KEY_F3);
+						return HandleSystemKey(KEY_ALTED | KEY_F3, {});
 				}
 				return window_event_result::handled;
 			}
@@ -983,7 +992,7 @@ static window_event_result HandleSystemKey(int key)
 #if DXX_BUILD_DESCENT == 2
 		KEY_MAC(case KEY_COMMAND+KEY_SHIFTED+KEY_4:)
 		case KEY_F4 + KEY_SHIFTED:
-			do_escort_menu();
+			do_escort_menu(source == d_event::source::keyboard ? escort_menu_style::traditional : escort_menu_style::gamecontroller);
 			break;
 
 
@@ -2198,6 +2207,24 @@ window_event_result ReadControls(const d_level_shared_robot_info_state &LevelSha
 	if (Newdemo_state == ND_STATE_PLAYBACK)
 		update_vcr_state();
 
+#if DXX_MAX_BUTTONS_PER_JOYSTICK && SDL_MAJOR_VERSION == 2
+	// Translate Back (-> ESC, opens game menu) and L3 (-> Shift+F4, guidebot in D2)
+	// during gameplay, but only if the button is not already bound to a kconfig
+	// action.  This preserves user customization: if the user binds Back to a
+	// different control, it will not also open the menu.
+	if (event.type == event_type::joystick_button_down)
+	{
+		const auto button = event_joystick_get_button(event);
+		if (button == SDL_CONTROLLER_BUTTON_BACK ||
+			button == SDL_CONTROLLER_BUTTON_LEFTSTICK)
+		{
+			const auto &joy_settings = PlayerCfg.KeySettings.Joystick;
+			if (std::find(joy_settings.begin(), joy_settings.end(), button) == joy_settings.end())
+				joy_translate_menu_key(event);
+		}
+	}
+#endif
+
 	if (event.type == event_type::key_command)
 	{
 		key = event_key_get(event);
@@ -2235,7 +2262,7 @@ window_event_result ReadControls(const d_level_shared_robot_info_state &LevelSha
 		{
 			window_event_result r = FinalCheats(LevelSharedRobotInfoState);
 			if (r == window_event_result::ignored)
-				r = HandleSystemKey(key);
+				r = HandleSystemKey(key, event_key_get_source(event));
 			if (r == window_event_result::ignored)
 				r = HandleGameKey(key, Controls);
 			if (r != window_event_result::ignored)
@@ -2282,7 +2309,7 @@ window_event_result ReadControls(const d_level_shared_robot_info_state &LevelSha
 	if (Controls.state.show_menu)
 	{
 		Controls.state.show_menu = 0;
-		return HandleSystemKey(KEY_ESC);
+		return HandleSystemKey(KEY_ESC, {});
 	}
 
 	return window_event_result::ignored;
