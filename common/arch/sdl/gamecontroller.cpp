@@ -32,6 +32,22 @@
 #include "partial_range.h"
 #include "physfsrwops.h"
 
+/* Allow the build system to pick whether to search the SDL base directory. */
+#ifndef DXX_ENABLE_GAMECONTROLLER_SEARCH_SDL_BASE_DIRECTORY
+#ifdef __linux__
+/* By default, disable on Linux, since it is normal for Linux
+ * to install the executable in a directory separate from data files.
+ */
+#define DXX_ENABLE_GAMECONTROLLER_SEARCH_SDL_BASE_DIRECTORY	0
+#else
+/* By default, enable on other platforms, since it is common for Windows
+ * systems to bundle everything in one directory.  Mac OS X may work the same,
+ * and the extra search is harmless if it is not needed.
+ */
+#define DXX_ENABLE_GAMECONTROLLER_SEARCH_SDL_BASE_DIRECTORY	1
+#endif
+#endif
+
 namespace dcx {
 
 int num_controllers{};
@@ -177,6 +193,24 @@ static void gc_load_controller_db()
 	}
 	else if (physfserr != PHYSFS_ERR_NOT_FOUND)
 		con_printf(CON_NORMAL, "gamecontroller: failed to use PhysFS to open gamecontrollerdb.txt: %s", PHYSFS_getErrorByCode(physfserr));
+#ifdef DXX_GAMECONTROLLER_DB_DIRECTORY
+	/* Allow the build system to specify one additional search directory.  If
+	 * set, `DXX_GAMECONTROLLER_DB_DIRECTORY` must be a string literal suitable
+	 * for use with `SDL_RWFromFile`.  It must be a path in the platform native
+	 * form and, if relative, is parsed relative to the current working
+	 * directory of the game.
+	 */
+	{
+		static constexpr char path[]{DXX_GAMECONTROLLER_DB_DIRECTORY};
+		if (const auto n{SDL_GameControllerAddMappingsFromFile(path)}; n >= 0)
+		{
+			con_printf(CON_NORMAL, "gamecontroller: loaded %d mappings from %s", n, path);
+			return;
+		}
+		con_printf(CON_NORMAL, "gamecontroller: found " DXX_GAMECONTROLLER_DB_DIRECTORY ", but no mappings could be loaded: %s", SDL_GetError());
+	}
+#endif
+#if DXX_ENABLE_GAMECONTROLLER_SEARCH_SDL_BASE_DIRECTORY
 	// Also try from the executable directory
 	if (const auto base = SDL_GetBasePath())
 	{
@@ -189,8 +223,9 @@ static void gc_load_controller_db()
 			con_printf(CON_NORMAL, "gamecontroller: loaded %d mappings from %s", n, path.data());
 			return;
 		}
+		con_printf(CON_NORMAL, "gamecontroller: SDL base directory contained gamecontrollerdb.txt, but no mappings could be loaded: %s", SDL_GetError());
 	}
-	con_puts(CON_VERBOSE, "gamecontroller: no gamecontrollerdb.txt found");
+#endif
 }
 
 static void gc_open_controller(int device_index)
