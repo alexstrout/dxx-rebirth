@@ -105,10 +105,12 @@ void kconfig_begin_loop(control_info &Controls)
 
 namespace {
 
+#if DXX_MAX_JOYSTICKS
 #if SDL_MAJOR_VERSION == 2
 // GameController axis-as-button indices for use in default key settings
 constexpr unsigned GC_AXIS_BUTTON(unsigned axis_id) { return SDL_CONTROLLER_BUTTON_MAX + (axis_id * 2); }
 constexpr unsigned GC_AXIS_BUTTON_NEG(unsigned axis_id) { return SDL_CONTROLLER_BUTTON_MAX + (axis_id * 2) + 1; }
+#endif
 #endif
 
 struct kc_mitem {
@@ -528,6 +530,7 @@ const struct player_config::KeySettings DefaultKeySettings{
 	}}}
 };
 
+#if DXX_MAX_JOYSTICKS
 #if SDL_MAJOR_VERSION == 2
 constexpr enumerated_array<uint8_t, MAX_CONTROLS, dxx_kconfig_ui_kc_joystick> DefaultKeySettingsGameController{{{
 	/* SDL2 GameController defaults (standardized button indices)
@@ -654,6 +657,7 @@ constexpr enumerated_array<uint8_t, MAX_CONTROLS, dxx_kconfig_ui_kc_joystick> De
 		0xff, 0xff, 0xff, 0xff, 0xff
 #endif
 }}};
+#endif
 #endif
 
 namespace {
@@ -878,10 +882,12 @@ static void kconfig_draw(kc_menu &menu)
 	auto &game_font = *GAME_FONT;
 	gr_set_fontcolor(canvas, BM_XRGB(28, 28, 28), -1);
 	gr_string(canvas, game_font, 0x8000, fspacy(21),
+#if DXX_MAX_JOYSTICKS
 #if SDL_MAJOR_VERSION == 2
 		num_controllers
 		? "Enter/A changes, ctrl-d/R3 deletes, ctrl-r/Start(hold) resets, ESC/B exits"
 		:
+#endif
 #endif
 		"Enter changes, ctrl-d deletes, ctrl-r resets defaults, ESC exits"
 	);

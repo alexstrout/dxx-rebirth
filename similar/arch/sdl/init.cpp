@@ -31,6 +31,7 @@ static void arch_close(void)
 
 	gr_close();
 
+#if DXX_MAX_JOYSTICKS
 	if (!CGameArg.CtlNoJoystick)
 	{
 		joy_close();
@@ -38,6 +39,7 @@ static void arch_close(void)
 		gamecontroller_close();
 #endif
 	}
+#endif
 
 	if (!CGameArg.CtlNoMouse)
 		mouse_close();

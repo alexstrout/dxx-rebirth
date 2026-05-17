@@ -72,6 +72,7 @@ window_event_result joy_axisbutton_handler(const SDL_JoyAxisEvent *jae);
 #define joy_axisbutton_handler(jbe) (static_cast<const SDL_JoyAxisEvent *const &>(jbe), window_event_result::ignored)
 #endif
 
+#if DXX_MAX_JOYSTICKS
 #if SDL_MAJOR_VERSION == 2
 
 window_event_result gc_button_handler(const SDL_ControllerButtonEvent *cbe);
@@ -86,6 +87,8 @@ void gamecontroller_close();
 bool gamecontroller_translate_menu_key(unsigned button);
 
 extern int num_controllers;
+#endif
+
 #endif
 
 }
