@@ -71,13 +71,6 @@ struct d_gamecontroller
 
 static std::array<d_gamecontroller, DXX_MAX_JOYSTICKS> GameControllers;
 
-// Virtual joystick state
-static struct gc_joyinfo {
-#if DXX_MAX_BUTTONS_PER_JOYSTICK
-	std::array<uint8_t, JOY_MAX_BUTTONS> button_state{};
-#endif
-} GC_Joystick;
-
 struct d_event_joystickbutton : d_event
 {
 	const unsigned button;
@@ -353,9 +346,6 @@ void gamecontroller_flush()
 {
 	if (!num_controllers)
 		return;
-#if DXX_MAX_BUTTONS_PER_JOYSTICK
-	GC_Joystick.button_state = {};
-#endif
 	gc_axis_values = {};
 }
 
@@ -366,8 +356,6 @@ window_event_result gc_button_handler(const SDL_ControllerButtonEvent *const cbe
 	const unsigned button = cbe->button;
 	if (button >= GC_NUM_BUTTONS)
 		return window_event_result::ignored;
-
-	GC_Joystick.button_state[button] = cbe->state;
 
 	const d_event_joystickbutton event{
 		(cbe->type == SDL_CONTROLLERBUTTONDOWN) ? event_type::joystick_button_down : event_type::joystick_button_up,
@@ -382,7 +370,6 @@ namespace {
 
 static window_event_result gc_send_axis_button_event(unsigned button, event_type e)
 {
-	GC_Joystick.button_state[button] = (e == event_type::joystick_button_up) ? 0 : 1;
 	const d_event_joystickbutton event{e, button};
 	return event_send(event);
 }
