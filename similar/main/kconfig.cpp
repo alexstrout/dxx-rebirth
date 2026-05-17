@@ -105,6 +105,12 @@ void kconfig_begin_loop(control_info &Controls)
 
 namespace {
 
+#if SDL_MAJOR_VERSION == 2
+// GameController axis-as-button indices for use in default key settings
+constexpr unsigned GC_AXIS_BUTTON(unsigned axis_id) { return SDL_CONTROLLER_BUTTON_MAX + (axis_id * 2); }
+constexpr unsigned GC_AXIS_BUTTON_NEG(unsigned axis_id) { return SDL_CONTROLLER_BUTTON_MAX + (axis_id * 2) + 1; }
+#endif
+
 struct kc_mitem {
 	uint8_t oldvalue;
 	uint8_t value;		// what key,button,etc
