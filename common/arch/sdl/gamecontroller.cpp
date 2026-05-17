@@ -236,7 +236,7 @@ static void gc_close_controller(SDL_JoystickID instance_id)
 
 } // end anonymous namespace
 
-void joy_init()
+void gamecontroller_init()
 {
 	if (SDL_Init(SDL_INIT_GAMECONTROLLER) < 0) {
 		con_printf(CON_NORMAL, "gamecontroller: initialization failed: %s.", SDL_GetError());
@@ -292,7 +292,7 @@ void joy_init()
 	con_printf(CON_NORMAL, "gamecontroller: %d joystick(s) detected", SDL_NumJoysticks());
 }
 
-void joy_close()
+void gamecontroller_close()
 {
 	for (auto &gc : GameControllers)
 		gc.handle.reset();
@@ -303,7 +303,7 @@ void joy_close()
 	joybutton_text.clear();
 }
 
-void joy_flush()
+void gamecontroller_flush()
 {
 	if (!num_controllers)
 		return;
@@ -312,41 +312,6 @@ void joy_flush()
 #endif
 	gc_axis_values = {};
 }
-
-#if DXX_MAX_BUTTONS_PER_JOYSTICK
-window_event_result joy_button_handler(const SDL_JoyButtonEvent *const jbe)
-{
-	// Ignored for SDL2 — we use SDL_CONTROLLERBUTTONDOWN/UP instead
-	(void)jbe;
-	return window_event_result::ignored;
-}
-#endif
-
-#if DXX_MAX_HATS_PER_JOYSTICK
-window_event_result joy_hat_handler(const SDL_JoyHatEvent *const jhe)
-{
-	// Ignored for SDL2 — d-pad is handled as GameController buttons
-	(void)jhe;
-	return window_event_result::ignored;
-}
-#endif
-
-#if DXX_MAX_AXES_PER_JOYSTICK
-window_event_result joy_axis_handler(const SDL_JoyAxisEvent *const jae)
-{
-	// Ignored for SDL2 — we use SDL_CONTROLLERAXISMOTION instead
-	(void)jae;
-	return window_event_result::ignored;
-}
-#endif
-
-#if DXX_MAX_AXES_PER_JOYSTICK && (DXX_MAX_BUTTONS_PER_JOYSTICK || DXX_MAX_HATS_PER_JOYSTICK)
-window_event_result joy_axisbutton_handler(const SDL_JoyAxisEvent *const jae)
-{
-	(void)jae;
-	return window_event_result::ignored;
-}
-#endif
 
 // --- GameController event handlers ---
 
@@ -444,31 +409,12 @@ window_event_result gc_device_removed(const SDL_ControllerDeviceEvent *const cde
 	return window_event_result::handled;
 }
 
-#if DXX_MAX_AXES_PER_JOYSTICK
-const d_event_joystick_axis_value &event_joystick_get_axis(const d_event &event)
-{
-	auto &e = static_cast<const d_event_joystick_moved &>(event);
-	assert(e.type == event_type::joystick_moved);
-	return e;
-}
-#endif
-
 #if DXX_MAX_BUTTONS_PER_JOYSTICK
-int event_joystick_get_button(const d_event &event)
+bool gamecontroller_translate_menu_key(const unsigned button)
 {
-	auto &e = static_cast<const d_event_joystickbutton &>(event);
-	assert(e.type == event_type::joystick_button_down || e.type == event_type::joystick_button_up);
-	return e.button;
-}
-
-bool joy_translate_menu_key(const d_event &event)
-{
-	if (event.type != event_type::joystick_button_down)
+	if (button >= gc_key_map.size())
 		return false;
-	auto &e = static_cast<const d_event_joystickbutton &>(event);
-	if (e.button >= gc_key_map.size())
-		return false;
-	auto key = gc_key_map[e.button];
+	auto key = gc_key_map[button];
 	if (key)
 	{
 		event_keycommand_send(key);
@@ -477,16 +423,6 @@ bool joy_translate_menu_key(const d_event &event)
 	return false;
 }
 #endif
-
-int apply_deadzone(int value, int deadzone)
-{
-	if (value > deadzone)
-		return ((value - deadzone) * 128) / (128 - deadzone);
-	else if (value < -deadzone)
-		return ((value + deadzone) * 128) / (128 - deadzone);
-	else
-		return 0;
-}
 
 }
 

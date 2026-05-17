@@ -167,7 +167,6 @@ void event_poll_state::process_event_batch(const std::ranges::subrange<const SDL
 				result = gc_device_removed(&event.cdevice);
 				break;
 #endif
-#if SDL_MAJOR_VERSION == 1
 			case SDL_JOYBUTTONDOWN:
 			case SDL_JOYBUTTONUP:
 				if (CGameArg.CtlNoJoystick)
@@ -189,7 +188,6 @@ void event_poll_state::process_event_batch(const std::ranges::subrange<const SDL
 				break;
 			case SDL_JOYBALLMOTION:
 				continue;
-#endif
 			case SDL_QUIT: {
 				result = call_default_handler(d_event{event_type::quit});
 				break;

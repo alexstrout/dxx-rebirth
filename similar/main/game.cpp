@@ -589,6 +589,9 @@ static void game_flush_common_inputs()
 	event_flush();
 	key_flush();
 	joy_flush();
+#if SDL_MAJOR_VERSION == 2
+	gamecontroller_flush();
+#endif
 	mouse_flush();
 }
 
