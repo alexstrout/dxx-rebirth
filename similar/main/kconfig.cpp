@@ -186,8 +186,10 @@ struct kc_menu : window
 #if DXX_MAX_AXES_PER_JOYSTICK
 	std::array<int, JOY_MAX_AXES>	old_jaxis;
 #endif
+#if DXX_MAX_BUTTONS_PER_JOYSTICK || DXX_MAX_HATS_PER_JOYSTICK
 #if SDL_MAJOR_VERSION == 2
 	fix64 start_press_time{0};	// timestamp of Start button press for long-press detection
+#endif
 #endif
 	virtual window_event_result event_handler(const d_event &) override;
 };
