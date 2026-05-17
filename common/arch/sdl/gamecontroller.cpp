@@ -30,6 +30,7 @@
 #include "d_enumerate.h"
 #include "d_range.h"
 #include "partial_range.h"
+#include "physfsrwops.h"
 
 namespace dcx {
 
@@ -165,20 +166,17 @@ static std::array<int, GC_NUM_AXES> gc_axis_values{};
 static void gc_load_controller_db()
 {
 	// Try to load gamecontrollerdb.txt from PhysFS search path
-	const char *db_files[] = {"gamecontrollerdb.txt", "GameControllerDB.txt"};
-	for (const auto *name : db_files)
+	if (auto &&[rwops, physfserr]{PHYSFSRWOPS_openRead("gamecontrollerdb.txt")}; rwops)
 	{
-		std::array<char, PATH_MAX> realpath;
-		if (PHYSFSX_getRealPath(name, realpath))
+		if (const auto n{SDL_GameControllerAddMappingsFromRW(rwops.get(), 0)}; n >= 0)
 		{
-			const auto n = SDL_GameControllerAddMappingsFromFile(realpath.data());
-			if (n >= 0)
-			{
-				con_printf(CON_NORMAL, "gamecontroller: loaded %d mappings from %s", n, name);
-				return;
-			}
+			con_printf(CON_NORMAL, "gamecontroller: loaded %d mappings from PhysFS gamecontrollerdb.txt", n);
+			return;
 		}
+		con_printf(CON_NORMAL, "gamecontroller: PhysFS found gamecontrollerdb.txt, but no mappings could be loaded: %s", SDL_GetError());
 	}
+	else if (physfserr != PHYSFS_ERR_NOT_FOUND)
+		con_printf(CON_NORMAL, "gamecontroller: failed to use PhysFS to open gamecontrollerdb.txt: %s", PHYSFS_getErrorByCode(physfserr));
 	// Also try from the executable directory
 	if (const auto base = SDL_GetBasePath())
 	{
