@@ -297,7 +297,6 @@ void gamecontroller_init()
 		return;
 	}
 
-	GC_Joystick = {};
 	gc_axis_values = {};
 	gcbutton_text.clear();
 	num_controllers = 0;
