@@ -120,7 +120,6 @@ namespace {
 #if SDL_MAJOR_VERSION == 2
 // GameController axis-as-button indices for use in default key settings
 constexpr unsigned GC_AXIS_BUTTON(unsigned axis_id) { return SDL_CONTROLLER_BUTTON_MAX + (axis_id * 2); }
-constexpr unsigned GC_AXIS_BUTTON_NEG(unsigned axis_id) { return SDL_CONTROLLER_BUTTON_MAX + (axis_id * 2) + 1; }
 #endif
 #endif
 
@@ -548,7 +547,7 @@ constexpr enumerated_array<uint8_t, MAX_CONTROLS, dxx_kconfig_ui_kc_joystick> De
 	 *  D-pad pitch/turn handled via keyboard key mapping
 	 *
 	 *  Button indices use SDL_CONTROLLER_BUTTON_* constants.
-	 *  Axis-as-button indices use GC_AXIS_BUTTON() / GC_AXIS_BUTTON_NEG().
+	 *  Axis-as-button indices use GC_AXIS_BUTTON().
 	 *  Axis assignments use SDL_CONTROLLER_AXIS_* constants.
 	 */
 #if DXX_BUILD_DESCENT == 1
