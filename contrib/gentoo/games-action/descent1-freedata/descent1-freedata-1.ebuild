@@ -4,7 +4,7 @@ EAPI=7
 
 DXX_ENGINE="${PN:7:1}"
 DESCRIPTION="Free content for games-action/d${DXX_ENGINE}x-rebirth"
-HOMEPAGE="https://www.dxx-rebirth.com/"
+HOMEPAGE='https://github.com/dxx-rebirth/dxx-rebirth/'
 IUSE="l10n_de opl3-musicpack sc55-musicpack"
 SRC_URI="
 	l10n_de? ( https://www.dxx-rebirth.com/download/dxx/res/d${DXX_ENGINE}xr-briefings-ger.dxa )

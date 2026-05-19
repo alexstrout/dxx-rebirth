@@ -40,7 +40,7 @@ else
 	RESTRICT='mirror'
 fi
 
-HOMEPAGE="https://www.dxx-rebirth.com/"
+HOMEPAGE='https://github.com/dxx-rebirth/dxx-rebirth/'
 
 LICENSE="DXX-Rebirth GPL-3"
 SLOT="0"
