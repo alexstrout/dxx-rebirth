@@ -167,7 +167,7 @@ REQUIRED_USE='
 # Note that while individual music formats can be switched without a
 # rebuild, the master flag USE=music controls whether sdl-mixer is used,
 # and therefore requires a rebuild when changed.
-#IUSE_RUNTIME="flac l10n_de midi mp3 opl3-musicpack sc55-musicpack vorbis"
+#IUSE_RUNTIME="data flac l10n_de midi mp3 opl3-musicpack sc55-musicpack vorbis"
 
 dxx_scons() {
 	# Always build profile `m`.  If use editor, also build profile `e`.
