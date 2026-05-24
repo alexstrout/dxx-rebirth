@@ -301,10 +301,12 @@ PHYSFSX_uncounted_list PHYSFSX_findFiles(const char *path, const std::ranges::su
 // This can be used to further seperate files in search path but it must be made sure realpath is properly formatted.
 PHYSFSX_uncounted_list PHYSFSX_findabsoluteFiles(const char *path, const char *realpath, const std::ranges::subrange<const file_extension_t *> exts)
 {
-	const auto predicate = [&](const char *i) {
-		return PHYSFSX_checkMatchingExtension(i, exts) && (!strcmp(PHYSFS_getRealDir(i), realpath));
-	};
-	return PHYSFSX_findPredicateFiles(path, predicate);
+	return PHYSFSX_findPredicateFiles(path, /* predicate = */ [realpath, exts](const char *i) {
+		return PHYSFSX_checkMatchingExtension(i, exts) && ({
+			const auto real_directory{PHYSFS_getRealDir(i)};
+			likely(real_directory) && !strcmp(real_directory, realpath);
+		});
+	});
 }
 
 int PHYSFSX_exists_ignorecase(char *filename)
