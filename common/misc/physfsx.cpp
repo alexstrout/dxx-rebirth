@@ -267,17 +267,36 @@ static PHYSFSX_uncounted_list trim_physfs_list(PHYSFSX_uncounted_list list, char
 {
 	*iter_first_unused = nullptr;
 	const auto old_begin = list.get();
-	const auto r = reinterpret_cast<char **>(realloc(old_begin, (iter_first_unused - old_begin + 1) * sizeof(char *)));	// save a bit of memory (or a lot?)
-	/* iter_first_unused, old_begin are now invalid since realloc may have moved the block */
-	return r ? PHYSFSX_uncounted_list{(list.release(), r)} : std::move(list);
+	/* Reallocate the array to be exactly as large as needed for the values
+	 * that were not removed.  This returns to the heap's free list any
+	 * trailing storage associated with removed values.
+	 */
+	if (const auto r{reinterpret_cast<char **>(realloc(old_begin, (iter_first_unused - old_begin + 1) * sizeof(char *)))}) [[likely]]
+		/* iter_first_unused, old_begin are now invalid since realloc
+		 * may have moved the block.
+		 */
+		return PHYSFSX_uncounted_list{(list.release(), r)};
+	return list;
 }
 
 static PHYSFSX_uncounted_list PHYSFSX_findPredicateFiles(const char *path, auto &&predicate)
 {
 	PHYSFSX_uncounted_list list{PHYSFS_enumerateFiles(path)};
-	if (!list)
+	if (!list) [[unlikely]]
 		return nullptr;	// out of memory: not so good
 	char **j = list.get();
+	/* This is an open-coded rough equivalent of `std::ranges::remove_if`.
+	 * Unlike `std::ranges::remove_if`, this loop will always write every
+	 * non-removed element, even if that writes the element back to the
+	 * location it was already in.  The STL `std::ranges::remove_if` includes a
+	 * special case to scan until it finds a removable element, and only begin
+	 * writing after one is found.  Using that logic causes this function to
+	 * call `predicate` from two distinct call sites, which increases code size
+	 * notably.  This function is a cold path, and the game is likely to need
+	 * to remove at least some elements, so the minor penalty of writing
+	 * elements in place is less bad than the code size penalty of the special
+	 * case.
+	 */
 	for (const auto i : list)
 	{
 		if (predicate(i))
