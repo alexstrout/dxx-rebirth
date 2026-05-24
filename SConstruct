@@ -4340,10 +4340,11 @@ class DXXCommon(LazyObjectConstructor):
 						if g.returncode else \
 					"`git ls-files` failed, but `git --version` works.  Check that scons is run from a Git repository."
 				)
-			# Filter out OS X related directories.  Files in those
-			# directories assume they are only ever built on OS X, so
-			# they unconditionally include headers specific to OS X.
-			excluded_directories = (
+			# When building on a non-OS X platform, filter out OS X related
+			# directories.  Files in those directories assume they are only
+			# ever built on OS X, so they unconditionally include headers
+			# specific to OS X.
+			osx_excluded_directories = () if self.user_settings.host_platform == 'darwin' else (
 				'common/arch/cocoa/',
 			)
 			# Use `.extend()` instead of assignment because
@@ -4351,7 +4352,7 @@ class DXXCommon(LazyObjectConstructor):
 			# this function.  An assignment would redirect the name
 			# `__shared_header_file_list` to a non-shared copy of the list,
 			# forcing future calls to generate their own list.
-			__shared_header_file_list.extend([h for h in headers.decode().split('\0') if h and not h.startswith(excluded_directories)])
+			__shared_header_file_list.extend([h for h in headers.decode().split('\0') if h and not h.startswith(osx_excluded_directories)])
 			if not __shared_header_file_list:
 				raise SCons.Errors.StopError("`git ls-files` found headers, but none can be checked.")
 		Depends = env.Depends
