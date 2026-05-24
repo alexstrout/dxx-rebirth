@@ -23,9 +23,6 @@
 #ifdef _WIN32
 #include <windows.h>
 #define OGLFUNCCALL	__stdcall
-#else
-#define OGLFUNCCALL
-#endif
 
 #include <GL/gl.h>
 #include "pstypes.h"
@@ -466,6 +463,7 @@ static void OpenGL_SetFuncsToNull(void)
 	dglVertexPointer = NULL;
 	dglViewport = NULL;
 }
+#endif
 #endif
 
 
