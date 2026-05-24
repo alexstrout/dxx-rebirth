@@ -44,7 +44,7 @@ std::vector<unsigned> joy_key_map;
  */
 static struct joyinfo {
 #if DXX_MAX_BUTTONS_PER_JOYSTICK
-	std::array<uint8_t, JOY_MAX_BUTTONS> button_state;
+	std::array<uint8_t, (DXX_MAX_BUTTONS_PER_JOYSTICK * DXX_MAX_JOYSTICKS)> button_state;
 #endif
 } Joystick;
 

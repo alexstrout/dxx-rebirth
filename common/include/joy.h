@@ -22,7 +22,6 @@
 namespace dcx {
 
 constexpr unsigned JOY_MAX_AXES{DXX_MAX_AXES_PER_JOYSTICK * DXX_MAX_JOYSTICKS};
-#define JOY_MAX_BUTTONS				(DXX_MAX_BUTTONS_PER_JOYSTICK * DXX_MAX_JOYSTICKS)
 
 struct d_event_joystick_axis_value
 {
