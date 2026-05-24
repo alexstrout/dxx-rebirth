@@ -593,12 +593,12 @@ int do_powerup(const vmobjptridx_t obj)
 			used = pick_up_secondary(player_info, secondary_weapon_index::homing, 4, Controls);
 			break;
 		case	powerup_type_t::POW_CLOAK:
-			if (player_info.powerup_flags & player_flag::player_cloaked) {
+			if (player_info.powerup_flags & player_flag::cloaked) {
 				HUD_init_message(HM_DEFAULT|HM_REDUNDANT|HM_MAYDUPL, "%s %s!",TXT_ALREADY_ARE,TXT_CLOAKED);
 				break;
 			} else {
 				player_info.cloak_time = {GameTime64};	//	Not! changed by awareness events (like player fires laser).
-				player_info.powerup_flags |= player_flag::player_cloaked;
+				player_info.powerup_flags |= player_flag::cloaked;
 				ai_do_cloak_stuff();
 				if (+(Game_mode & GM_MULTI))
 					multi_send_cloak();

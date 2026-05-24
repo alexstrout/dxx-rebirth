@@ -1760,7 +1760,7 @@ static int maybe_steal_flag_item(object &playerobj, const player_flag flagval)
 					powerup_index = powerup_type_t::POW_INVULNERABILITY;
 					msg = "Invulnerability stolen!";
 					break;
-				case player_flag::player_cloaked:
+				case player_flag::cloaked:
 					powerup_index = powerup_type_t::POW_CLOAK;
 					msg = "Cloak stolen!";
 					break;
@@ -1927,7 +1927,7 @@ static int attempt_to_steal_item_3(object &thief, object &player_num)
 	//	Try best things first.
 	if (auto r = maybe_steal_flag_item(player_num, player_flag::invulnerable))
 		return r;
-	if (auto r = maybe_steal_flag_item(player_num, player_flag::player_cloaked))
+	if (auto r = maybe_steal_flag_item(player_num, player_flag::cloaked))
 		return r;
 	if (auto r = maybe_steal_flag_item(player_num, player_flag::quad_lasers))
 		return r;

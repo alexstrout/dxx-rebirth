@@ -1052,7 +1052,7 @@ void do_ai_robot_hit_attack(const d_robot_info_array &Robot_info, const vmobjptr
 	if (robptr.attack_type == 1) {
 		if (ready_to_fire_weapon1(ailp, 0)) {
 			auto &player_info = plrobj.ctype.player_info;
-			if (!(player_info.powerup_flags & player_flag::player_cloaked))
+			if (!(player_info.powerup_flags & player_flag::cloaked))
 				if (vm_vec_dist_quick(plrobj.pos, robot->pos) < robot->size + plrobj.size + F1_0*2)
 				{
 					collide_player_and_nasty_robot(Robot_info, playerobj, robot, collision_point);
@@ -1105,7 +1105,7 @@ static void compute_lead_component(fix vms_vector::*const m, vms_vector &out, co
 static int lead_player(const object_base &objp, const vms_vector &fire_point, const vms_vector &believed_player_pos, const robot_gun_number gun_num, vms_vector &fire_vec)
 {
 	const auto &plrobj = *ConsoleObject;
-	if (plrobj.ctype.player_info.powerup_flags & player_flag::player_cloaked)
+	if (plrobj.ctype.player_info.powerup_flags & player_flag::cloaked)
 		return 0;
 
 	const auto &velocity = plrobj.mtype.phys_info.velocity;
@@ -1219,7 +1219,7 @@ static void ai_fire_laser_at_player(const d_robot_info_array &Robot_info, const 
 #endif
 
 	//	If player is cloaked, maybe don't fire based on how long cloaked and randomness.
-	if (powerup_flags & player_flag::player_cloaked) {
+	if (powerup_flags & player_flag::cloaked) {
 		fix64	cloak_time = Ai_cloak_info[static_cast<imobjptridx_t::index_type>(obj) % MAX_AI_CLOAK_INFO].last_time;
 
 		if (GameTime64 - cloak_time > CLOAK_TIME_MAX/4)
@@ -1478,7 +1478,7 @@ static void move_around_player(const d_robot_info_array &Robot_info, const vmobj
 		//	Evasion speed is scaled by percentage of shields left so wounded robots evade less effectively.
 
 		dot = vm_vec_build_dot(vec_to_player, objp->orient.fvec);
-		if (dot > robptr.field_of_view[Difficulty_level] && !(powerup_flags & player_flag::player_cloaked)) {
+		if (dot > robptr.field_of_view[Difficulty_level] && !(powerup_flags & player_flag::cloaked)) {
 			fix	damage_scale;
 
 			if (!robptr.strength)
@@ -1681,7 +1681,7 @@ static void do_firing_stuff(object &obj, const player_flags powerup_flags, const
 	{
 		//	Now, if in robot's field of view, lock onto player
 		const fix dot = vm_vec_build_dot(obj.orient.fvec, player_visibility.vec_to_player);
-		if ((dot >= 7*F1_0/8) || (powerup_flags & player_flag::player_cloaked)) {
+		if ((dot >= 7*F1_0/8) || (powerup_flags & player_flag::cloaked)) {
 			ai_static *const aip = &obj.ctype.ai_info;
 			ai_local *const ailp = &obj.ctype.ai_info.ail;
 
@@ -1790,7 +1790,7 @@ static void compute_vis_and_vec(const d_robot_info_array &Robot_info, const vmob
 		return;
 	const auto Difficulty_level = GameUniqueState.Difficulty_level;
 	const auto powerup_flags = player_info.powerup_flags;
-		if (powerup_flags & player_flag::player_cloaked)
+		if (powerup_flags & player_flag::cloaked)
 		{
 			const unsigned cloak_index = (objp) % MAX_AI_CLOAK_INFO;
 			const fix delta_time = GameTime64 - Ai_cloak_info[cloak_index].last_time;
@@ -3107,7 +3107,7 @@ void init_ai_frame(const player_flags powerup_flags, const control_info &Control
 {
 	Dist_to_last_fired_upon_player_pos = vm_vec_dist_quick(Last_fired_upon_player_pos, Believed_player_pos);
 
-	if (!(powerup_flags & player_flag::player_cloaked) ||
+	if (!(powerup_flags & player_flag::cloaked) ||
 		(powerup_flags & player_flag::headlight_on) ||
 		(Afterburner_charge && Controls.state.afterburner && (powerup_flags & player_flag::afterburner)))
 	{
@@ -3384,7 +3384,7 @@ void do_ai_frame(const d_level_shared_robot_info_state &LevelSharedRobotInfoStat
 	robot_to_player_visibility_state player_visibility;
 	auto &vec_to_player = player_visibility.vec_to_player;
 #if DXX_BUILD_DESCENT == 1
-	if (!(player_info.powerup_flags & player_flag::player_cloaked))
+	if (!(player_info.powerup_flags & player_flag::cloaked))
 		Believed_player_pos = ConsoleObject->pos;
 #elif DXX_BUILD_DESCENT == 2
 	// If only awake because of a camera, make that the believed player position.
@@ -3426,7 +3426,7 @@ void do_ai_frame(const d_level_shared_robot_info_state &LevelSharedRobotInfoStat
 _exit_cheat:
 			DXX_MAKE_VAR_UNDEFINED(player_visibility);
 			player_visibility.initialized = 0;
-			if (!(player_info.powerup_flags & player_flag::player_cloaked))
+			if (!(player_info.powerup_flags & player_flag::cloaked))
 				Believed_player_pos = ConsoleObject->pos;
 			else
 				Believed_player_pos = Ai_cloak_info[objnum & (MAX_AI_CLOAK_INFO-1)].last_position;
@@ -3475,7 +3475,7 @@ _exit_cheat:
 			auto dtp = dist_to_player/4;
 			
 			// If player cloaked, visibility is screwed up and superboss will gate in robots when not supposed to.
-			if (player_info.powerup_flags & player_flag::player_cloaked) {
+			if (player_info.powerup_flags & player_flag::cloaked) {
 				pv = player_visibility_state::no_line_of_sight;
 				dtp = vm_vec_dist_quick(ConsoleObject->pos, obj->pos)/4;
 			}
@@ -3502,7 +3502,7 @@ _exit_cheat:
 #if DXX_BUILD_DESCENT == 2
 			auto pv = player_visibility.visibility;
 			// If player cloaked, visibility is screwed up and superboss will gate in robots when not supposed to.
-			if (player_info.powerup_flags & player_flag::player_cloaked) {
+			if (player_info.powerup_flags & player_flag::cloaked) {
 				pv = player_visibility_state::no_line_of_sight;
 			}
 

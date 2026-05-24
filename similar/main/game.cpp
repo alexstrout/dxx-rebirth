@@ -1102,11 +1102,11 @@ static void do_cloak_stuff()
 		auto &plobj = *vmobjptr(value.objnum);
 		auto &player_info = plobj.ctype.player_info;
 		auto &pl_flags = player_info.powerup_flags;
-		if (pl_flags & player_flag::player_cloaked)
+		if (pl_flags & player_flag::cloaked)
 		{
 			if (GameTime64 > player_info.cloak_time+CLOAK_TIME_MAX)
 			{
-				pl_flags &= ~player_flag::player_cloaked;
+				pl_flags &= ~player_flag::cloaked;
 				if (i == Player_num) {
 					multi_digi_play_sample(sound_effect::SOUND_CLOAK_OFF, F1_0);
 #if DXX_USE_MULTIPLAYER

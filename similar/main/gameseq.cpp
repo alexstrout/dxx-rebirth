@@ -634,7 +634,7 @@ static void init_player_stats_level(player &plr, object &plrobj, const secret_re
 		init_ammo_and_energy(plrobj);
 
 		auto &powerup_flags = player_info.powerup_flags;
-		powerup_flags &= ~(player_flag::invulnerable | player_flag::player_cloaked);
+		powerup_flags &= ~(player_flag::invulnerable | player_flag::cloaked);
 #if DXX_BUILD_DESCENT == 2
 		powerup_flags &= ~(player_flag::map_all);
 #endif
@@ -686,7 +686,7 @@ void init_player_stats_new_ship(const playernum_t pnum)
 	player_info.laser_level = granted_laser_level;
 	const auto granted_primary_weapon_flags = HAS_LASER_FLAG | map_granted_flags_to_primary_weapon_flags(GrantedItems);
 	player_info.primary_weapon_flags = granted_primary_weapon_flags;
-	player_info.powerup_flags &= ~(player_flag::quad_lasers | player_flag::player_cloaked | player_flag::invulnerable);
+	player_info.powerup_flags &= ~(player_flag::quad_lasers | player_flag::cloaked | player_flag::invulnerable);
 #if DXX_BUILD_DESCENT == 2
 	player_info.powerup_flags &= ~(player_flag::afterburner | player_flag::map_all | player_flag::converter | player_flag::ammo_rack | player_flag::headlight | player_flag::headlight_on | player_flag::has_team_flag);
 	player_info.Omega_charge = (granted_primary_weapon_flags & HAS_OMEGA_FLAG)
@@ -1601,7 +1601,7 @@ void do_cloak_invul_secret_stuff(fix64 old_gametime, player_info &player_info)
 		t = GameTime64 - time_used;
 	}
 
-	if (pl_flags & player_flag::player_cloaked)
+	if (pl_flags & player_flag::cloaked)
 	{
 		fix	time_used;
 

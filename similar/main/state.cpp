@@ -816,7 +816,7 @@ static void state_player_to_player_rw(const relocated_player_data &rpd, const pl
 	pl_rw->score                     = pl_info.mission.score;
 	pl_rw->time_level                = pl->time_level;
 	pl_rw->time_total                = pl->time_total;
-	if (!(pl_info.powerup_flags & player_flag::player_cloaked) || pl_info.cloak_time - GameTime64 < F1_0*(-18000))
+	if (!(pl_info.powerup_flags & player_flag::cloaked) || pl_info.cloak_time - GameTime64 < F1_0*(-18000))
 		pl_rw->cloak_time        = F1_0*(-18000);
 	else
 		pl_rw->cloak_time        = pl_info.cloak_time - GameTime64;

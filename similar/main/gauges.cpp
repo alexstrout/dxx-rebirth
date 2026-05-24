@@ -1926,7 +1926,7 @@ namespace {
 
 static void hud_show_cloak_invuln(grs_canvas &canvas, const player_flags player_flags, const fix64 cloak_time, const fix64 invulnerable_time, const unsigned base_y)
 {
-	if (!(player_flags & (player_flag::player_cloaked | player_flag::invulnerable)))
+	if (!(player_flags & (player_flag::cloaked | player_flag::invulnerable)))
 		return;
 	gr_set_fontcolor(canvas, BM_XRGB(0, 31, 0), -1);
 	const auto &&line_spacing = LINE_SPACING(*canvas.cv_font, *GAME_FONT);
@@ -1941,7 +1941,7 @@ static void hud_show_cloak_invuln(grs_canvas &canvas, const player_flags player_
 			gr_string(canvas, *canvas.cv_font, fspacx1, y, txt);
 	};
 
-	if (player_flags & player_flag::player_cloaked)
+	if (player_flags & player_flag::cloaked)
 	{
 		const fix64 effect_end = cloak_time + CLOAK_TIME_MAX - gametime64;
 		if (effect_end > F1_0*3 || gametime64 & 0x8000)
@@ -3705,7 +3705,7 @@ void show_HUD_names(const d_robot_info_array &Robot_info, grs_canvas &canvas, co
 		const auto &pl_flags = objp->ctype.player_info.powerup_flags;
 		const auto is_friend{(+(Game_mode & GM_MULTI_COOP) || (+(Game_mode & GM_TEAM) && multi_get_team_from_player(Netgame, pnum) == multi_get_team_from_player(Netgame, Player_num)))};
 		const auto show_friend_name{Show_reticle_name};
-		const auto is_cloaked = pl_flags & player_flag::player_cloaked;
+		const auto is_cloaked = pl_flags & player_flag::cloaked;
 		const auto show_enemy_name = Show_reticle_name && Netgame.ShowEnemyNames && !is_cloaked;
 		const auto show_name = is_friend ? show_friend_name : show_enemy_name;
 		const auto show_typing = is_friend || !is_cloaked;
@@ -3981,7 +3981,7 @@ void render_gauges(grs_canvas &canvas, const game_mode_flags Game_mode)
 	auto &player_info = plrobj.ctype.player_info;
 	const auto energy = f2ir(player_info.energy);
 	auto &pl_flags = player_info.powerup_flags;
-	const auto cloak = (pl_flags & player_flag::player_cloaked);
+	const auto cloak = (pl_flags & player_flag::cloaked);
 
 	assert(PlayerCfg.CockpitMode[1] == cockpit_mode_t::full_cockpit || PlayerCfg.CockpitMode[1] == cockpit_mode_t::status_bar);
 

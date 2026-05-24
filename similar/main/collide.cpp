@@ -2071,7 +2071,7 @@ void drop_player_eggs(const vmobjptridx_t playerobj)
 		if (player_info.powerup_flags & player_flag::quad_lasers)
 			call_object_create_egg(playerobj, powerup_type_t::POW_QUAD_FIRE);
 
-		if (player_info.powerup_flags & player_flag::player_cloaked)
+		if (player_info.powerup_flags & player_flag::cloaked)
 			call_object_create_egg(playerobj, powerup_type_t::POW_CLOAK);
 
 #if DXX_BUILD_DESCENT == 2

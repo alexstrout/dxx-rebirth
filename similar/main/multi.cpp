@@ -1893,7 +1893,7 @@ static void multi_do_player_deres(const d_robot_info_array &Robot_info, object_a
 		create_player_appearance_effect(Vclip, objp);
 	}
 
-	player_info.powerup_flags &= ~(player_flag::player_cloaked | player_flag::invulnerable);
+	player_info.powerup_flags &= ~(player_flag::cloaked | player_flag::invulnerable);
 #if DXX_BUILD_DESCENT == 2
 	player_info.powerup_flags &= ~player_flag::has_team_flag;
 #endif
@@ -2118,7 +2118,7 @@ static void multi_do_cloak(fvmobjptr &vmobjptr, const playernum_t pnum)
 
 	const auto &&objp = vmobjptr(vcplayerptr(pnum)->objnum);
 	auto &player_info = objp->ctype.player_info;
-	player_info.powerup_flags |= player_flag::player_cloaked;
+	player_info.powerup_flags |= player_flag::cloaked;
 	player_info.cloak_time = {GameTime64};
 	ai_do_cloak_stuff();
 
@@ -2755,7 +2755,7 @@ void multi_send_player_deres(deres_type_t type)
 	}
 
 	multi_send_data(multibuf, multiplayer_data_priority::_2);
-	if (player_info.powerup_flags & player_flag::player_cloaked)
+	if (player_info.powerup_flags & player_flag::cloaked)
 		multi_send_decloak();
 	multi_strip_robots(Player_num);
 }
@@ -5429,7 +5429,7 @@ static void MultiLevelInv_CountPlayerInventory()
 						primary_weapon_flags.process(HAS_PRIMARY_FLAG(primary_weapon_index::spreadfire), powerup_type_t::POW_SPREADFIRE_WEAPON);
 						primary_weapon_flags.process(HAS_PRIMARY_FLAG(primary_weapon_index::plasma), powerup_type_t::POW_PLASMA_WEAPON);
 						primary_weapon_flags.process(HAS_PRIMARY_FLAG(primary_weapon_index::fusion), powerup_type_t::POW_FUSION_WEAPON);
-						powerup_flags.process(player_flag::player_cloaked, powerup_type_t::POW_CLOAK);
+						powerup_flags.process(player_flag::cloaked, powerup_type_t::POW_CLOAK);
 						powerup_flags.process(player_flag::invulnerable, powerup_type_t::POW_INVULNERABILITY);
                         // NOTE: The following can probably be simplified.
 #if DXX_BUILD_DESCENT == 2

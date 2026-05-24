@@ -535,7 +535,7 @@ static void draw_polygon_object(grs_canvas &canvas, const d_level_unique_light_s
 	else {
 		std::pair<fix64, fix> cloak_duration;
 		std::pair<fix, fix> cloak_fade;
-		if (obj->type==object_type::OBJ_PLAYER && (obj->ctype.player_info.powerup_flags & player_flag::player_cloaked))
+		if (obj->type==object_type::OBJ_PLAYER && (obj->ctype.player_info.powerup_flags & player_flag::cloaked))
 		{
 			auto &cloak_time = obj->ctype.player_info.cloak_time;
 			cloak_duration = {cloak_time, CLOAK_TIME_MAX};

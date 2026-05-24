@@ -1059,7 +1059,7 @@ static int object_is_trackable(const imobjptridx_t objp, const vmobjptridx_t tra
 	if (+(Game_mode & GM_MULTI_COOP))
 		return 0;
 	//	Don't track player if he's cloaked.
-	if ((objp == get_local_player().objnum) && (objp->ctype.player_info.powerup_flags & player_flag::player_cloaked))
+	if ((objp == get_local_player().objnum) && (objp->ctype.player_info.powerup_flags & player_flag::cloaked))
 		return 0;
 #if DXX_BUILD_DESCENT == 2
 	auto &Robot_info = LevelSharedRobotInfoState.Robot_info;
@@ -1207,7 +1207,7 @@ imobjptridx_t find_homing_object_complete(const vms_vector &curpos, const vmobjp
 		//	Don't track cloaked players.
 		if (curobjp->type == object_type::OBJ_PLAYER)
 		{
-			if (curobjp->ctype.player_info.powerup_flags & player_flag::player_cloaked)
+			if (curobjp->ctype.player_info.powerup_flags & player_flag::cloaked)
 				continue;
 			// Don't track teammates in team games
 			if (+(Game_mode & GM_TEAM))
@@ -2180,7 +2180,7 @@ static void create_smart_children(object_array &Objects, const vmobjptridx_t obj
 						continue;
 					if (+(Game_mode & GM_TEAM) && multi_get_team_from_player(Netgame, get_player_id(curobjp)) == multi_get_team_from_player(Netgame, get_player_id(vcobjptr(parent.num))))
 						continue;
-					if (curobjp->ctype.player_info.powerup_flags & player_flag::player_cloaked)
+					if (curobjp->ctype.player_info.powerup_flags & player_flag::cloaked)
 						continue;
 				}
 

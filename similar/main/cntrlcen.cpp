@@ -429,7 +429,7 @@ void do_controlcen_frame(const d_robot_info_array &Robot_info, const vmobjptridx
 	if (LevelUniqueControlCenterState.Frametime_until_next_fire < 0 && !(Frametime_since_player_died > Relative_frametime_cease_fire))
 	{
 		auto &player_info = plrobj.ctype.player_info;
-		const auto &player_pos = (player_info.powerup_flags & player_flag::player_cloaked) ? Believed_player_pos : ConsoleObject->pos;
+		const auto &player_pos = (player_info.powerup_flags & player_flag::cloaked) ? Believed_player_pos : ConsoleObject->pos;
 		if (const auto opt_best_gun{calc_best_gun(get_reactor_definition(obj).n_guns, obj, player_pos)})
 		{
 			const auto best_gun_num{*opt_best_gun};

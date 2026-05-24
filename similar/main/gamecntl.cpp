@@ -1426,8 +1426,8 @@ static window_event_result HandleTestKey(const d_level_shared_robot_info_state &
 
 			auto &player_info = get_local_plrobj().ctype.player_info;
 			auto &pl_flags = player_info.powerup_flags;
-			pl_flags ^= player_flag::player_cloaked;
-			if (pl_flags & player_flag::player_cloaked) {
+			pl_flags ^= player_flag::cloaked;
+			if (pl_flags & player_flag::cloaked) {
 				if (+(Game_mode & GM_MULTI))
 					multi_send_cloak();
 				ai_do_cloak_stuff();
@@ -1886,8 +1886,8 @@ static window_event_result FinalCheats(const d_level_shared_robot_info_state &Le
 	if (gotcha == &game_cheats::cloak)
 	{
 		auto &pl_flags = player_info.powerup_flags;
-		pl_flags ^= player_flag::player_cloaked;
-		const auto have_cloaked = pl_flags & player_flag::player_cloaked;
+		pl_flags ^= player_flag::cloaked;
+		const auto have_cloaked = pl_flags & player_flag::cloaked;
 		HUD_init_message(HM_DEFAULT, "%s %s!", TXT_CLOAK, have_cloaked ? TXT_ON : TXT_OFF);
 		if (have_cloaked)
 		{
@@ -2057,7 +2057,7 @@ public:
 
 class cheat_menu_bit_cloak :
 	std::reference_wrapper<player_info>,
-	public menu_bit_wrapper_t<player_flags, std::integral_constant<player_flag, player_flag::player_cloaked>>
+	public menu_bit_wrapper_t<player_flags, std::integral_constant<player_flag, player_flag::cloaked>>
 {
 public:
 	cheat_menu_bit_cloak(player_info &pl_info) :

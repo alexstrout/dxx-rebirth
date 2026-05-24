@@ -1819,7 +1819,7 @@ static int newdemo_read_demo_start(const purpose_type purpose)
 		{
 			auto &objp = *vmobjptr(i.objnum);
 			auto &player_info = objp.ctype.player_info;
-			player_info.powerup_flags &= ~(player_flag::player_cloaked | player_flag::invulnerable);
+			player_info.powerup_flags &= ~(player_flag::cloaked | player_flag::invulnerable);
 			DXX_MAKE_VAR_UNDEFINED(player_info.cloak_time);
 			DXX_MAKE_VAR_UNDEFINED(player_info.invulnerable_time);
 		}
@@ -1851,7 +1851,7 @@ static int newdemo_read_demo_start(const purpose_type purpose)
 			range_for (auto &i, partial_range(Players, N_players)) {
 				const auto &&objp = vmobjptr(i.objnum);
 				auto &player_info = objp->ctype.player_info;
-				player_info.powerup_flags &= ~(player_flag::player_cloaked | player_flag::invulnerable);
+				player_info.powerup_flags &= ~(player_flag::cloaked | player_flag::invulnerable);
 				DXX_MAKE_VAR_UNDEFINED(player_info.cloak_time);
 				DXX_MAKE_VAR_UNDEFINED(player_info.invulnerable_time);
 				nd_read_string(i.callsign.buffer());
@@ -1982,7 +1982,7 @@ static int newdemo_read_demo_start(const purpose_type purpose)
 	player_info.powerup_flags = player_flags(recorded_player_flags);
 	if (purpose == purpose_type::rewrite)
 		nd_write_int(recorded_player_flags);
-	if (player_info.powerup_flags & player_flag::player_cloaked) {
+	if (player_info.powerup_flags & player_flag::cloaked) {
 		player_info.cloak_time = GameTime64 - (CLOAK_TIME_MAX / 2);
 	}
 	if (player_info.powerup_flags & player_flag::invulnerable)
@@ -2656,8 +2656,8 @@ static int newdemo_read_frame_information(int rewrite)
 			const auto old_player_flags = player_flags(static_cast<unsigned>(recorded_player_flags) >> 16);
 			const auto new_player_flags = player_flags(static_cast<unsigned>(recorded_player_flags));
 
-			const auto old_cloaked = old_player_flags & player_flag::player_cloaked;
-			const auto new_cloaked = new_player_flags & player_flag::player_cloaked;
+			const auto old_cloaked = old_player_flags & player_flag::cloaked;
+			const auto new_cloaked = new_player_flags & player_flag::cloaked;
 			const auto old_invul = old_player_flags & player_flag::invulnerable;
 			const auto new_invul = new_player_flags & player_flag::invulnerable;
 			if ((Newdemo_vcr_state == ND_STATE_REWINDING) || ((Newdemo_vcr_state == ND_STATE_ONEFRAMEBACKWARD) && (old_player_flags.get_player_flags() != 0xffff)) ) {
@@ -2905,10 +2905,10 @@ static int newdemo_read_frame_information(int rewrite)
 			}
 			auto &player_info = get_local_plrobj().ctype.player_info;
 			if ((Newdemo_vcr_state == ND_STATE_REWINDING) || (Newdemo_vcr_state == ND_STATE_ONEFRAMEBACKWARD)) {
-				player_info.powerup_flags &= ~player_flag::player_cloaked;
+				player_info.powerup_flags &= ~player_flag::cloaked;
 				DXX_MAKE_VAR_UNDEFINED(player_info.cloak_time);
 			} else if ((Newdemo_vcr_state == ND_STATE_PLAYBACK) || (Newdemo_vcr_state == ND_STATE_FASTFORWARD) || (Newdemo_vcr_state == ND_STATE_ONEFRAMEFORWARD)) {
-				player_info.powerup_flags |= player_flag::player_cloaked;
+				player_info.powerup_flags |= player_flag::cloaked;
 				player_info.cloak_time = GameTime64  - (CLOAK_TIME_MAX / 2);
 			}
 			break;
@@ -2926,10 +2926,10 @@ static int newdemo_read_frame_information(int rewrite)
 
 			auto &player_info = get_local_plrobj().ctype.player_info;
 			if ((Newdemo_vcr_state == ND_STATE_REWINDING) || (Newdemo_vcr_state == ND_STATE_ONEFRAMEBACKWARD)) {
-				player_info.powerup_flags |= player_flag::player_cloaked;
+				player_info.powerup_flags |= player_flag::cloaked;
 				player_info.cloak_time = GameTime64 - (CLOAK_TIME_MAX / 2);
 			} else if ((Newdemo_vcr_state == ND_STATE_PLAYBACK) || (Newdemo_vcr_state == ND_STATE_FASTFORWARD) || (Newdemo_vcr_state == ND_STATE_ONEFRAMEFORWARD)) {
-				player_info.powerup_flags &= ~player_flag::player_cloaked;
+				player_info.powerup_flags &= ~player_flag::cloaked;
 				DXX_MAKE_VAR_UNDEFINED(player_info.cloak_time);
 			}
 			break;
@@ -3294,7 +3294,7 @@ static int newdemo_read_frame_information(int rewrite)
 					{
 						const auto &&objp = vmobjptr(i.objnum);
 						auto &player_info = objp->ctype.player_info;
-						player_info.powerup_flags &= ~player_flag::player_cloaked;
+						player_info.powerup_flags &= ~player_flag::cloaked;
 						DXX_MAKE_VAR_UNDEFINED(player_info.cloak_time);
 					}
 				}
@@ -3492,7 +3492,7 @@ window_event_result newdemo_goto_end(int to_rewrite)
 				auto &player_info = objp->ctype.player_info;
 				if ((1 << i) & cloaked)
 				{
-					player_info.powerup_flags |= player_flag::player_cloaked;
+					player_info.powerup_flags |= player_flag::cloaked;
 				}
 				player_info.cloak_time = GameTime64 - (CLOAK_TIME_MAX / 2);
 			}
@@ -3520,7 +3520,7 @@ window_event_result newdemo_goto_end(int to_rewrite)
 			if (cloaked & (1 << i))
 				{
 					const auto &&objp = vmobjptr(vcplayerptr(i)->objnum);
-					objp->ctype.player_info.powerup_flags |= player_flag::player_cloaked;
+					objp->ctype.player_info.powerup_flags |= player_flag::cloaked;
 				}
 	}
 	else
@@ -3537,7 +3537,7 @@ window_event_result newdemo_goto_end(int to_rewrite)
 	int recorded_player_flags;
 	nd_read_int(&recorded_player_flags);
 	player_info.powerup_flags = player_flags(recorded_player_flags);
-	if (player_info.powerup_flags & player_flag::player_cloaked) {
+	if (player_info.powerup_flags & player_flag::cloaked) {
 		player_info.cloak_time = GameTime64 - (CLOAK_TIME_MAX / 2);
 	}
 	if (player_info.powerup_flags & player_flag::invulnerable)
@@ -3761,7 +3761,7 @@ window_event_result newdemo_playback_one_frame()
 	{
 		const auto &&objp = vmobjptr(i.objnum);
 		auto &player_info = objp->ctype.player_info;
-		if (player_info.powerup_flags & player_flag::player_cloaked)
+		if (player_info.powerup_flags & player_flag::cloaked)
 			player_info.cloak_time = GameTime64 - (CLOAK_TIME_MAX / 2);
 		if (player_info.powerup_flags & player_flag::invulnerable)
 			player_info.invulnerable_time = GameTime64 - (INVULNERABLE_TIME_MAX / 2);
@@ -3989,7 +3989,7 @@ static void newdemo_write_end()
 		for (unsigned i = 0; i < N_players; ++i)
 		{
 			const auto &&objp = vmobjptr(vcplayerptr(i)->objnum);
-			if (objp->ctype.player_info.powerup_flags & player_flag::player_cloaked)
+			if (objp->ctype.player_info.powerup_flags & player_flag::cloaked)
 				cloaked |= (1 << i);
 		}
 		nd_write_byte(cloaked);

@@ -31,10 +31,7 @@ enum class player_flag : uint32_t
 	gold_key = 8,		// Player has gold key
 	map_all = 64,		// Player can see unvisited areas on map
 	quad_lasers = 1024,	// Player shoots 4 at once
-	/* Renamed from CLOAKED due to name conflict with AI define
-	 * `CLOAKED`.
-	 */
-	player_cloaked = 2048,		// Player is cloaked for awhile
+	cloaked = 2048,		// Player is cloaked for awhile
 #if DXX_BUILD_DESCENT == 2
 	has_team_flag = 16,			// Player has his team's flag
 	ammo_rack = 128,	// Player has ammo rack
