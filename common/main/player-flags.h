@@ -14,24 +14,24 @@
 enum class player_flag : uint32_t
 {
 	None = 0,
-	INVULNERABLE = 1,	// Player is invincible
-	BLUE_KEY = 2,		// Player has blue key
-	RED_KEY = 4,		// Player has red key
-	GOLD_KEY = 8,		// Player has gold key
-	MAP_ALL = 64,		// Player can see unvisited areas on map
-	QUAD_LASERS = 1024,	// Player shoots 4 at once
+	invulnerable = 1,	// Player is invincible
+	blue_key = 2,		// Player has blue key
+	red_key = 4,		// Player has red key
+	gold_key = 8,		// Player has gold key
+	map_all = 64,		// Player can see unvisited areas on map
+	quad_lasers = 1024,	// Player shoots 4 at once
 	/* Renamed from CLOAKED due to name conflict with AI define
 	 * `CLOAKED`.
 	 */
-	PLAYER_CLOAKED = 2048,		// Player is cloaked for awhile
+	player_cloaked = 2048,		// Player is cloaked for awhile
 #if DXX_BUILD_DESCENT == 2
-	HAS_TEAM_FLAG = 16,			// Player has his team's flag
-	AMMO_RACK = 128,	// Player has ammo rack
-	CONVERTER = 256,	// Player has energy->shield converter
-	AFTERBURNER = 4096,	// Player's afterburner is engaged
-	HEADLIGHT = 8192,	// Player has headlight boost
-	HEADLIGHT_ON = 16384,	// is headlight on or off?
-	HEADLIGHT_PRESENT_AND_ON = HEADLIGHT | HEADLIGHT_ON,	// required for thief
+	has_team_flag = 16,			// Player has his team's flag
+	ammo_rack = 128,	// Player has ammo rack
+	converter = 256,	// Player has energy->shield converter
+	afterburner = 4096,	// Player's afterburner is engaged
+	headlight = 8192,	// Player has headlight boost
+	headlight_on = 16384,	// is headlight on or off?
+	headlight_present_and_on = headlight | headlight_on,	// required for thief
 #endif
 };
 
@@ -45,20 +45,20 @@ constexpr player_flag operator|(const player_flag a, const player_flag b)
 	return static_cast<player_flag>(static_cast<uint32_t>(a) | static_cast<uint32_t>(b));
 }
 
-#define PLAYER_FLAGS_INVULNERABLE	player_flag::INVULNERABLE
-#define PLAYER_FLAGS_BLUE_KEY	player_flag::BLUE_KEY
-#define PLAYER_FLAGS_RED_KEY	player_flag::RED_KEY
-#define PLAYER_FLAGS_GOLD_KEY	player_flag::GOLD_KEY
-#define PLAYER_FLAGS_MAP_ALL	player_flag::MAP_ALL
-#define PLAYER_FLAGS_QUAD_LASERS	player_flag::QUAD_LASERS
-#define PLAYER_FLAGS_CLOAKED	player_flag::PLAYER_CLOAKED
+#define PLAYER_FLAGS_INVULNERABLE	player_flag::invulnerable
+#define PLAYER_FLAGS_BLUE_KEY	player_flag::blue_key
+#define PLAYER_FLAGS_RED_KEY	player_flag::red_key
+#define PLAYER_FLAGS_GOLD_KEY	player_flag::gold_key
+#define PLAYER_FLAGS_MAP_ALL	player_flag::map_all
+#define PLAYER_FLAGS_QUAD_LASERS	player_flag::quad_lasers
+#define PLAYER_FLAGS_CLOAKED	player_flag::player_cloaked
 #if DXX_BUILD_DESCENT == 2
-#define PLAYER_FLAGS_FLAG	player_flag::HAS_TEAM_FLAG
-#define PLAYER_FLAGS_AMMO_RACK	player_flag::AMMO_RACK
-#define PLAYER_FLAGS_CONVERTER	player_flag::CONVERTER
-#define PLAYER_FLAGS_AFTERBURNER	player_flag::AFTERBURNER
-#define PLAYER_FLAGS_HEADLIGHT	player_flag::HEADLIGHT
-#define PLAYER_FLAGS_HEADLIGHT_ON	player_flag::HEADLIGHT_ON
+#define PLAYER_FLAGS_FLAG	player_flag::has_team_flag
+#define PLAYER_FLAGS_AMMO_RACK	player_flag::ammo_rack
+#define PLAYER_FLAGS_CONVERTER	player_flag::converter
+#define PLAYER_FLAGS_AFTERBURNER	player_flag::afterburner
+#define PLAYER_FLAGS_HEADLIGHT	player_flag::headlight
+#define PLAYER_FLAGS_HEADLIGHT_ON	player_flag::headlight_on
 #endif
 
 class player_flags

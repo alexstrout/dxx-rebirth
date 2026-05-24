@@ -314,8 +314,8 @@ struct player_hit_headlight_powerup
 	{
 		const auto active{PlayerCfg.HeadlightActiveDefault};
 		powerup_flags |= active
-			? player_flag::HEADLIGHT_PRESENT_AND_ON
-			: player_flag::HEADLIGHT;
+			? player_flag::headlight_present_and_on
+			: player_flag::headlight;
 		powerup_basic(15, 0, 15, 0, "HEADLIGHT BOOST! (Headlight is O%s)", active ? "N" : "FF");
 		multi_digi_play_sample(Powerup_info[powerup_type_t::POW_HEADLIGHT].hit_sound, F1_0);
 		if (active && +(Game_mode & GM_MULTI))

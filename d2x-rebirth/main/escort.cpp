@@ -1781,7 +1781,7 @@ static int maybe_steal_flag_item(object &playerobj, const player_flag flagval)
 					powerup_index = powerup_type_t::POW_CONVERTER;
 					msg = "Converter stolen!";
 					break;
-				case player_flag::HEADLIGHT_PRESENT_AND_ON:
+				case player_flag::headlight_present_and_on:
 					powerup_index = powerup_type_t::POW_HEADLIGHT;
 					msg = "Headlight stolen!";
 					break;
@@ -1937,7 +1937,7 @@ static int attempt_to_steal_item_3(object &thief, object &player_num)
 		return r;
 // --	if (maybe_steal_flag_item(player_num, PLAYER_FLAGS_AMMO_RACK))	//	Can't steal because what if have too many items, say 15 homing missiles?
 // --		return 1;
-	if (auto r = maybe_steal_flag_item(player_num, player_flag::HEADLIGHT_PRESENT_AND_ON))
+	if (auto r = maybe_steal_flag_item(player_num, player_flag::headlight_present_and_on))
 		return r;
 	if (auto r = maybe_steal_flag_item(player_num, PLAYER_FLAGS_MAP_ALL))
 		return r;
