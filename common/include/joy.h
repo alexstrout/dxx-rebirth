@@ -17,13 +17,11 @@
 #include "fwd-event.h"
 
 #if DXX_MAX_JOYSTICKS
-#include "pstypes.h"
-#include "maths.h"
 #include <SDL.h>
 
 namespace dcx {
 
-constexpr std::integral_constant<unsigned, DXX_MAX_AXES_PER_JOYSTICK * DXX_MAX_JOYSTICKS> JOY_MAX_AXES{};
+constexpr unsigned JOY_MAX_AXES{DXX_MAX_AXES_PER_JOYSTICK * DXX_MAX_JOYSTICKS};
 #define JOY_MAX_BUTTONS				(DXX_MAX_BUTTONS_PER_JOYSTICK * DXX_MAX_JOYSTICKS)
 
 struct d_event_joystick_axis_value
