@@ -56,22 +56,6 @@ constexpr player_flag operator|(const player_flag a, const player_flag b)
 	return static_cast<player_flag>(static_cast<uint32_t>(a) | static_cast<uint32_t>(b));
 }
 
-#define PLAYER_FLAGS_INVULNERABLE	player_flag::invulnerable
-#define PLAYER_FLAGS_BLUE_KEY	player_flag::blue_key
-#define PLAYER_FLAGS_RED_KEY	player_flag::red_key
-#define PLAYER_FLAGS_GOLD_KEY	player_flag::gold_key
-#define PLAYER_FLAGS_MAP_ALL	player_flag::map_all
-#define PLAYER_FLAGS_QUAD_LASERS	player_flag::quad_lasers
-#define PLAYER_FLAGS_CLOAKED	player_flag::player_cloaked
-#if DXX_BUILD_DESCENT == 2
-#define PLAYER_FLAGS_FLAG	player_flag::has_team_flag
-#define PLAYER_FLAGS_AMMO_RACK	player_flag::ammo_rack
-#define PLAYER_FLAGS_CONVERTER	player_flag::converter
-#define PLAYER_FLAGS_AFTERBURNER	player_flag::afterburner
-#define PLAYER_FLAGS_HEADLIGHT	player_flag::headlight
-#define PLAYER_FLAGS_HEADLIGHT_ON	player_flag::headlight_on
-#endif
-
 class player_flags
 {
 	uint32_t flags;

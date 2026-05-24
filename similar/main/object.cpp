@@ -509,9 +509,9 @@ static void draw_polygon_object(grs_canvas &canvas, const d_level_unique_light_s
 			 * end-level sequence.
 			 */
 			return -3;	// Hide headlight during end-level sequence
-		if (!(o.ctype.player_info.powerup_flags & PLAYER_FLAGS_HEADLIGHT))
+		if (!(o.ctype.player_info.powerup_flags & player_flag::headlight))
 			return -3;	// Hide headlight if powerup not present
-		if (o.ctype.player_info.powerup_flags & PLAYER_FLAGS_HEADLIGHT_ON) [[unlikely]]
+		if (o.ctype.player_info.powerup_flags & player_flag::headlight_on) [[unlikely]]
 			return -2;	// Draw headlight in white when headlight is on
 		return base_headlight_value;	// Draw headlight in grey if present but not on
 	}(obj)
@@ -535,7 +535,7 @@ static void draw_polygon_object(grs_canvas &canvas, const d_level_unique_light_s
 	else {
 		std::pair<fix64, fix> cloak_duration;
 		std::pair<fix, fix> cloak_fade;
-		if (obj->type==object_type::OBJ_PLAYER && (obj->ctype.player_info.powerup_flags & PLAYER_FLAGS_CLOAKED))
+		if (obj->type==object_type::OBJ_PLAYER && (obj->ctype.player_info.powerup_flags & player_flag::player_cloaked))
 		{
 			auto &cloak_time = obj->ctype.player_info.cloak_time;
 			cloak_duration = {cloak_time, CLOAK_TIME_MAX};
@@ -1503,7 +1503,7 @@ void dead_player_end(void)
 	ConsoleObject->control_source = Control_type_save;
 	ConsoleObject->render_type = Render_type_save;
 	auto &player_info = ConsoleObject->ctype.player_info;
-	player_info.powerup_flags &= ~PLAYER_FLAGS_INVULNERABLE;
+	player_info.powerup_flags &= ~player_flag::invulnerable;
 	player_info.Player_eggs_dropped = false;
 }
 
@@ -1645,7 +1645,7 @@ window_event_result dead_player_frame(const d_robot_info_array &Robot_info)
 				ConsoleObject->render_type = render_type::RT_NONE;				//..just make him disappear
 				ConsoleObject->type = object_type::OBJ_GHOST;						//..and kill intersections
 #if DXX_BUILD_DESCENT == 2
-				player_info.powerup_flags &= ~PLAYER_FLAGS_HEADLIGHT_ON;
+				player_info.powerup_flags &= ~player_flag::headlight_on;
 #endif
 			}
 		} else {
@@ -1762,7 +1762,7 @@ static void start_player_death_sequence(object &player)
 	Render_type_save = player.render_type;
 
 	player.flags &= ~OF_SHOULD_BE_DEAD;
-//	Players[Player_num].flags |= PLAYER_FLAGS_INVULNERABLE;
+//	Players[Player_num].flags |= player_flag::invulnerable;
 	player.control_source = object::control_type::None;
 
 	PALETTE_FLASH_SET(0,0,0);

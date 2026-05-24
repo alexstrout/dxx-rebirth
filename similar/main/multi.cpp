@@ -612,11 +612,11 @@ kmatrix_result multi_endlevel_score()
 	 * flag, depending on game type.  This version has the advantage of
 	 * making only one pass when in cooperative mode, where the previous
 	 * version would make one pass if in a cooperative game, then make
-	 * an unconditional pass to try to clear PLAYER_FLAGS_FLAG.
+	 * an unconditional pass to try to clear player_flag::has_team_flag.
 	 */
 	const auto clear_flags{+(Game_mode & GM_MULTI_COOP)
 		// Reset keys
-		? ~player_flags(PLAYER_FLAGS_BLUE_KEY | PLAYER_FLAGS_GOLD_KEY | PLAYER_FLAGS_RED_KEY)
+		? ~player_flags(player_flag::blue_key | player_flag::gold_key | player_flag::red_key)
 		:
 #if DXX_BUILD_DESCENT == 1
 		/* Nothing to clear.  Set a mask that has no effect when
@@ -626,7 +626,7 @@ kmatrix_result multi_endlevel_score()
 		player_flags(~0u)
 #elif DXX_BUILD_DESCENT == 2
 		// Clear capture flag
-		~player_flags(PLAYER_FLAGS_FLAG)
+		~player_flags(player_flag::has_team_flag)
 #endif
 	};
 	range_for (auto &i, partial_const_range(Players, Netgame.max_numplayers))
@@ -1045,7 +1045,7 @@ static void multi_compute_kill(const d_robot_info_array &Robot_info, const imobj
 	multi_show_player_list();
 #if DXX_BUILD_DESCENT == 2
 	// clear the killed guys flags/headlights
-	killed.ctype.player_info.powerup_flags &= ~(PLAYER_FLAGS_HEADLIGHT_ON); 
+	killed.ctype.player_info.powerup_flags &= ~(player_flag::headlight_on); 
 #endif
 }
 
@@ -1409,7 +1409,7 @@ static void multi_send_message_end(const d_robot_info_array &Robot_info, fvmobjp
 				if (vcplayerptr(i)->connected != player_connection_status::disconnected && !d_strnicmp(static_cast<const char *>(vcplayerptr(i)->callsign), &Network_message[name_index], nlen - name_index))
 				{
 #if DXX_BUILD_DESCENT == 2
-					if (game_mode_capture_flag(Game_mode) && (vmobjptr(vcplayerptr(i)->objnum)->ctype.player_info.powerup_flags & PLAYER_FLAGS_FLAG))
+					if (game_mode_capture_flag(Game_mode) && (vmobjptr(vcplayerptr(i)->objnum)->ctype.player_info.powerup_flags & player_flag::has_team_flag))
 					{
 						HUD_init_message_literal(HM_MULTI, "Can't move player because s/he has a flag!");
 						return;
@@ -1685,9 +1685,9 @@ static void multi_do_fire(fvmobjptridx &vmobjptridx, const playernum_t pnum, con
 		{
 			auto &powerup_flags = obj->ctype.player_info.powerup_flags;
 			if (flags & LASER_QUAD)
-				powerup_flags |= PLAYER_FLAGS_QUAD_LASERS;
+				powerup_flags |= player_flag::quad_lasers;
 			else
-				powerup_flags &= ~PLAYER_FLAGS_QUAD_LASERS;
+				powerup_flags &= ~player_flag::quad_lasers;
 		}
 
 		do_laser_firing(obj, weapon, laser_level{buf[3]}, flags, shot_orientation, Network_laser_track);
@@ -1893,9 +1893,9 @@ static void multi_do_player_deres(const d_robot_info_array &Robot_info, object_a
 		create_player_appearance_effect(Vclip, objp);
 	}
 
-	player_info.powerup_flags &= ~(PLAYER_FLAGS_CLOAKED | PLAYER_FLAGS_INVULNERABLE);
+	player_info.powerup_flags &= ~(player_flag::player_cloaked | player_flag::invulnerable);
 #if DXX_BUILD_DESCENT == 2
-	player_info.powerup_flags &= ~PLAYER_FLAGS_FLAG;
+	player_info.powerup_flags &= ~player_flag::has_team_flag;
 #endif
 	DXX_MAKE_VAR_UNDEFINED(player_info.cloak_time);
 }
@@ -2118,7 +2118,7 @@ static void multi_do_cloak(fvmobjptr &vmobjptr, const playernum_t pnum)
 
 	const auto &&objp = vmobjptr(vcplayerptr(pnum)->objnum);
 	auto &player_info = objp->ctype.player_info;
-	player_info.powerup_flags |= PLAYER_FLAGS_CLOAKED;
+	player_info.powerup_flags |= player_flag::player_cloaked;
 	player_info.cloak_time = {GameTime64};
 	ai_do_cloak_stuff();
 
@@ -2755,7 +2755,7 @@ void multi_send_player_deres(deres_type_t type)
 	}
 
 	multi_send_data(multibuf, multiplayer_data_priority::_2);
-	if (player_info.powerup_flags & PLAYER_FLAGS_CLOAKED)
+	if (player_info.powerup_flags & player_flag::player_cloaked)
 		multi_send_decloak();
 	multi_strip_robots(Player_num);
 }
@@ -3205,12 +3205,12 @@ player_flags map_granted_flags_to_player_flags(const packed_spawn_granted_items 
 	auto &grant = p.mask;
 	const auto None = player_flag::None;
 	return player_flags(
-		((grant & netgrant_flag::NETGRANT_QUAD) != netgrant_flag::None ? PLAYER_FLAGS_QUAD_LASERS : None)
+		((grant & netgrant_flag::NETGRANT_QUAD) != netgrant_flag::None ? player_flag::quad_lasers : None)
 #if DXX_BUILD_DESCENT == 2
-		| ((grant & netgrant_flag::NETGRANT_AFTERBURNER) != netgrant_flag::None ? PLAYER_FLAGS_AFTERBURNER : None)
-		| ((grant & netgrant_flag::NETGRANT_AMMORACK) != netgrant_flag::None ? PLAYER_FLAGS_AMMO_RACK : None)
-		| ((grant & netgrant_flag::NETGRANT_CONVERTER) != netgrant_flag::None ? PLAYER_FLAGS_CONVERTER : None)
-		| ((grant & netgrant_flag::NETGRANT_HEADLIGHT) != netgrant_flag::None ? PLAYER_FLAGS_HEADLIGHT : None)
+		| ((grant & netgrant_flag::NETGRANT_AFTERBURNER) != netgrant_flag::None ? player_flag::afterburner : None)
+		| ((grant & netgrant_flag::NETGRANT_AMMORACK) != netgrant_flag::None ? player_flag::ammo_rack : None)
+		| ((grant & netgrant_flag::NETGRANT_CONVERTER) != netgrant_flag::None ? player_flag::converter : None)
+		| ((grant & netgrant_flag::NETGRANT_HEADLIGHT) != netgrant_flag::None ? player_flag::headlight : None)
 #endif
 	);
 }
@@ -4361,7 +4361,7 @@ void multi_do_capture_bonus(const playernum_t pnum)
 	team_kills[multi_get_team_from_player(Netgame, pnum)] += 5;
 	auto &plr = *vcplayerptr(pnum);
 	auto &player_info = vmobjptr(plr.objnum)->ctype.player_info;
-	player_info.powerup_flags &= ~PLAYER_FLAGS_FLAG;  // Clear capture flag
+	player_info.powerup_flags &= ~player_flag::has_team_flag;  // Clear capture flag
 	player_info.net_kills_total += 5;
 	player_info.KillGoalCount += 5;
 
@@ -4433,7 +4433,7 @@ void multi_do_orb_bonus(const playernum_t pnum, const multiplayer_rspan<multipla
 	team_kills[multi_get_team_from_player(Netgame, pnum)] += bonus;
 	auto &plr = *vcplayerptr(pnum);
 	auto &player_info = vmobjptr(plr.objnum)->ctype.player_info;
-	player_info.powerup_flags &= ~PLAYER_FLAGS_FLAG;  // Clear orb flag
+	player_info.powerup_flags &= ~player_flag::has_team_flag;  // Clear orb flag
 	player_info.net_kills_total += bonus;
 	player_info.KillGoalCount += bonus;
 
@@ -4497,7 +4497,7 @@ static void multi_do_got_flag (const playernum_t pnum)
 			? sound_effect::SOUND_HUD_BLUE_GOT_FLAG
 			: sound_effect::SOUND_HUD_RED_GOT_FLAG
 		), F1_0*2);
-	vmobjptr(vcplayerptr(pnum)->objnum)->ctype.player_info.powerup_flags |= PLAYER_FLAGS_FLAG;
+	vmobjptr(vcplayerptr(pnum)->objnum)->ctype.player_info.powerup_flags |= player_flag::has_team_flag;
 	HUD_init_message(HM_MULTI, "%s picked up a flag!",static_cast<const char *>(vcplayerptr(pnum)->callsign));
 }
 
@@ -4512,7 +4512,7 @@ static void multi_do_got_orb (const playernum_t pnum)
 		: sound_effect::SOUND_OPPONENT_GOT_ORB, F1_0*2);
 
 	const auto &&objp = vmobjptr(vcplayerptr(pnum)->objnum);
-	objp->ctype.player_info.powerup_flags |= PLAYER_FLAGS_FLAG;
+	objp->ctype.player_info.powerup_flags |= player_flag::has_team_flag;
 	HUD_init_message(HM_MULTI, "%s picked up an orb!",static_cast<const char *>(vcplayerptr(pnum)->callsign));
 }
 
@@ -4551,7 +4551,7 @@ static void DropOrb ()
 	// If empty, tell everyone to stop drawing the box around me
 	if (!proximity)
 	{
-		player_info.powerup_flags &=~(PLAYER_FLAGS_FLAG);
+		player_info.powerup_flags &=~(player_flag::has_team_flag);
 		multi_send_flags (Player_num);
 	}
 }
@@ -4573,7 +4573,7 @@ void DropFlag ()
 		return;
 
 	auto &player_info = get_local_plrobj().ctype.player_info;
-	if (!(player_info.powerup_flags & PLAYER_FLAGS_FLAG))
+	if (!(player_info.powerup_flags & player_flag::has_team_flag))
 	{
 		HUD_init_message_literal(HM_MULTI, "No flag to drop!");
 		return;
@@ -4592,7 +4592,7 @@ void DropFlag ()
 	if (game_mode_capture_flag(Game_mode))
 		multi_send_drop_flag(objnum,seed);
 
-	player_info.powerup_flags &=~(PLAYER_FLAGS_FLAG);
+	player_info.powerup_flags &=~(player_flag::has_team_flag);
 }
 
 namespace {
@@ -4629,7 +4629,7 @@ static void multi_do_drop_flag(const playernum_t pnum, const multiplayer_rspan<m
 
 	map_objnum_local_to_remote(objnum, remote_objnum, pnum);
 	if (!game_mode_hoard(Game_mode))
-		plrobj.ctype.player_info.powerup_flags &= ~(PLAYER_FLAGS_FLAG);
+		plrobj.ctype.player_info.powerup_flags &= ~(player_flag::has_team_flag);
 }
 
 }
@@ -5424,25 +5424,25 @@ static void MultiLevelInv_CountPlayerInventory()
                         }
 						accumulate_flags_count<player_flags, player_flag> powerup_flags(Current, player_info.powerup_flags);
 						accumulate_flags_count<player_info::primary_weapon_flag_type, unsigned> primary_weapon_flags(Current, player_info.primary_weapon_flags);
-						powerup_flags.process(PLAYER_FLAGS_QUAD_LASERS, powerup_type_t::POW_QUAD_FIRE);
+						powerup_flags.process(player_flag::quad_lasers, powerup_type_t::POW_QUAD_FIRE);
 						primary_weapon_flags.process(HAS_PRIMARY_FLAG(primary_weapon_index::vulcan), powerup_type_t::POW_VULCAN_WEAPON);
 						primary_weapon_flags.process(HAS_PRIMARY_FLAG(primary_weapon_index::spreadfire), powerup_type_t::POW_SPREADFIRE_WEAPON);
 						primary_weapon_flags.process(HAS_PRIMARY_FLAG(primary_weapon_index::plasma), powerup_type_t::POW_PLASMA_WEAPON);
 						primary_weapon_flags.process(HAS_PRIMARY_FLAG(primary_weapon_index::fusion), powerup_type_t::POW_FUSION_WEAPON);
-						powerup_flags.process(PLAYER_FLAGS_CLOAKED, powerup_type_t::POW_CLOAK);
-						powerup_flags.process(PLAYER_FLAGS_INVULNERABLE, powerup_type_t::POW_INVULNERABILITY);
+						powerup_flags.process(player_flag::player_cloaked, powerup_type_t::POW_CLOAK);
+						powerup_flags.process(player_flag::invulnerable, powerup_type_t::POW_INVULNERABILITY);
                         // NOTE: The following can probably be simplified.
 #if DXX_BUILD_DESCENT == 2
 						primary_weapon_flags.process(HAS_PRIMARY_FLAG(primary_weapon_index::gauss), powerup_type_t::POW_GAUSS_WEAPON);
 						primary_weapon_flags.process(HAS_PRIMARY_FLAG(primary_weapon_index::helix), powerup_type_t::POW_HELIX_WEAPON);
 						primary_weapon_flags.process(HAS_PRIMARY_FLAG(primary_weapon_index::phoenix), powerup_type_t::POW_PHOENIX_WEAPON);
 						primary_weapon_flags.process(HAS_PRIMARY_FLAG(primary_weapon_index::omega), powerup_type_t::POW_OMEGA_WEAPON);
-						powerup_flags.process(PLAYER_FLAGS_MAP_ALL, powerup_type_t::POW_FULL_MAP);
-						powerup_flags.process(PLAYER_FLAGS_CONVERTER, powerup_type_t::POW_CONVERTER);
-						powerup_flags.process(PLAYER_FLAGS_AMMO_RACK, powerup_type_t::POW_AMMO_RACK);
-						powerup_flags.process(PLAYER_FLAGS_AFTERBURNER, powerup_type_t::POW_AFTERBURNER);
-						powerup_flags.process(PLAYER_FLAGS_HEADLIGHT, powerup_type_t::POW_HEADLIGHT);
-                        if (+(Game_mode & GM_CAPTURE) && (player_info.powerup_flags & PLAYER_FLAGS_FLAG))
+						powerup_flags.process(player_flag::map_all, powerup_type_t::POW_FULL_MAP);
+						powerup_flags.process(player_flag::converter, powerup_type_t::POW_CONVERTER);
+						powerup_flags.process(player_flag::ammo_rack, powerup_type_t::POW_AMMO_RACK);
+						powerup_flags.process(player_flag::afterburner, powerup_type_t::POW_AFTERBURNER);
+						powerup_flags.process(player_flag::headlight, powerup_type_t::POW_HEADLIGHT);
+                        if (+(Game_mode & GM_CAPTURE) && (player_info.powerup_flags & player_flag::has_team_flag))
                         {
 							++Current[(multi_get_team_from_player(Netgame, i) == team_number::blue) ? powerup_type_t::POW_FLAG_RED : powerup_type_t::POW_FLAG_BLUE];
                         }

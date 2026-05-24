@@ -159,7 +159,7 @@ static void apply_light(fvmsegptridx &vmsegptridx, const g3s_lrgb obj_light_emis
 			{
 				const object &obj = *objnum;
 				if (obj.type == object_type::OBJ_PLAYER)
-					if (obj.ctype.player_info.powerup_flags & PLAYER_FLAGS_HEADLIGHT_ON) {
+					if (obj.ctype.player_info.powerup_flags & player_flag::headlight_on) {
 						headlight_shift = 3;
 						if (get_player_id(obj) != Player_num)
 						{
@@ -291,7 +291,7 @@ namespace {
 #if DXX_BUILD_DESCENT == 2
 static fix compute_player_light_emission_intensity(d_level_unique_headlight_state &LevelUniqueHeadlightState, const object &objp)
 {
-	if (objp.ctype.player_info.powerup_flags & PLAYER_FLAGS_HEADLIGHT_ON)
+	if (objp.ctype.player_info.powerup_flags & player_flag::headlight_on)
 	{
 		auto &Headlights = LevelUniqueHeadlightState.Headlights;
 		auto &Num_headlights = LevelUniqueHeadlightState.Num_headlights;
@@ -571,8 +571,8 @@ void set_dynamic_light(const d_robot_info_array &Robot_info, render_state_t &rst
 void toggle_headlight_active(object &player)
 {
 	auto &player_info = player.ctype.player_info;
-	if (player_info.powerup_flags & PLAYER_FLAGS_HEADLIGHT) {
-		player_info.powerup_flags ^= PLAYER_FLAGS_HEADLIGHT_ON;
+	if (player_info.powerup_flags & player_flag::headlight) {
+		player_info.powerup_flags ^= player_flag::headlight_on;
 		if (+(Game_mode & GM_MULTI))
 			multi_send_flags(player.id);
 	}

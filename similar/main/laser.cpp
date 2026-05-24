@@ -772,7 +772,7 @@ imobjptridx_t Laser_create_new(const vms_vector &direction, const vms_vector &po
 		 * when the Descent 2 build plays a Descent 1 mission, the weapons work
 		 * more like they would in a Descent 1 build playing that mission.
 		 */
-		else if (!EMULATING_D1 && is_laser_weapon_type(weapon_type) && (parent->ctype.player_info.powerup_flags & PLAYER_FLAGS_QUAD_LASERS))
+		else if (!EMULATING_D1 && is_laser_weapon_type(weapon_type) && (parent->ctype.player_info.powerup_flags & player_flag::quad_lasers))
 			obj->ctype.laser_info.multiplier = F1_0*3/4;
 		else if (weapon_type == weapon_id_type::GUIDEDMISS_ID) {
 			LevelUniqueObjectState.Guided_missile.set_player_active_guided_missile(obj, get_player_id(parent));
@@ -1059,7 +1059,7 @@ static int object_is_trackable(const imobjptridx_t objp, const vmobjptridx_t tra
 	if (+(Game_mode & GM_MULTI_COOP))
 		return 0;
 	//	Don't track player if he's cloaked.
-	if ((objp == get_local_player().objnum) && (objp->ctype.player_info.powerup_flags & PLAYER_FLAGS_CLOAKED))
+	if ((objp == get_local_player().objnum) && (objp->ctype.player_info.powerup_flags & player_flag::player_cloaked))
 		return 0;
 #if DXX_BUILD_DESCENT == 2
 	auto &Robot_info = LevelSharedRobotInfoState.Robot_info;
@@ -1207,7 +1207,7 @@ imobjptridx_t find_homing_object_complete(const vms_vector &curpos, const vmobjp
 		//	Don't track cloaked players.
 		if (curobjp->type == object_type::OBJ_PLAYER)
 		{
-			if (curobjp->ctype.player_info.powerup_flags & PLAYER_FLAGS_CLOAKED)
+			if (curobjp->ctype.player_info.powerup_flags & player_flag::player_cloaked)
 				continue;
 			// Don't track teammates in team games
 			if (+(Game_mode & GM_TEAM))
@@ -1859,7 +1859,7 @@ void do_laser_firing_player(object &plrobj)
 			switch (Primary_weapon)
 			{
 				case primary_weapon_index::laser:
-					if (player_info.powerup_flags & PLAYER_FLAGS_QUAD_LASERS)
+					if (player_info.powerup_flags & player_flag::quad_lasers)
 						flags |= LASER_QUAD;
 					break;
 				case primary_weapon_index::spreadfire:
@@ -2180,7 +2180,7 @@ static void create_smart_children(object_array &Objects, const vmobjptridx_t obj
 						continue;
 					if (+(Game_mode & GM_TEAM) && multi_get_team_from_player(Netgame, get_player_id(curobjp)) == multi_get_team_from_player(Netgame, get_player_id(vcobjptr(parent.num))))
 						continue;
-					if (curobjp->ctype.player_info.powerup_flags & PLAYER_FLAGS_CLOAKED)
+					if (curobjp->ctype.player_info.powerup_flags & player_flag::player_cloaked)
 						continue;
 				}
 

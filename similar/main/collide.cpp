@@ -467,7 +467,7 @@ static void collide_player_and_wall(const vmobjptridx_t playerobj, const fix hit
 		}
 
 		auto &player_info = playerobj->ctype.player_info;
-		if (!(player_info.powerup_flags & PLAYER_FLAGS_INVULNERABLE))
+		if (!(player_info.powerup_flags & player_flag::invulnerable))
 			if (playerobj->shields > f1_0*10 || ForceFieldHit)
 				apply_damage_to_player(playerobj, playerobj, damage, apply_damage_player::always);
 
@@ -1449,8 +1449,8 @@ void do_final_boss_hacks(void)
 
 	//	If you're not invulnerable, get invulnerable!
 	auto &pl_flags = player_info.powerup_flags;
-	if (!(pl_flags & PLAYER_FLAGS_INVULNERABLE)) {
-		pl_flags |= PLAYER_FLAGS_INVULNERABLE;
+	if (!(pl_flags & player_flag::invulnerable)) {
+		pl_flags |= player_flag::invulnerable;
 		player_info.FakingInvul = 0;
 		player_info.invulnerable_time = {GameTime64};
 	}
@@ -2068,31 +2068,31 @@ void drop_player_eggs(const vmobjptridx_t playerobj)
 		}
 
 		//	Drop quad laser if appropos
-		if (player_info.powerup_flags & PLAYER_FLAGS_QUAD_LASERS)
+		if (player_info.powerup_flags & player_flag::quad_lasers)
 			call_object_create_egg(playerobj, powerup_type_t::POW_QUAD_FIRE);
 
-		if (player_info.powerup_flags & PLAYER_FLAGS_CLOAKED)
+		if (player_info.powerup_flags & player_flag::player_cloaked)
 			call_object_create_egg(playerobj, powerup_type_t::POW_CLOAK);
 
 #if DXX_BUILD_DESCENT == 2
-		if (player_info.powerup_flags & PLAYER_FLAGS_MAP_ALL)
+		if (player_info.powerup_flags & player_flag::map_all)
 			call_object_create_egg(playerobj, powerup_type_t::POW_FULL_MAP);
 
-		if (player_info.powerup_flags & PLAYER_FLAGS_AFTERBURNER)
+		if (player_info.powerup_flags & player_flag::afterburner)
 			call_object_create_egg(playerobj, powerup_type_t::POW_AFTERBURNER);
 
-		if (player_info.powerup_flags & PLAYER_FLAGS_AMMO_RACK)
+		if (player_info.powerup_flags & player_flag::ammo_rack)
 			call_object_create_egg(playerobj, powerup_type_t::POW_AMMO_RACK);
 
-		if (player_info.powerup_flags & PLAYER_FLAGS_CONVERTER)
+		if (player_info.powerup_flags & player_flag::converter)
 			call_object_create_egg(playerobj, powerup_type_t::POW_CONVERTER);
 
-		if (player_info.powerup_flags & PLAYER_FLAGS_HEADLIGHT)
+		if (player_info.powerup_flags & player_flag::headlight)
 			call_object_create_egg(playerobj, powerup_type_t::POW_HEADLIGHT);
 
 		// drop the other enemies flag if you have it
 
-		if (game_mode_capture_flag(Game_mode) && (player_info.powerup_flags & PLAYER_FLAGS_FLAG))
+		if (game_mode_capture_flag(Game_mode) && (player_info.powerup_flags & player_flag::has_team_flag))
 		{
 			call_object_create_egg(playerobj, multi_get_team_from_player(Netgame, get_player_id(playerobj)) == team_number::blue ? powerup_type_t::POW_FLAG_RED : powerup_type_t::POW_FLAG_BLUE);
 		}
@@ -2178,7 +2178,7 @@ void apply_damage_to_player(object &playerobj, const icobjptridx_t killer, const
 		return;
 
 	auto &player_info = playerobj.ctype.player_info;
-	if (player_info.powerup_flags & PLAYER_FLAGS_INVULNERABLE)
+	if (player_info.powerup_flags & player_flag::invulnerable)
 		return;
 
 	if (possibly_friendly != apply_damage_player::always && multi_maybe_disable_friendly_fire(static_cast<const object *>(killer)))
@@ -2264,7 +2264,7 @@ static void collide_player_and_weapon(const d_robot_info_array &Robot_info, cons
 	if (get_player_id(playerobj) == Player_num)
 	{
 		auto &player_info = playerobj->ctype.player_info;
-		multi_digi_link_sound_to_pos((player_info.powerup_flags & PLAYER_FLAGS_INVULNERABLE) ? sound_effect::SOUND_WEAPON_HIT_DOOR : sound_effect::SOUND_PLAYER_GOT_HIT, player_segp, sidenum_t::WLEFT, collision_point, 0, F1_0);
+		multi_digi_link_sound_to_pos((player_info.powerup_flags & player_flag::invulnerable) ? sound_effect::SOUND_WEAPON_HIT_DOOR : sound_effect::SOUND_PLAYER_GOT_HIT, player_segp, sidenum_t::WLEFT, collision_point, 0, F1_0);
 	}
 
 	object_create_explosion_without_damage(Vclip, player_segp, collision_point, i2f(10) / 2, vclip_index::player_hit);
@@ -2405,13 +2405,13 @@ static void collide_player_and_powerup(const d_robot_info_array &, object &playe
 	{
 		switch (get_powerup_id(powerup)) {
 			case powerup_type_t::POW_KEY_BLUE:
-				playerobj.ctype.player_info.powerup_flags |= PLAYER_FLAGS_BLUE_KEY;
+				playerobj.ctype.player_info.powerup_flags |= player_flag::blue_key;
 				break;
 			case powerup_type_t::POW_KEY_RED:
-				playerobj.ctype.player_info.powerup_flags |= PLAYER_FLAGS_RED_KEY;
+				playerobj.ctype.player_info.powerup_flags |= player_flag::red_key;
 				break;
 			case powerup_type_t::POW_KEY_GOLD:
-				playerobj.ctype.player_info.powerup_flags |= PLAYER_FLAGS_GOLD_KEY;
+				playerobj.ctype.player_info.powerup_flags |= player_flag::gold_key;
 				break;
 			default:
 				break;

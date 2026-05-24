@@ -174,7 +174,7 @@ void do_megawow_powerup(object &plrobj, const int quantity)
 
 	player_info.energy = F1_0*200;
 	plrobj.shields = F1_0*200;
-	player_info.powerup_flags |= PLAYER_FLAGS_QUAD_LASERS;
+	player_info.powerup_flags |= player_flag::quad_lasers;
 #if DXX_BUILD_DESCENT == 1
 	const auto laser_level{MAX_LASER_LEVEL};
 #elif DXX_BUILD_DESCENT == 2
@@ -331,7 +331,7 @@ static int player_hit_flag_powerup(player_info &player_info, const std::span<con
 	const auto pnum{Player_num};
 	if (multi_get_team_from_player(Netgame, pnum) == TEAM)
 	{
-		player_info.powerup_flags |= PLAYER_FLAGS_FLAG;
+		player_info.powerup_flags |= player_flag::has_team_flag;
 		powerup_basic_str(15, 0, 15, 0, desc);
 		multi_send_got_flag(pnum);
 		return 1;
@@ -352,7 +352,7 @@ struct player_hit_quadlaser_powerup
 		}
 	void process(player_flags &powerup_flags) const
 	{
-		powerup_flags |= PLAYER_FLAGS_QUAD_LASERS;
+		powerup_flags |= player_flag::quad_lasers;
 		powerup_basic(15, 15, 7, QUAD_FIRE_SCORE, "%s!", TXT_QUAD_LASERS);
 		update_laser_weapon_info();
 	}
@@ -477,16 +477,16 @@ int do_powerup(const vmobjptridx_t obj)
 			break;
 
 		case powerup_type_t::POW_KEY_BLUE:
-			used = pick_up_key(0, 0, 15, player_info.powerup_flags, PLAYER_FLAGS_BLUE_KEY, TXT_BLUE, id);
+			used = pick_up_key(0, 0, 15, player_info.powerup_flags, player_flag::blue_key, TXT_BLUE, id);
 			break;
 		case powerup_type_t::POW_KEY_RED:
-			used = pick_up_key(15, 0, 0, player_info.powerup_flags, PLAYER_FLAGS_RED_KEY, TXT_RED, id);
+			used = pick_up_key(15, 0, 0, player_info.powerup_flags, player_flag::red_key, TXT_RED, id);
 			break;
 		case powerup_type_t::POW_KEY_GOLD:
-			used = pick_up_key(15, 15, 7, player_info.powerup_flags, PLAYER_FLAGS_GOLD_KEY, TXT_YELLOW, id);
+			used = pick_up_key(15, 15, 7, player_info.powerup_flags, player_flag::gold_key, TXT_YELLOW, id);
 			break;
 		case powerup_type_t::POW_QUAD_FIRE:
-			used = player_hit_powerup<PLAYER_FLAGS_QUAD_LASERS>(player_info, TXT_QUAD_LASERS, player_hit_quadlaser_powerup());
+			used = player_hit_powerup<player_flag::quad_lasers>(player_info, TXT_QUAD_LASERS, player_hit_quadlaser_powerup());
 			break;
 
 		case	powerup_type_t::POW_VULCAN_WEAPON:
@@ -593,12 +593,12 @@ int do_powerup(const vmobjptridx_t obj)
 			used = pick_up_secondary(player_info, secondary_weapon_index::homing, 4, Controls);
 			break;
 		case	powerup_type_t::POW_CLOAK:
-			if (player_info.powerup_flags & PLAYER_FLAGS_CLOAKED) {
+			if (player_info.powerup_flags & player_flag::player_cloaked) {
 				HUD_init_message(HM_DEFAULT|HM_REDUNDANT|HM_MAYDUPL, "%s %s!",TXT_ALREADY_ARE,TXT_CLOAKED);
 				break;
 			} else {
 				player_info.cloak_time = {GameTime64};	//	Not! changed by awareness events (like player fires laser).
-				player_info.powerup_flags |= PLAYER_FLAGS_CLOAKED;
+				player_info.powerup_flags |= player_flag::player_cloaked;
 				ai_do_cloak_stuff();
 				if (+(Game_mode & GM_MULTI))
 					multi_send_cloak();
@@ -609,7 +609,7 @@ int do_powerup(const vmobjptridx_t obj)
 		case	powerup_type_t::POW_INVULNERABILITY:
 			{
 				auto &pl_flags = player_info.powerup_flags;
-				if (pl_flags & PLAYER_FLAGS_INVULNERABLE) {
+				if (pl_flags & player_flag::invulnerable) {
 					if (!player_info.FakingInvul)
 					{
 				HUD_init_message(HM_DEFAULT|HM_REDUNDANT|HM_MAYDUPL, "%s %s!",TXT_ALREADY_ARE,TXT_INVULNERABLE);
@@ -617,7 +617,7 @@ int do_powerup(const vmobjptridx_t obj)
 					}
 			}
 				player_info.FakingInvul = 0;
-				pl_flags |= PLAYER_FLAGS_INVULNERABLE;
+				pl_flags |= player_flag::invulnerable;
 				player_info.invulnerable_time = {GameTime64};
 				powerup_basic(7, 14, 21, INVULNERABILITY_SCORE, "%s!",TXT_INVULNERABILITY);
 				used = 1;
@@ -632,11 +632,11 @@ int do_powerup(const vmobjptridx_t obj)
 
 #if DXX_BUILD_DESCENT == 2
 		case powerup_type_t::POW_FULL_MAP:
-			used = player_hit_powerup<PLAYER_FLAGS_MAP_ALL>(player_info, "the FULL MAP", player_hit_silent_rb_powerup("FULL MAP!"));
+			used = player_hit_powerup<player_flag::map_all>(player_info, "the FULL MAP", player_hit_silent_rb_powerup("FULL MAP!"));
 			break;
 
 		case powerup_type_t::POW_CONVERTER:
-			used = player_hit_powerup<PLAYER_FLAGS_CONVERTER>(player_info, "the Converter", player_hit_silent_rb_powerup("Energy -> shield converter!"));
+			used = player_hit_powerup<player_flag::converter>(player_info, "the Converter", player_hit_silent_rb_powerup("Energy -> shield converter!"));
 			break;
 
 		case powerup_type_t::POW_SUPER_LASER:
@@ -662,15 +662,15 @@ int do_powerup(const vmobjptridx_t obj)
 			break;
 
 		case powerup_type_t::POW_AMMO_RACK:
-			used = player_hit_powerup<PLAYER_FLAGS_AMMO_RACK>(player_info, "the Ammo rack", player_hit_basic_sound_powerup<15, 0, 15, powerup_type_t::POW_AMMO_RACK>("AMMO RACK!"));
+			used = player_hit_powerup<player_flag::ammo_rack>(player_info, "the Ammo rack", player_hit_basic_sound_powerup<15, 0, 15, powerup_type_t::POW_AMMO_RACK>("AMMO RACK!"));
 			break;
 
 		case powerup_type_t::POW_AFTERBURNER:
-			used = player_hit_powerup<PLAYER_FLAGS_AFTERBURNER>(player_info, "the Afterburner", player_hit_afterburner_powerup("AFTERBURNER!"));
+			used = player_hit_powerup<player_flag::afterburner>(player_info, "the Afterburner", player_hit_afterburner_powerup("AFTERBURNER!"));
 			break;
 
 		case powerup_type_t::POW_HEADLIGHT:
-			used = player_hit_powerup<PLAYER_FLAGS_HEADLIGHT>(player_info, "the Headlight boost", player_hit_headlight_powerup());
+			used = player_hit_powerup<player_flag::headlight>(player_info, "the Headlight boost", player_hit_headlight_powerup());
 			break;
 
 		case powerup_type_t::POW_FLAG_BLUE:
@@ -685,7 +685,7 @@ int do_powerup(const vmobjptridx_t obj)
 				{
 					++ proximity;
 					powerup_basic_str(15, 0, 15, 0, "Orb!!!");
-					player_info.powerup_flags |= PLAYER_FLAGS_FLAG;
+					player_info.powerup_flags |= player_flag::has_team_flag;
 					used=1;
 					multi_send_got_orb (Player_num);
 				}

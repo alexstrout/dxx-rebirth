@@ -1160,9 +1160,9 @@ wall_hit_process_t wall_hit_process(const player_flags powerup_flags, const vmse
 	{
 		if (!(powerup_flags & static_cast<player_flag>(w->keys)))
 		{
-			static_assert(static_cast<unsigned>(wall_key::blue) == static_cast<unsigned>(PLAYER_FLAGS_BLUE_KEY), "BLUE key flag mismatch");
-			static_assert(static_cast<unsigned>(wall_key::gold) == static_cast<unsigned>(PLAYER_FLAGS_GOLD_KEY), "GOLD key flag mismatch");
-			static_assert(static_cast<unsigned>(wall_key::red) == static_cast<unsigned>(PLAYER_FLAGS_RED_KEY), "RED key flag mismatch");
+			static_assert(static_cast<unsigned>(wall_key::blue) == static_cast<unsigned>(player_flag::blue_key), "BLUE key flag mismatch");
+			static_assert(static_cast<unsigned>(wall_key::gold) == static_cast<unsigned>(player_flag::gold_key), "GOLD key flag mismatch");
+			static_assert(static_cast<unsigned>(wall_key::red) == static_cast<unsigned>(player_flag::red_key), "RED key flag mismatch");
 				if (show_message)
 					HUD_init_message(HM_DEFAULT, "%s %s",key_color,TXT_ACCESS_DENIED);
 			return wall_hit_process_t::WHP_NO_KEY;

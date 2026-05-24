@@ -1078,7 +1078,7 @@ static void draw_automap(fvcobjptr &vcobjptr, automap &am, fix eye = 0)
 
 static void recompute_automap_segment_visibility(const d_level_unique_automap_state &LevelUniqueAutomapState, const object &plrobj, automap &am)
 {
-	recompute_automap_segment_visibility(LevelUniqueAutomapState, plrobj.ctype.player_info.powerup_flags & PLAYER_FLAGS_MAP_ALL, plrobj.segnum, am);
+	recompute_automap_segment_visibility(LevelUniqueAutomapState, plrobj.ctype.player_info.powerup_flags & player_flag::map_all, plrobj.segnum, am);
 }
 
 static window_event_result automap_key_command(const d_event &event, automap &am)
@@ -1657,7 +1657,7 @@ static void add_segment_edges(fvcsegptr &vcsegptr, fvcwallptr &vcwallptr, automa
 #endif
 			{
 			auto &player_info{get_local_plrobj().ctype.player_info};
-				if ((cheats.fullautomap || player_info.powerup_flags & PLAYER_FLAGS_MAP_ALL) && !LevelUniqueAutomapState.Automap_visited[seg])
+				if ((cheats.fullautomap || player_info.powerup_flags & player_flag::map_all) && !LevelUniqueAutomapState.Automap_visited[seg])
 				color = am.wall_revealed_color;
 			}
 			Here:

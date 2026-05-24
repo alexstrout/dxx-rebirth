@@ -634,15 +634,15 @@ static void init_player_stats_level(player &plr, object &plrobj, const secret_re
 		init_ammo_and_energy(plrobj);
 
 		auto &powerup_flags = player_info.powerup_flags;
-		powerup_flags &= ~(PLAYER_FLAGS_INVULNERABLE | PLAYER_FLAGS_CLOAKED);
+		powerup_flags &= ~(player_flag::invulnerable | player_flag::player_cloaked);
 #if DXX_BUILD_DESCENT == 2
-		powerup_flags &= ~(PLAYER_FLAGS_MAP_ALL);
+		powerup_flags &= ~(player_flag::map_all);
 #endif
 
 		DXX_MAKE_VAR_UNDEFINED(player_info.cloak_time);
 		DXX_MAKE_VAR_UNDEFINED(player_info.invulnerable_time);
 
-		const auto all_keys = PLAYER_FLAGS_BLUE_KEY | PLAYER_FLAGS_GOLD_KEY | PLAYER_FLAGS_RED_KEY;
+		const auto all_keys = player_flag::blue_key | player_flag::gold_key | player_flag::red_key;
 		if (+(Game_mode & GM_MULTI) && !(Game_mode & GM_MULTI_COOP))
 			powerup_flags |= all_keys;
 		else
@@ -686,9 +686,9 @@ void init_player_stats_new_ship(const playernum_t pnum)
 	player_info.laser_level = granted_laser_level;
 	const auto granted_primary_weapon_flags = HAS_LASER_FLAG | map_granted_flags_to_primary_weapon_flags(GrantedItems);
 	player_info.primary_weapon_flags = granted_primary_weapon_flags;
-	player_info.powerup_flags &= ~(PLAYER_FLAGS_QUAD_LASERS | PLAYER_FLAGS_CLOAKED | PLAYER_FLAGS_INVULNERABLE);
+	player_info.powerup_flags &= ~(player_flag::quad_lasers | player_flag::player_cloaked | player_flag::invulnerable);
 #if DXX_BUILD_DESCENT == 2
-	player_info.powerup_flags &= ~(PLAYER_FLAGS_AFTERBURNER | PLAYER_FLAGS_MAP_ALL | PLAYER_FLAGS_CONVERTER | PLAYER_FLAGS_AMMO_RACK | PLAYER_FLAGS_HEADLIGHT | PLAYER_FLAGS_HEADLIGHT_ON | PLAYER_FLAGS_FLAG);
+	player_info.powerup_flags &= ~(player_flag::afterburner | player_flag::map_all | player_flag::converter | player_flag::ammo_rack | player_flag::headlight | player_flag::headlight_on | player_flag::has_team_flag);
 	player_info.Omega_charge = (granted_primary_weapon_flags & HAS_OMEGA_FLAG)
 		? MAX_OMEGA_CHARGE
 		: 0;
@@ -703,7 +703,7 @@ void init_player_stats_new_ship(const playernum_t pnum)
 	{
 		if (+(Game_mode & GM_MULTI) && Netgame.InvulAppear)
 		{
-			player_info.powerup_flags |= PLAYER_FLAGS_INVULNERABLE;
+			player_info.powerup_flags |= player_flag::invulnerable;
 			player_info.invulnerable_time = GameTime64 - (i2f(58 - Netgame.InvulAppear) >> 1);
 			player_info.FakingInvul = 1;
 		}
@@ -1592,7 +1592,7 @@ window_event_result ExitSecretLevel()
 void do_cloak_invul_secret_stuff(fix64 old_gametime, player_info &player_info)
 {
 	auto &pl_flags = player_info.powerup_flags;
-	if (pl_flags & PLAYER_FLAGS_INVULNERABLE)
+	if (pl_flags & player_flag::invulnerable)
 	{
 		fix64	time_used;
 
@@ -1601,7 +1601,7 @@ void do_cloak_invul_secret_stuff(fix64 old_gametime, player_info &player_info)
 		t = GameTime64 - time_used;
 	}
 
-	if (pl_flags & PLAYER_FLAGS_CLOAKED)
+	if (pl_flags & player_flag::player_cloaked)
 	{
 		fix	time_used;
 

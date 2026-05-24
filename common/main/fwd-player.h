@@ -37,7 +37,7 @@ COPYRIGHT 1993-1999 PARALLAX SOFTWARE CORPORATION.  ALL RIGHTS RESERVED.
 // Values for special flags
 #ifdef DXX_BUILD_DESCENT
 #if DXX_BUILD_DESCENT == 2
-#define PLAYER_MAX_AMMO(powerup_flags,BASE)	((powerup_flags & PLAYER_FLAGS_AMMO_RACK) ? BASE * 2 : BASE)
+#define PLAYER_MAX_AMMO(powerup_flags,BASE)	((powerup_flags & player_flag::ammo_rack) ? BASE * 2 : BASE)
 
 #define AFTERBURNER_MAX_TIME    (F1_0*5)    // Max time afterburner can be on.
 #endif

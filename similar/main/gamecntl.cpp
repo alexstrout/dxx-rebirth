@@ -387,7 +387,7 @@ static void do_weapon_n_item_stuff(object_array &Objects, control_info &Controls
 		Controls.state.toggle_bomb = 0;
 	}
 
-	if (Controls.state.energy_to_shield && (player_info.powerup_flags & PLAYER_FLAGS_CONVERTER))
+	if (Controls.state.energy_to_shield && (player_info.powerup_flags & player_flag::converter))
 		transfer_energy_to_shield(plrobj);
 #endif
 }
@@ -1426,8 +1426,8 @@ static window_event_result HandleTestKey(const d_level_shared_robot_info_state &
 
 			auto &player_info = get_local_plrobj().ctype.player_info;
 			auto &pl_flags = player_info.powerup_flags;
-			pl_flags ^= PLAYER_FLAGS_CLOAKED;
-			if (pl_flags & PLAYER_FLAGS_CLOAKED) {
+			pl_flags ^= player_flag::player_cloaked;
+			if (pl_flags & player_flag::player_cloaked) {
 				if (+(Game_mode & GM_MULTI))
 					multi_send_cloak();
 				ai_do_cloak_stuff();
@@ -1784,7 +1784,7 @@ static window_event_result FinalCheats(const d_level_shared_robot_info_state &Le
 
 		player_info.energy = MAX_ENERGY;
 		player_info.laser_level = MAX_LASER_LEVEL;
-		player_info.powerup_flags |= PLAYER_FLAGS_QUAD_LASERS;
+		player_info.powerup_flags |= player_flag::quad_lasers;
 		update_laser_weapon_info();
 	}
 
@@ -1803,7 +1803,7 @@ static window_event_result FinalCheats(const d_level_shared_robot_info_state &Le
 
 		player_info.energy = MAX_ENERGY;
 		player_info.laser_level = MAX_LASER_LEVEL;
-		player_info.powerup_flags |= PLAYER_FLAGS_QUAD_LASERS;
+		player_info.powerup_flags |= player_flag::quad_lasers;
 		update_laser_weapon_info();
 	}
 #elif DXX_BUILD_DESCENT == 2
@@ -1845,13 +1845,13 @@ static window_event_result FinalCheats(const d_level_shared_robot_info_state &Le
 
 		player_info.energy = MAX_ENERGY;
 		player_info.laser_level = MAX_SUPER_LASER_LEVEL;
-		player_info.powerup_flags |= PLAYER_FLAGS_QUAD_LASERS;
+		player_info.powerup_flags |= player_flag::quad_lasers;
 		update_laser_weapon_info();
 	}
 
 	if (gotcha == &game_cheats::accessory)
 	{
-		player_info.powerup_flags |= PLAYER_FLAGS_HEADLIGHT | PLAYER_FLAGS_AFTERBURNER | PLAYER_FLAGS_AMMO_RACK | PLAYER_FLAGS_CONVERTER;
+		player_info.powerup_flags |= player_flag::headlight | player_flag::afterburner | player_flag::ammo_rack | player_flag::converter;
 		HUD_init_message_literal(HM_DEFAULT, "Accessories!!");
 	}
 #endif
@@ -1862,15 +1862,15 @@ static window_event_result FinalCheats(const d_level_shared_robot_info_state &Le
 			const auto &&m = TXT_ALL_KEYS;
 			HUD_init_message_literal(HM_DEFAULT, {m, strlen(m)});
 		}
-		player_info.powerup_flags |= PLAYER_FLAGS_BLUE_KEY | PLAYER_FLAGS_RED_KEY | PLAYER_FLAGS_GOLD_KEY;
+		player_info.powerup_flags |= player_flag::blue_key | player_flag::red_key | player_flag::gold_key;
 	}
 
 	if (gotcha == &game_cheats::invul)
 	{
 		player_info.invulnerable_time = GameTime64+i2f(1000);
 		auto &pl_flags = player_info.powerup_flags;
-		pl_flags ^= PLAYER_FLAGS_INVULNERABLE;
-		HUD_init_message(HM_DEFAULT, "%s %s!", TXT_INVULNERABILITY, (pl_flags & PLAYER_FLAGS_INVULNERABLE) ? (player_info.FakingInvul = 0, TXT_ON) : TXT_OFF);
+		pl_flags ^= player_flag::invulnerable;
+		HUD_init_message(HM_DEFAULT, "%s %s!", TXT_INVULNERABILITY, (pl_flags & player_flag::invulnerable) ? (player_info.FakingInvul = 0, TXT_ON) : TXT_OFF);
 	}
 
 	if (gotcha == &game_cheats::shields)
@@ -1886,8 +1886,8 @@ static window_event_result FinalCheats(const d_level_shared_robot_info_state &Le
 	if (gotcha == &game_cheats::cloak)
 	{
 		auto &pl_flags = player_info.powerup_flags;
-		pl_flags ^= PLAYER_FLAGS_CLOAKED;
-		const auto have_cloaked = pl_flags & PLAYER_FLAGS_CLOAKED;
+		pl_flags ^= player_flag::player_cloaked;
+		const auto have_cloaked = pl_flags & player_flag::player_cloaked;
 		HUD_init_message(HM_DEFAULT, "%s %s!", TXT_CLOAK, have_cloaked ? TXT_ON : TXT_OFF);
 		if (have_cloaked)
 		{
@@ -2034,7 +2034,7 @@ public:
 
 class cheat_menu_bit_invulnerability :
 	std::reference_wrapper<player_info>,
-	public menu_bit_wrapper_t<player_flags, std::integral_constant<player_flag, PLAYER_FLAGS_INVULNERABLE>>
+	public menu_bit_wrapper_t<player_flags, std::integral_constant<player_flag, player_flag::invulnerable>>
 {
 public:
 	cheat_menu_bit_invulnerability(player_info &pl_info) :
@@ -2057,7 +2057,7 @@ public:
 
 class cheat_menu_bit_cloak :
 	std::reference_wrapper<player_info>,
-	public menu_bit_wrapper_t<player_flags, std::integral_constant<player_flag, PLAYER_FLAGS_CLOAKED>>
+	public menu_bit_wrapper_t<player_flags, std::integral_constant<player_flag, player_flag::player_cloaked>>
 {
 public:
 	cheat_menu_bit_cloak(player_info &pl_info) :
@@ -2086,16 +2086,16 @@ public:
  * a cheat.  The player can change his energy up if he needs more.
  */
 #define WIMP_MENU_DXX(VERB)	\
-	DXX_MENUITEM(VERB, CHECK, TXT_AFTERBURNER, opt_afterburner, menu_bit_wrapper(pl_info.powerup_flags, PLAYER_FLAGS_AFTERBURNER))	\
+	DXX_MENUITEM(VERB, CHECK, TXT_AFTERBURNER, opt_afterburner, menu_bit_wrapper(pl_info.powerup_flags, player_flag::afterburner))	\
 
 #endif
 
 #define DXX_WIMP_MENU(VERB)	\
 	DXX_MENUITEM(VERB, CHECK, TXT_INVULNERABILITY, opt_invul, cheat_menu_bit_invulnerability(pl_info))	\
 	DXX_MENUITEM(VERB, CHECK, TXT_CLOAKED, opt_cloak, cheat_menu_bit_cloak(pl_info))	\
-	DXX_MENUITEM(VERB, CHECK, "BLUE KEY", opt_key_blue, menu_bit_wrapper(pl_info.powerup_flags, PLAYER_FLAGS_BLUE_KEY))	\
-	DXX_MENUITEM(VERB, CHECK, "GOLD KEY", opt_key_gold, menu_bit_wrapper(pl_info.powerup_flags, PLAYER_FLAGS_GOLD_KEY))	\
-	DXX_MENUITEM(VERB, CHECK, "RED KEY", opt_key_red, menu_bit_wrapper(pl_info.powerup_flags, PLAYER_FLAGS_RED_KEY))	\
+	DXX_MENUITEM(VERB, CHECK, "BLUE KEY", opt_key_blue, menu_bit_wrapper(pl_info.powerup_flags, player_flag::blue_key))	\
+	DXX_MENUITEM(VERB, CHECK, "GOLD KEY", opt_key_gold, menu_bit_wrapper(pl_info.powerup_flags, player_flag::gold_key))	\
+	DXX_MENUITEM(VERB, CHECK, "RED KEY", opt_key_red, menu_bit_wrapper(pl_info.powerup_flags, player_flag::red_key))	\
 	WIMP_MENU_DXX(VERB)	\
 	DXX_MENUITEM(VERB, NUMBER, TXT_ENERGY, opt_energy, menu_fix_wrapper(pl_info.energy), 0, 200)	\
 	DXX_MENUITEM(VERB, NUMBER, "Shields", opt_shields, menu_fix_wrapper(plrobj.shields), 0, 200)	\

@@ -1060,7 +1060,7 @@ void maybe_replace_powerup_with_energy(object_base &del_obj)
 		}
 	} else if (del_obj.contains.id.powerup == powerup_type_t::POW_QUAD_FIRE)
 	{
-		if ((player_info.powerup_flags & PLAYER_FLAGS_QUAD_LASERS) || weapon_nearby(vcobjptridx, vcsegptr, del_obj, del_obj.contains.id.powerup) != nullptr)
+		if ((player_info.powerup_flags & player_flag::quad_lasers) || weapon_nearby(vcobjptridx, vcsegptr, del_obj, del_obj.contains.id.powerup) != nullptr)
 		{
 			if (d_rand() > 16384) {
 #if DXX_BUILD_DESCENT == 1

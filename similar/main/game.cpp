@@ -1102,11 +1102,11 @@ static void do_cloak_stuff()
 		auto &plobj = *vmobjptr(value.objnum);
 		auto &player_info = plobj.ctype.player_info;
 		auto &pl_flags = player_info.powerup_flags;
-		if (pl_flags & PLAYER_FLAGS_CLOAKED)
+		if (pl_flags & player_flag::player_cloaked)
 		{
 			if (GameTime64 > player_info.cloak_time+CLOAK_TIME_MAX)
 			{
-				pl_flags &= ~PLAYER_FLAGS_CLOAKED;
+				pl_flags &= ~player_flag::player_cloaked;
 				if (i == Player_num) {
 					multi_digi_play_sample(sound_effect::SOUND_CLOAK_OFF, F1_0);
 #if DXX_USE_MULTIPLAYER
@@ -1126,11 +1126,11 @@ static void do_cloak_stuff()
 static void do_invulnerable_stuff(player_info &player_info)
 {
 	auto &pl_flags = player_info.powerup_flags;
-	if (pl_flags & PLAYER_FLAGS_INVULNERABLE)
+	if (pl_flags & player_flag::invulnerable)
 	{
 		if (GameTime64 > player_info.invulnerable_time + INVULNERABLE_TIME_MAX)
 		{
-			pl_flags &= ~PLAYER_FLAGS_INVULNERABLE;
+			pl_flags &= ~player_flag::invulnerable;
 			if (auto &FakingInvul = player_info.FakingInvul)
 			{
 				FakingInvul = 0;
@@ -1168,7 +1168,7 @@ static void do_afterburner_stuff(object_array &Objects)
 	static sbyte func_play = 0;
 
 	auto &player_info = get_local_plrobj().ctype.player_info;
-	const auto have_afterburner = player_info.powerup_flags & PLAYER_FLAGS_AFTERBURNER;
+	const auto have_afterburner = player_info.powerup_flags & player_flag::afterburner;
 	if (!have_afterburner)
 		Afterburner_charge = 0;
 
@@ -1994,7 +1994,7 @@ window_event_result GameProcessFrame(const d_level_shared_robot_info_state &Leve
 	result = do_final_boss_frame();
 
 	auto &pl_flags = player_info.powerup_flags;
-	if (pl_flags & PLAYER_FLAGS_HEADLIGHT_ON)
+	if (pl_flags & player_flag::headlight_on)
 	{
 		/* The headlight consumes energy every frame.  If the player's energy
 		 * drops to less than 10, turn off the headlight to try to avoid
@@ -2032,7 +2032,7 @@ window_event_result GameProcessFrame(const d_level_shared_robot_info_state &Leve
 		player_info.energy = energy;
 		if (headlight_should_turn_off)
 		{
-			pl_flags &= ~PLAYER_FLAGS_HEADLIGHT_ON;
+			pl_flags &= ~player_flag::headlight_on;
 			if (+(Game_mode & GM_MULTI))
 				multi_send_flags(Player_num);
 		}

@@ -109,7 +109,7 @@ void read_flying_controls(object &obj, control_info &Controls)
 
 #if DXX_BUILD_DESCENT == 2
 	auto &player_info = obj.ctype.player_info;
-	if (player_info.powerup_flags & PLAYER_FLAGS_AFTERBURNER)
+	if (player_info.powerup_flags & player_flag::afterburner)
 	{
 		if (Controls.state.afterburner) {			//player has key down
 			{

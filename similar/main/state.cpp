@@ -816,11 +816,11 @@ static void state_player_to_player_rw(const relocated_player_data &rpd, const pl
 	pl_rw->score                     = pl_info.mission.score;
 	pl_rw->time_level                = pl->time_level;
 	pl_rw->time_total                = pl->time_total;
-	if (!(pl_info.powerup_flags & PLAYER_FLAGS_CLOAKED) || pl_info.cloak_time - GameTime64 < F1_0*(-18000))
+	if (!(pl_info.powerup_flags & player_flag::player_cloaked) || pl_info.cloak_time - GameTime64 < F1_0*(-18000))
 		pl_rw->cloak_time        = F1_0*(-18000);
 	else
 		pl_rw->cloak_time        = pl_info.cloak_time - GameTime64;
-	if (!(pl_info.powerup_flags & PLAYER_FLAGS_INVULNERABLE) || pl_info.invulnerable_time - GameTime64 < F1_0*(-18000))
+	if (!(pl_info.powerup_flags & player_flag::invulnerable) || pl_info.invulnerable_time - GameTime64 < F1_0*(-18000))
 		pl_rw->invulnerable_time = F1_0*(-18000);
 	else
 		pl_rw->invulnerable_time = pl_info.invulnerable_time - GameTime64;
@@ -2044,9 +2044,9 @@ int state_restore_all_sub(const d_level_shared_destructible_light_state &LevelSh
 				// Keep keys even if they died on secret level (otherwise game becomes impossible)
 				// Example: Cameron 'Stryker' Fultz's Area 51
 				pl_info.powerup_flags |= (plrobj.ctype.player_info.powerup_flags &
-										  (PLAYER_FLAGS_BLUE_KEY |
-										   PLAYER_FLAGS_RED_KEY |
-										   PLAYER_FLAGS_GOLD_KEY));
+										  (player_flag::blue_key |
+										   player_flag::red_key |
+										   player_flag::gold_key));
 			}
 		} else
 #endif

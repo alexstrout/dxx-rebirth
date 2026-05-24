@@ -781,9 +781,9 @@ void fuelcen_check_for_goal(object &plrobj, const shared_segment &segp)
 	if (multi_get_team_from_player(Netgame, Player_num) != check_team)
 		return;
 	auto &player_info = plrobj.ctype.player_info;
-	if (player_info.powerup_flags & PLAYER_FLAGS_FLAG)
+	if (player_info.powerup_flags & player_flag::has_team_flag)
 	{
-		player_info.powerup_flags &= ~PLAYER_FLAGS_FLAG;
+		player_info.powerup_flags &= ~player_flag::has_team_flag;
 				multi_send_capture_bonus (Player_num);
 		maybe_drop_net_powerup(powerup_to_drop, 1, 0);
 	}
@@ -802,7 +802,7 @@ void fuelcen_check_for_hoard_goal(object &plrobj, const shared_segment &segp)
 		auto &player_info = plrobj.ctype.player_info;
 		if (auto &hoard_orbs = player_info.hoard.orbs)
 		{
-				player_info.powerup_flags &= ~PLAYER_FLAGS_FLAG;
+				player_info.powerup_flags &= ~player_flag::has_team_flag;
 			multi_send_orb_bonus(Player_num, std::exchange(hoard_orbs, 0));
       }
 	}

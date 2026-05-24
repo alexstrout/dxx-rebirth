@@ -377,11 +377,11 @@ static int segment_is_reachable(const object &robot, const robot_info &robptr, c
 // -- MK, 10/17/95 -- // -- 			else
 // -- MK, 10/17/95 -- // -- 				return 1;
 // -- MK, 10/17/95 -- 		} else if (Walls[wall_num].keys == KEY_BLUE)
-// -- MK, 10/17/95 -- 			return (Players[Player_num].flags & PLAYER_FLAGS_BLUE_KEY);
+// -- MK, 10/17/95 -- 			return (Players[Player_num].flags & player_flag::blue_key);
 // -- MK, 10/17/95 -- 		else if (Walls[wall_num].keys == KEY_GOLD)
-// -- MK, 10/17/95 -- 			return (Players[Player_num].flags & PLAYER_FLAGS_GOLD_KEY);
+// -- MK, 10/17/95 -- 			return (Players[Player_num].flags & player_flag::gold_key);
 // -- MK, 10/17/95 -- 		else if (Walls[wall_num].keys == KEY_RED)
-// -- MK, 10/17/95 -- 			return (Players[Player_num].flags & PLAYER_FLAGS_RED_KEY);
+// -- MK, 10/17/95 -- 			return (Players[Player_num].flags & player_flag::red_key);
 // -- MK, 10/17/95 -- 		else
 // -- MK, 10/17/95 -- 			Int3();	//	Impossible!  Doesn't have no key, but doesn't have any key!
 // -- MK, 10/17/95 -- 	} else
@@ -1202,11 +1202,11 @@ static escort_goal_t escort_set_goal_object(const object &Buddy_objp, const play
 		 */
 		return e.first != object_none;
 	};
-	if (need_key_and_key_exists(PLAYER_FLAGS_BLUE_KEY, powerup_type_t::POW_KEY_BLUE))
+	if (need_key_and_key_exists(player_flag::blue_key, powerup_type_t::POW_KEY_BLUE))
 		return ESCORT_GOAL_BLUE_KEY;
-	else if (need_key_and_key_exists(PLAYER_FLAGS_GOLD_KEY, powerup_type_t::POW_KEY_GOLD))
+	else if (need_key_and_key_exists(player_flag::gold_key, powerup_type_t::POW_KEY_GOLD))
 		return ESCORT_GOAL_GOLD_KEY;
-	else if (need_key_and_key_exists(PLAYER_FLAGS_RED_KEY, powerup_type_t::POW_KEY_RED))
+	else if (need_key_and_key_exists(player_flag::red_key, powerup_type_t::POW_KEY_RED))
 		return ESCORT_GOAL_RED_KEY;
 	else if (LevelUniqueControlCenterState.Control_center_destroyed == 0)
 	{
@@ -1391,7 +1391,7 @@ void do_escort_frame(const vmobjptridx_t objp, const robot_info &robptr, const o
 	if (player_is_visible(player_visibility))
 	{
 		BuddyState.Buddy_last_seen_player = {GameTime64};
-		if (player_info.powerup_flags & PLAYER_FLAGS_HEADLIGHT_ON)	//	DAMN! MK, stupid bug, fixed 12/08/95, changed PLAYER_FLAGS_HEADLIGHT to PLAYER_FLAGS_HEADLIGHT_ON
+		if (player_info.powerup_flags & player_flag::headlight_on)	//	DAMN! MK, stupid bug, fixed 12/08/95, changed player_flag::headlight to player_flag::headlight_on
 		{
 			const auto energy = player_info.energy;
 			const auto ienergy = f2i(energy);
@@ -1756,28 +1756,28 @@ static int maybe_steal_flag_item(object &playerobj, const player_flag flagval)
 			const char *msg;
 			plr_flags &= (~flagval);
 			switch (flagval) {
-				case PLAYER_FLAGS_INVULNERABLE:
+				case player_flag::invulnerable:
 					powerup_index = powerup_type_t::POW_INVULNERABILITY;
 					msg = "Invulnerability stolen!";
 					break;
-				case PLAYER_FLAGS_CLOAKED:
+				case player_flag::player_cloaked:
 					powerup_index = powerup_type_t::POW_CLOAK;
 					msg = "Cloak stolen!";
 					break;
-				case PLAYER_FLAGS_MAP_ALL:
+				case player_flag::map_all:
 					powerup_index = powerup_type_t::POW_FULL_MAP;
 					msg = "Full map stolen!";
 					break;
-				case PLAYER_FLAGS_QUAD_LASERS:
+				case player_flag::quad_lasers:
 					update_laser_weapon_info();
 					powerup_index = powerup_type_t::POW_QUAD_FIRE;
 					msg = "Quad lasers stolen!";
 					break;
-				case PLAYER_FLAGS_AFTERBURNER:
+				case player_flag::afterburner:
 					powerup_index = powerup_type_t::POW_AFTERBURNER;
 					msg = "Afterburner stolen!";
 					break;
-				case PLAYER_FLAGS_CONVERTER:
+				case player_flag::converter:
 					powerup_index = powerup_type_t::POW_CONVERTER;
 					msg = "Converter stolen!";
 					break;
@@ -1903,13 +1903,13 @@ static int attempt_to_steal_item_3(object &thief, object &player_num)
 	(void)thief;
 	//	First, try to steal equipped items.
 
-	if (auto r = maybe_steal_flag_item(player_num, PLAYER_FLAGS_INVULNERABLE))
+	if (auto r = maybe_steal_flag_item(player_num, player_flag::invulnerable))
 		return r;
 
 	//	If primary weapon = laser, first try to rip away those nasty quad lasers!
 	const auto Primary_weapon = player_num.ctype.player_info.Primary_weapon;
 	if (Primary_weapon == primary_weapon_index::laser)
-		if (auto r = maybe_steal_flag_item(player_num, PLAYER_FLAGS_QUAD_LASERS))
+		if (auto r = maybe_steal_flag_item(player_num, player_flag::quad_lasers))
 			return r;
 
 	//	Makes it more likely to steal primary than secondary.
@@ -1925,21 +1925,21 @@ static int attempt_to_steal_item_3(object &thief, object &player_num)
 
 	//	See what the player has and try to snag something.
 	//	Try best things first.
-	if (auto r = maybe_steal_flag_item(player_num, PLAYER_FLAGS_INVULNERABLE))
+	if (auto r = maybe_steal_flag_item(player_num, player_flag::invulnerable))
 		return r;
-	if (auto r = maybe_steal_flag_item(player_num, PLAYER_FLAGS_CLOAKED))
+	if (auto r = maybe_steal_flag_item(player_num, player_flag::player_cloaked))
 		return r;
-	if (auto r = maybe_steal_flag_item(player_num, PLAYER_FLAGS_QUAD_LASERS))
+	if (auto r = maybe_steal_flag_item(player_num, player_flag::quad_lasers))
 		return r;
-	if (auto r = maybe_steal_flag_item(player_num, PLAYER_FLAGS_AFTERBURNER))
+	if (auto r = maybe_steal_flag_item(player_num, player_flag::afterburner))
 		return r;
-	if (auto r = maybe_steal_flag_item(player_num, PLAYER_FLAGS_CONVERTER))
+	if (auto r = maybe_steal_flag_item(player_num, player_flag::converter))
 		return r;
-// --	if (maybe_steal_flag_item(player_num, PLAYER_FLAGS_AMMO_RACK))	//	Can't steal because what if have too many items, say 15 homing missiles?
+// --	if (maybe_steal_flag_item(player_num, player_flag::ammo_rack))	//	Can't steal because what if have too many items, say 15 homing missiles?
 // --		return 1;
 	if (auto r = maybe_steal_flag_item(player_num, player_flag::headlight_present_and_on))
 		return r;
-	if (auto r = maybe_steal_flag_item(player_num, PLAYER_FLAGS_MAP_ALL))
+	if (auto r = maybe_steal_flag_item(player_num, player_flag::map_all))
 		return r;
 
 	for (int i=MAX_SECONDARY_WEAPONS-1; i>=0; i--) {
