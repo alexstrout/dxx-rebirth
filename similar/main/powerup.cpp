@@ -164,12 +164,13 @@ void do_megawow_powerup(object &plrobj, const int quantity)
 #endif
 	player_info.vulcan_ammo = VULCAN_AMMO_MAX;
 
-	auto &secondary_ammo = player_info.secondary_ammo;
-	range_for (auto &i, partial_range(secondary_ammo, 3u))
-		i = quantity;
-
-	range_for (auto &i, partial_range(secondary_ammo, 3u, secondary_ammo.size()))
-		i = quantity/5;
+	{
+		const std::span secondary_ammo{player_info.secondary_ammo};
+		for (auto &i : secondary_ammo.template subspan<0u, 3u>())
+			i = quantity;
+		for (auto &i : secondary_ammo.template subspan<3u>())
+			i = quantity / 5;
+	}
 
 	player_info.energy = F1_0*200;
 	plrobj.shields = F1_0*200;
