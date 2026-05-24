@@ -205,7 +205,7 @@ static void collide_robot_and_wall(fvcwallptr &vcwallptr, object &robot, const v
 					if (w.keys != wall_key::none)
 					{
 						auto &player_info = get_local_plrobj().ctype.player_info;
-						if (player_info.powerup_flags & static_cast<PLAYER_FLAG>(w.keys))
+						if (player_info.powerup_flags & static_cast<player_flag>(w.keys))
 							wall_open_door(hitseg, hitwall);
 					}
 					else if (!(w.flags & wall_flag::door_locked))
@@ -215,7 +215,7 @@ static void collide_robot_and_wall(fvcwallptr &vcwallptr, object &robot, const v
 				if (w.keys != wall_key::none)
 				{
 					auto &player_info = get_local_plrobj().ctype.player_info;
-					if (player_info.powerup_flags & static_cast<PLAYER_FLAG>(w.keys))
+					if (player_info.powerup_flags & static_cast<player_flag>(w.keys))
 						wall_open_door(hitseg, hitwall);
 				}
 			}

@@ -953,7 +953,7 @@ public:
 	void draw_all_cockpit_keys();
 	void draw_all_statusbar_keys();
 protected:
-	void draw_one_key(const unsigned x, const unsigned y, const unsigned gauge, const PLAYER_FLAG flag) const
+	void draw_one_key(const unsigned x, const unsigned y, const unsigned gauge, const player_flag flag) const
 	{
 		hud_gauge_bitblt(hudctx, x, y, (player_key_flags & flag) ? gauge : (gauge + 3));
 	}

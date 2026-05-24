@@ -11,7 +11,7 @@
 
 #ifdef DXX_BUILD_DESCENT
 // Values for special flags
-enum class PLAYER_FLAG : uint32_t
+enum class player_flag : uint32_t
 {
 	None = 0,
 	INVULNERABLE = 1,	// Player is invincible
@@ -35,30 +35,30 @@ enum class PLAYER_FLAG : uint32_t
 #endif
 };
 
-constexpr PLAYER_FLAG operator~(const PLAYER_FLAG a)
+constexpr player_flag operator~(const player_flag a)
 {
-	return static_cast<PLAYER_FLAG>(~static_cast<uint32_t>(a));
+	return static_cast<player_flag>(~static_cast<uint32_t>(a));
 }
 
-constexpr PLAYER_FLAG operator|(const PLAYER_FLAG a, const PLAYER_FLAG b)
+constexpr player_flag operator|(const player_flag a, const player_flag b)
 {
-	return static_cast<PLAYER_FLAG>(static_cast<uint32_t>(a) | static_cast<uint32_t>(b));
+	return static_cast<player_flag>(static_cast<uint32_t>(a) | static_cast<uint32_t>(b));
 }
 
-#define PLAYER_FLAGS_INVULNERABLE	PLAYER_FLAG::INVULNERABLE
-#define PLAYER_FLAGS_BLUE_KEY	PLAYER_FLAG::BLUE_KEY
-#define PLAYER_FLAGS_RED_KEY	PLAYER_FLAG::RED_KEY
-#define PLAYER_FLAGS_GOLD_KEY	PLAYER_FLAG::GOLD_KEY
-#define PLAYER_FLAGS_MAP_ALL	PLAYER_FLAG::MAP_ALL
-#define PLAYER_FLAGS_QUAD_LASERS	PLAYER_FLAG::QUAD_LASERS
-#define PLAYER_FLAGS_CLOAKED	PLAYER_FLAG::PLAYER_CLOAKED
+#define PLAYER_FLAGS_INVULNERABLE	player_flag::INVULNERABLE
+#define PLAYER_FLAGS_BLUE_KEY	player_flag::BLUE_KEY
+#define PLAYER_FLAGS_RED_KEY	player_flag::RED_KEY
+#define PLAYER_FLAGS_GOLD_KEY	player_flag::GOLD_KEY
+#define PLAYER_FLAGS_MAP_ALL	player_flag::MAP_ALL
+#define PLAYER_FLAGS_QUAD_LASERS	player_flag::QUAD_LASERS
+#define PLAYER_FLAGS_CLOAKED	player_flag::PLAYER_CLOAKED
 #if DXX_BUILD_DESCENT == 2
-#define PLAYER_FLAGS_FLAG	PLAYER_FLAG::HAS_TEAM_FLAG
-#define PLAYER_FLAGS_AMMO_RACK	PLAYER_FLAG::AMMO_RACK
-#define PLAYER_FLAGS_CONVERTER	PLAYER_FLAG::CONVERTER
-#define PLAYER_FLAGS_AFTERBURNER	PLAYER_FLAG::AFTERBURNER
-#define PLAYER_FLAGS_HEADLIGHT	PLAYER_FLAG::HEADLIGHT
-#define PLAYER_FLAGS_HEADLIGHT_ON	PLAYER_FLAG::HEADLIGHT_ON
+#define PLAYER_FLAGS_FLAG	player_flag::HAS_TEAM_FLAG
+#define PLAYER_FLAGS_AMMO_RACK	player_flag::AMMO_RACK
+#define PLAYER_FLAGS_CONVERTER	player_flag::CONVERTER
+#define PLAYER_FLAGS_AFTERBURNER	player_flag::AFTERBURNER
+#define PLAYER_FLAGS_HEADLIGHT	player_flag::HEADLIGHT
+#define PLAYER_FLAGS_HEADLIGHT_ON	player_flag::HEADLIGHT_ON
 #endif
 
 class player_flags
@@ -70,7 +70,7 @@ public:
 	explicit player_flags(const uint32_t &f) : flags(f)
 	{
 	}
-	explicit player_flags(PLAYER_FLAG f) : flags(static_cast<uint32_t>(f))
+	explicit player_flags(player_flag f) : flags(static_cast<uint32_t>(f))
 	{
 	}
 	uint32_t get_player_flags() const
@@ -100,21 +100,21 @@ public:
 	{
 		return player_flags(~flags);
 	}
-	uint32_t operator&(const PLAYER_FLAG value) const
+	uint32_t operator&(const player_flag value) const
 	{
 		return flags & static_cast<uint32_t>(value);
 	}
-	player_flags &operator^=(const PLAYER_FLAG value)
+	player_flags &operator^=(const player_flag value)
 	{
 		flags ^= static_cast<uint32_t>(value);
 		return *this;
 	}
-	player_flags &operator&=(const PLAYER_FLAG value)
+	player_flags &operator&=(const player_flag value)
 	{
 		flags &= static_cast<uint32_t>(value);
 		return *this;
 	}
-	player_flags &operator|=(const PLAYER_FLAG value)
+	player_flags &operator|=(const player_flag value)
 	{
 		flags |= static_cast<uint32_t>(value);
 		return *this;

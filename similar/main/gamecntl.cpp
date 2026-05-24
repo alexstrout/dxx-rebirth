@@ -2034,7 +2034,7 @@ public:
 
 class cheat_menu_bit_invulnerability :
 	std::reference_wrapper<player_info>,
-	public menu_bit_wrapper_t<player_flags, std::integral_constant<PLAYER_FLAG, PLAYER_FLAGS_INVULNERABLE>>
+	public menu_bit_wrapper_t<player_flags, std::integral_constant<player_flag, PLAYER_FLAGS_INVULNERABLE>>
 {
 public:
 	cheat_menu_bit_invulnerability(player_info &pl_info) :
@@ -2057,7 +2057,7 @@ public:
 
 class cheat_menu_bit_cloak :
 	std::reference_wrapper<player_info>,
-	public menu_bit_wrapper_t<player_flags, std::integral_constant<PLAYER_FLAG, PLAYER_FLAGS_CLOAKED>>
+	public menu_bit_wrapper_t<player_flags, std::integral_constant<player_flag, PLAYER_FLAGS_CLOAKED>>
 {
 public:
 	cheat_menu_bit_cloak(player_info &pl_info) :

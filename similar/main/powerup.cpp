@@ -236,7 +236,7 @@ static int pick_up_vulcan_ammo(player_info &player_info)
 	return used;
 }
 
-static int pick_up_key(const int r, const int g, const int b, player_flags &player_flags, const PLAYER_FLAG key_flag, const char *const key_name, const powerup_type_t id)
+static int pick_up_key(const int r, const int g, const int b, player_flags &player_flags, const player_flag key_flag, const char *const key_name, const powerup_type_t id)
 {
 	if (player_flags & key_flag)
 		return 0;
@@ -264,7 +264,7 @@ struct player_hit_basic_silent_powerup
 	{
 		powerup_basic_str(r, g, b, 0, desc_pickup);
 	}
-	template <PLAYER_FLAG player_flag>
+	template <player_flag player_flag>
 		void pickup(player_flags &powerup_flags) const
 		{
 			powerup_flags |= player_flag;
@@ -277,7 +277,7 @@ struct player_hit_basic_sound_powerup : player_hit_basic_silent_powerup<r, g, b>
 {
 	using base_type = player_hit_basic_silent_powerup<r, g, b>;
 	using base_type::base_type;
-	template <PLAYER_FLAG player_flag>
+	template <player_flag player_flag>
 		void pickup(player_flags &powerup_flags) const
 		{
 			multi_digi_play_sample(Powerup_info[id].hit_sound, F1_0);
@@ -291,7 +291,7 @@ struct player_hit_afterburner_powerup : player_hit_basic_sound_powerup<15, 15, 1
 {
 	using base_type = player_hit_basic_sound_powerup<15, 15, 15, powerup_type_t::POW_AFTERBURNER>;
 	using base_type::base_type;
-	template <PLAYER_FLAG player_flag>
+	template <player_flag player_flag>
 		void pickup(player_flags &powerup_flags) const
 		{
 			Afterburner_charge = f1_0;
@@ -304,7 +304,7 @@ struct player_hit_headlight_powerup
 	/* Template parameter unused, but required for signature
 	 * compatibility with the other player_hit_* structures.
 	 */
-	template <PLAYER_FLAG>
+	template <player_flag>
 		void pickup(player_flags &powerup_flags) const
 		{
 			process(powerup_flags);
@@ -313,8 +313,8 @@ struct player_hit_headlight_powerup
 	{
 		const auto active{PlayerCfg.HeadlightActiveDefault};
 		powerup_flags |= active
-			? PLAYER_FLAG::HEADLIGHT_PRESENT_AND_ON
-			: PLAYER_FLAG::HEADLIGHT;
+			? player_flag::HEADLIGHT_PRESENT_AND_ON
+			: player_flag::HEADLIGHT;
 		powerup_basic(15, 0, 15, 0, "HEADLIGHT BOOST! (Headlight is O%s)", active ? "N" : "FF");
 		multi_digi_play_sample(Powerup_info[powerup_type_t::POW_HEADLIGHT].hit_sound, F1_0);
 		if (active && +(Game_mode & GM_MULTI))
@@ -344,7 +344,7 @@ struct player_hit_quadlaser_powerup
 	/* Template parameter unused, but required for signature
 	 * compatibility with the other player_hit_* structures.
 	 */
-	template <PLAYER_FLAG>
+	template <player_flag>
 		void pickup(player_flags &powerup_flags) const
 		{
 			process(powerup_flags);
@@ -363,7 +363,7 @@ static int player_has_powerup(player_info &player_info, const char *const desc_h
 	return +(Game_mode & GM_MULTI) ? 0 : pick_up_energy(player_info);
 }
 
-template <PLAYER_FLAG player_flag, typename F>
+template <player_flag player_flag, typename F>
 static int player_hit_powerup(player_info &player_info, const char *const desc_have, const F &&pickup)
 {
 	auto &powerup_flags = player_info.powerup_flags;

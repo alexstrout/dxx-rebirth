@@ -3203,7 +3203,7 @@ namespace dsx {
 player_flags map_granted_flags_to_player_flags(const packed_spawn_granted_items p)
 {
 	auto &grant = p.mask;
-	const auto None = PLAYER_FLAG::None;
+	const auto None = player_flag::None;
 	return player_flags(
 		((grant & netgrant_flag::NETGRANT_QUAD) != netgrant_flag::None ? PLAYER_FLAGS_QUAD_LASERS : None)
 #if DXX_BUILD_DESCENT == 2
@@ -5422,7 +5422,7 @@ static void MultiLevelInv_CountPlayerInventory()
 						{
 							Current[powerup_type_t::POW_LASER] += static_cast<unsigned>(player_info.laser_level) + 1; // Laser levels start at 0!
                         }
-						accumulate_flags_count<player_flags, PLAYER_FLAG> powerup_flags(Current, player_info.powerup_flags);
+						accumulate_flags_count<player_flags, player_flag> powerup_flags(Current, player_info.powerup_flags);
 						accumulate_flags_count<player_info::primary_weapon_flag_type, unsigned> primary_weapon_flags(Current, player_info.primary_weapon_flags);
 						powerup_flags.process(PLAYER_FLAGS_QUAD_LASERS, powerup_type_t::POW_QUAD_FIRE);
 						primary_weapon_flags.process(HAS_PRIMARY_FLAG(primary_weapon_index::vulcan), powerup_type_t::POW_VULCAN_WEAPON);

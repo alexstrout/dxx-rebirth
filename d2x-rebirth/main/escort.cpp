@@ -1190,7 +1190,7 @@ static escort_goal_t escort_set_goal_object(const object &Buddy_objp, const play
 	if (plrobj.type != object_type::OBJ_PLAYER)
 		return ESCORT_GOAL_UNSPECIFIED;
 
-	const auto need_key_and_key_exists = [&Buddy_objp, pl_flags, start_search_seg = plrobj.segnum](const PLAYER_FLAG flag_key, const powerup_type_t powerup_key) {
+	const auto need_key_and_key_exists = [&Buddy_objp, pl_flags, start_search_seg = plrobj.segnum](const player_flag flag_key, const powerup_type_t powerup_key) {
 		if (pl_flags & flag_key)
 			/* Player already has this key, so no need to get it again.
 			 */
@@ -1745,7 +1745,7 @@ namespace {
 
 //	----------------------------------------------------------------------------
 //	Return true if this item (whose presence is indicated by Players[player_num].flags) gets stolen.
-static int maybe_steal_flag_item(object &playerobj, const PLAYER_FLAG flagval)
+static int maybe_steal_flag_item(object &playerobj, const player_flag flagval)
 {
 	auto &ThiefUniqueState = LevelUniqueObjectState.ThiefState;
 	auto &plr_flags = playerobj.ctype.player_info.powerup_flags;
@@ -1781,7 +1781,7 @@ static int maybe_steal_flag_item(object &playerobj, const PLAYER_FLAG flagval)
 					powerup_index = powerup_type_t::POW_CONVERTER;
 					msg = "Converter stolen!";
 					break;
-				case PLAYER_FLAG::HEADLIGHT_PRESENT_AND_ON:
+				case player_flag::HEADLIGHT_PRESENT_AND_ON:
 					powerup_index = powerup_type_t::POW_HEADLIGHT;
 					msg = "Headlight stolen!";
 					break;
@@ -1937,7 +1937,7 @@ static int attempt_to_steal_item_3(object &thief, object &player_num)
 		return r;
 // --	if (maybe_steal_flag_item(player_num, PLAYER_FLAGS_AMMO_RACK))	//	Can't steal because what if have too many items, say 15 homing missiles?
 // --		return 1;
-	if (auto r = maybe_steal_flag_item(player_num, PLAYER_FLAG::HEADLIGHT_PRESENT_AND_ON))
+	if (auto r = maybe_steal_flag_item(player_num, player_flag::HEADLIGHT_PRESENT_AND_ON))
 		return r;
 	if (auto r = maybe_steal_flag_item(player_num, PLAYER_FLAGS_MAP_ALL))
 		return r;

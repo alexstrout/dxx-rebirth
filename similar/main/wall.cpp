@@ -1158,7 +1158,7 @@ wall_hit_process_t wall_hit_process(const player_flags powerup_flags, const vmse
 		(w->keys == wall_key::red && (key_color = TXT_RED, true))
 	)
 	{
-		if (!(powerup_flags & static_cast<PLAYER_FLAG>(w->keys)))
+		if (!(powerup_flags & static_cast<player_flag>(w->keys)))
 		{
 			static_assert(static_cast<unsigned>(wall_key::blue) == static_cast<unsigned>(PLAYER_FLAGS_BLUE_KEY), "BLUE key flag mismatch");
 			static_assert(static_cast<unsigned>(wall_key::gold) == static_cast<unsigned>(PLAYER_FLAGS_GOLD_KEY), "GOLD key flag mismatch");

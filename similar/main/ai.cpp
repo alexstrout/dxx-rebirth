@@ -2003,7 +2003,7 @@ int ai_door_is_openable(
 			case wall_key::gold:
 			case wall_key::red:
 				{
-					return powerup_flags & static_cast<PLAYER_FLAG>(wall_keys);
+					return powerup_flags & static_cast<player_flag>(wall_keys);
 				}
 			default:
 				break;
@@ -2066,7 +2066,7 @@ int ai_door_is_openable(
 				return wt;
 			}
 			else if (wall.keys != wall_key::none) {	//	Allow bots to open doors to which player has keys.
-				return powerup_flags & static_cast<PLAYER_FLAG>(wall.keys);
+				return powerup_flags & static_cast<player_flag>(wall.keys);
 			}
 		}
 	}
