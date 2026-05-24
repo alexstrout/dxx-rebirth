@@ -735,53 +735,28 @@ struct passive_messagebox : std::array<newmenu_item, 1>, newmenu
 #define DXX_MENUITEM_V_READ_T_TEXT(S,OPT)	/* handled specially */
 #define DXX_MENUITEM_V_READ_T_INPUT(S,OPT)	/* handled specially */
 
-template <typename T, typename B>
-class menu_bit_wrapper_t
+template <auto bit_value, typename mask_type>
+struct menu_bit_wrapper_t
 {
-	using M = decltype(std::declval<const T &>() & std::declval<B>());
-	std::tuple<T &, B> m_data;
-	enum
+	mask_type &mask;
+	constexpr operator decltype(std::declval<const mask_type &>() & bit_value)() const
 	{
-		m_mask = 0,
-		m_bit = 1,
-	};
-	T &get_mask()
-	{
-		return std::get<m_mask>(m_data);
+		return mask & bit_value;
 	}
-	const T &get_mask() const
+	constexpr menu_bit_wrapper_t &operator=(const bool n)
 	{
-		return std::get<m_mask>(m_data);
-	}
-	B get_bit() const
-	{
-		return std::get<m_bit>(m_data);
-	}
-public:
-	constexpr menu_bit_wrapper_t(T &t, B bit) :
-		m_data(t, bit)
-	{
-	}
-	constexpr operator M() const
-	{
-		return get_mask() & get_bit();
-	}
-	menu_bit_wrapper_t &operator=(const bool n)
-	{
-		auto &m = get_mask();
-		const auto b = get_bit();
 		if (n)
-			m |= b;
+			mask |= bit_value;
 		else
-			m &= ~b;
+			mask &= ~bit_value;
 		return *this;
 	}
 };
 
-template <typename T, typename B>
-static constexpr menu_bit_wrapper_t<T, B> menu_bit_wrapper(T &t, B b)
+template <auto bit_value, typename mask_type>
+static constexpr menu_bit_wrapper_t<bit_value, mask_type> menu_bit_wrapper(mask_type &t)
 {
-	return {t, b};
+	return {t};
 }
 
 template <unsigned B, typename T>

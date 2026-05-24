@@ -6582,20 +6582,20 @@ void show_netgame_info(const netgame_info &netgame)
 			array_snprintf(lines[allow_headlight], "Headlight\t  %s", (netgame.AllowedItems & netflag_flag::NETFLAG_DOHEADLIGHT) != netflag_flag::None ? TXT_YES : TXT_NO);
 #endif
 			array_snprintf(lines[grant_laser_level], "Laser Level\t  %u", static_cast<unsigned>(map_granted_flags_to_laser_level(netgame.SpawnGrantedItems)) + 1);
-			array_snprintf(lines[grant_quad_laser], "Quad Lasers\t  %s", menu_bit_wrapper(netgame.SpawnGrantedItems.mask, netgrant_flag::NETGRANT_QUAD) != netgrant_flag::None ? TXT_YES : TXT_NO);
-			array_snprintf(lines[grant_vulcan_cannon], "Vulcan Cannon\t  %s", menu_bit_wrapper(netgame.SpawnGrantedItems.mask, netgrant_flag::NETGRANT_VULCAN) != netgrant_flag::None ? TXT_YES : TXT_NO);
-			array_snprintf(lines[grant_spreadfire_cannon], "Spreadfire Cannon\t  %s", menu_bit_wrapper(netgame.SpawnGrantedItems.mask, netgrant_flag::NETGRANT_SPREAD) != netgrant_flag::None ? TXT_YES : TXT_NO);
-			array_snprintf(lines[grant_plasma_cannon], "Plasma Cannon\t  %s", menu_bit_wrapper(netgame.SpawnGrantedItems.mask, netgrant_flag::NETGRANT_PLASMA) != netgrant_flag::None ? TXT_YES : TXT_NO);
-			array_snprintf(lines[grant_fusion_cannon], "Fusion Cannon\t  %s", menu_bit_wrapper(netgame.SpawnGrantedItems.mask, netgrant_flag::NETGRANT_FUSION) != netgrant_flag::None ? TXT_YES : TXT_NO);
+			array_snprintf(lines[grant_quad_laser], "Quad Lasers\t  %s", menu_bit_wrapper<netgrant_flag::NETGRANT_QUAD>(netgame.SpawnGrantedItems.mask) != netgrant_flag::None ? TXT_YES : TXT_NO);
+			array_snprintf(lines[grant_vulcan_cannon], "Vulcan Cannon\t  %s", menu_bit_wrapper<netgrant_flag::NETGRANT_VULCAN>(netgame.SpawnGrantedItems.mask) != netgrant_flag::None ? TXT_YES : TXT_NO);
+			array_snprintf(lines[grant_spreadfire_cannon], "Spreadfire Cannon\t  %s", menu_bit_wrapper<netgrant_flag::NETGRANT_SPREAD>(netgame.SpawnGrantedItems.mask) != netgrant_flag::None ? TXT_YES : TXT_NO);
+			array_snprintf(lines[grant_plasma_cannon], "Plasma Cannon\t  %s", menu_bit_wrapper<netgrant_flag::NETGRANT_PLASMA>(netgame.SpawnGrantedItems.mask) != netgrant_flag::None ? TXT_YES : TXT_NO);
+			array_snprintf(lines[grant_fusion_cannon], "Fusion Cannon\t  %s", menu_bit_wrapper<netgrant_flag::NETGRANT_FUSION>(netgame.SpawnGrantedItems.mask) != netgrant_flag::None ? TXT_YES : TXT_NO);
 #if DXX_BUILD_DESCENT == 2
-			array_snprintf(lines[grant_gauss_cannon], "Gauss Cannon\t  %s", menu_bit_wrapper(netgame.SpawnGrantedItems.mask, netgrant_flag::NETGRANT_GAUSS) != netgrant_flag::None ? TXT_YES : TXT_NO);
-			array_snprintf(lines[grant_helix_cannon], "Helix Cannon\t  %s", menu_bit_wrapper(netgame.SpawnGrantedItems.mask, netgrant_flag::NETGRANT_HELIX) != netgrant_flag::None ? TXT_YES : TXT_NO);
-			array_snprintf(lines[grant_phoenix_cannon], "Phoenix Cannon\t  %s", menu_bit_wrapper(netgame.SpawnGrantedItems.mask, netgrant_flag::NETGRANT_PHOENIX) != netgrant_flag::None ? TXT_YES : TXT_NO);
-			array_snprintf(lines[grant_omega_cannon], "Omega Cannon\t  %s", menu_bit_wrapper(netgame.SpawnGrantedItems.mask, netgrant_flag::NETGRANT_OMEGA) != netgrant_flag::None ? TXT_YES : TXT_NO);
-			array_snprintf(lines[grant_afterburner], "Afterburner\t  %s", menu_bit_wrapper(netgame.SpawnGrantedItems.mask, netgrant_flag::NETGRANT_AFTERBURNER) != netgrant_flag::None ? TXT_YES : TXT_NO);
-			array_snprintf(lines[grant_ammo_rack], "Ammo Rack\t  %s", menu_bit_wrapper(netgame.SpawnGrantedItems.mask, netgrant_flag::NETGRANT_AMMORACK) != netgrant_flag::None ? TXT_YES : TXT_NO);
-			array_snprintf(lines[grant_energy_converter], "Energy Converter\t  %s", menu_bit_wrapper(netgame.SpawnGrantedItems.mask, netgrant_flag::NETGRANT_CONVERTER) != netgrant_flag::None ? TXT_YES : TXT_NO);
-			array_snprintf(lines[grant_headlight], "Headlight\t  %s", menu_bit_wrapper(netgame.SpawnGrantedItems.mask, netgrant_flag::NETGRANT_HEADLIGHT) != netgrant_flag::None ? TXT_YES : TXT_NO);
+			array_snprintf(lines[grant_gauss_cannon], "Gauss Cannon\t  %s", menu_bit_wrapper<netgrant_flag::NETGRANT_GAUSS>(netgame.SpawnGrantedItems.mask) != netgrant_flag::None ? TXT_YES : TXT_NO);
+			array_snprintf(lines[grant_helix_cannon], "Helix Cannon\t  %s", menu_bit_wrapper<netgrant_flag::NETGRANT_HELIX>(netgame.SpawnGrantedItems.mask) != netgrant_flag::None ? TXT_YES : TXT_NO);
+			array_snprintf(lines[grant_phoenix_cannon], "Phoenix Cannon\t  %s", menu_bit_wrapper<netgrant_flag::NETGRANT_PHOENIX>(netgame.SpawnGrantedItems.mask) != netgrant_flag::None ? TXT_YES : TXT_NO);
+			array_snprintf(lines[grant_omega_cannon], "Omega Cannon\t  %s", menu_bit_wrapper<netgrant_flag::NETGRANT_OMEGA>(netgame.SpawnGrantedItems.mask) != netgrant_flag::None ? TXT_YES : TXT_NO);
+			array_snprintf(lines[grant_afterburner], "Afterburner\t  %s", menu_bit_wrapper<netgrant_flag::NETGRANT_AFTERBURNER>(netgame.SpawnGrantedItems.mask) != netgrant_flag::None ? TXT_YES : TXT_NO);
+			array_snprintf(lines[grant_ammo_rack], "Ammo Rack\t  %s", menu_bit_wrapper<netgrant_flag::NETGRANT_AMMORACK>(netgame.SpawnGrantedItems.mask) != netgrant_flag::None ? TXT_YES : TXT_NO);
+			array_snprintf(lines[grant_energy_converter], "Energy Converter\t  %s", menu_bit_wrapper<netgrant_flag::NETGRANT_CONVERTER>(netgame.SpawnGrantedItems.mask) != netgrant_flag::None ? TXT_YES : TXT_NO);
+			array_snprintf(lines[grant_headlight], "Headlight\t  %s", menu_bit_wrapper<netgrant_flag::NETGRANT_HEADLIGHT>(netgame.SpawnGrantedItems.mask) != netgrant_flag::None ? TXT_YES : TXT_NO);
 #endif
 			array_snprintf(lines[show_all_players_on_automap], "Show All Players On Automap\t  %s", ((netgame.game_flag & netgame_rule_flags::show_all_players_on_automap) != netgame_rule_flags::None) ? TXT_YES : TXT_NO);
 #if DXX_BUILD_DESCENT == 2

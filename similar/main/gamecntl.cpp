@@ -2034,12 +2034,12 @@ public:
 
 class cheat_menu_bit_invulnerability :
 	std::reference_wrapper<player_info>,
-	public menu_bit_wrapper_t<player_flags, std::integral_constant<player_flag, player_flag::invulnerable>>
+	public menu_bit_wrapper_t<player_flag::invulnerable, player_flags>
 {
 public:
 	cheat_menu_bit_invulnerability(player_info &pl_info) :
 		reference_wrapper(pl_info),
-		menu_bit_wrapper_t(pl_info.powerup_flags, {})
+		menu_bit_wrapper_t{pl_info.powerup_flags}
 	{
 	}
 	cheat_menu_bit_invulnerability &operator=(const uint32_t n)
@@ -2057,12 +2057,12 @@ public:
 
 class cheat_menu_bit_cloak :
 	std::reference_wrapper<player_info>,
-	public menu_bit_wrapper_t<player_flags, std::integral_constant<player_flag, player_flag::cloaked>>
+	public menu_bit_wrapper_t<player_flag::cloaked, player_flags>
 {
 public:
 	cheat_menu_bit_cloak(player_info &pl_info) :
 		reference_wrapper(pl_info),
-		menu_bit_wrapper_t(pl_info.powerup_flags, {})
+		menu_bit_wrapper_t{pl_info.powerup_flags}
 	{
 	}
 	cheat_menu_bit_cloak &operator=(const uint32_t n)
@@ -2086,16 +2086,16 @@ public:
  * a cheat.  The player can change his energy up if he needs more.
  */
 #define WIMP_MENU_DXX(VERB)	\
-	DXX_MENUITEM(VERB, CHECK, TXT_AFTERBURNER, opt_afterburner, menu_bit_wrapper(pl_info.powerup_flags, player_flag::afterburner))	\
+	DXX_MENUITEM(VERB, CHECK, TXT_AFTERBURNER, opt_afterburner, menu_bit_wrapper<player_flag::afterburner>(pl_info.powerup_flags))	\
 
 #endif
 
 #define DXX_WIMP_MENU(VERB)	\
 	DXX_MENUITEM(VERB, CHECK, TXT_INVULNERABILITY, opt_invul, cheat_menu_bit_invulnerability(pl_info))	\
 	DXX_MENUITEM(VERB, CHECK, TXT_CLOAKED, opt_cloak, cheat_menu_bit_cloak(pl_info))	\
-	DXX_MENUITEM(VERB, CHECK, "BLUE KEY", opt_key_blue, menu_bit_wrapper(pl_info.powerup_flags, player_flag::blue_key))	\
-	DXX_MENUITEM(VERB, CHECK, "GOLD KEY", opt_key_gold, menu_bit_wrapper(pl_info.powerup_flags, player_flag::gold_key))	\
-	DXX_MENUITEM(VERB, CHECK, "RED KEY", opt_key_red, menu_bit_wrapper(pl_info.powerup_flags, player_flag::red_key))	\
+	DXX_MENUITEM(VERB, CHECK, "BLUE KEY", opt_key_blue, menu_bit_wrapper<player_flag::blue_key>(pl_info.powerup_flags))	\
+	DXX_MENUITEM(VERB, CHECK, "GOLD KEY", opt_key_gold, menu_bit_wrapper<player_flag::gold_key>(pl_info.powerup_flags))	\
+	DXX_MENUITEM(VERB, CHECK, "RED KEY", opt_key_red, menu_bit_wrapper<player_flag::red_key>(pl_info.powerup_flags))	\
 	WIMP_MENU_DXX(VERB)	\
 	DXX_MENUITEM(VERB, NUMBER, TXT_ENERGY, opt_energy, menu_fix_wrapper(pl_info.energy), 0, 200)	\
 	DXX_MENUITEM(VERB, NUMBER, "Shields", opt_shields, menu_fix_wrapper(plrobj.shields), 0, 200)	\

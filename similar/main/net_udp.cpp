@@ -3866,24 +3866,24 @@ static void net_udp_set_power (void)
 #define D2X_GRANT_POWERUP_MENU(VERB)
 #elif DXX_BUILD_DESCENT == 2
 #define D2X_GRANT_POWERUP_MENU(VERB)	\
-	DXX_MENUITEM(VERB, CHECK, NETFLAG_LABEL_GAUSS, opt_gauss, menu_bit_wrapper(flags, netgrant_flag::NETGRANT_GAUSS))	\
-	DXX_MENUITEM(VERB, CHECK, NETFLAG_LABEL_HELIX, opt_helix, menu_bit_wrapper(flags, netgrant_flag::NETGRANT_HELIX))	\
-	DXX_MENUITEM(VERB, CHECK, NETFLAG_LABEL_PHOENIX, opt_phoenix, menu_bit_wrapper(flags, netgrant_flag::NETGRANT_PHOENIX))	\
-	DXX_MENUITEM(VERB, CHECK, NETFLAG_LABEL_OMEGA, opt_omega, menu_bit_wrapper(flags, netgrant_flag::NETGRANT_OMEGA))	\
-	DXX_MENUITEM(VERB, CHECK, NETFLAG_LABEL_AFTERBURNER, opt_afterburner, menu_bit_wrapper(flags, netgrant_flag::NETGRANT_AFTERBURNER))	\
-	DXX_MENUITEM(VERB, CHECK, NETFLAG_LABEL_AMMORACK, opt_ammo_rack, menu_bit_wrapper(flags, netgrant_flag::NETGRANT_AMMORACK))	\
-	DXX_MENUITEM(VERB, CHECK, NETFLAG_LABEL_CONVERTER, opt_converter, menu_bit_wrapper(flags, netgrant_flag::NETGRANT_CONVERTER))	\
-	DXX_MENUITEM(VERB, CHECK, NETFLAG_LABEL_HEADLIGHT, opt_headlight, menu_bit_wrapper(flags, netgrant_flag::NETGRANT_HEADLIGHT))	\
+	DXX_MENUITEM(VERB, CHECK, NETFLAG_LABEL_GAUSS, opt_gauss, menu_bit_wrapper<netgrant_flag::NETGRANT_GAUSS>(flags))	\
+	DXX_MENUITEM(VERB, CHECK, NETFLAG_LABEL_HELIX, opt_helix, menu_bit_wrapper<netgrant_flag::NETGRANT_HELIX>(flags))	\
+	DXX_MENUITEM(VERB, CHECK, NETFLAG_LABEL_PHOENIX, opt_phoenix, menu_bit_wrapper<netgrant_flag::NETGRANT_PHOENIX>(flags))	\
+	DXX_MENUITEM(VERB, CHECK, NETFLAG_LABEL_OMEGA, opt_omega, menu_bit_wrapper<netgrant_flag::NETGRANT_OMEGA>(flags))	\
+	DXX_MENUITEM(VERB, CHECK, NETFLAG_LABEL_AFTERBURNER, opt_afterburner, menu_bit_wrapper<netgrant_flag::NETGRANT_AFTERBURNER>(flags))	\
+	DXX_MENUITEM(VERB, CHECK, NETFLAG_LABEL_AMMORACK, opt_ammo_rack, menu_bit_wrapper<netgrant_flag::NETGRANT_AMMORACK>(flags))	\
+	DXX_MENUITEM(VERB, CHECK, NETFLAG_LABEL_CONVERTER, opt_converter, menu_bit_wrapper<netgrant_flag::NETGRANT_CONVERTER>(flags))	\
+	DXX_MENUITEM(VERB, CHECK, NETFLAG_LABEL_HEADLIGHT, opt_headlight, menu_bit_wrapper<netgrant_flag::NETGRANT_HEADLIGHT>(flags))	\
 
 #endif
 
 #define DXX_GRANT_POWERUP_MENU(VERB)	\
 	DXX_MENUITEM(VERB, NUMBER, "Laser level", opt_laser_level, menu_number_bias_wrapper<1>(laser_level), static_cast<unsigned>(laser_level::_1) + 1, static_cast<unsigned>(DXX_MAXIMUM_LASER_LEVEL) + 1)	\
-	DXX_MENUITEM(VERB, CHECK, NETFLAG_LABEL_QUAD, opt_quad_lasers, menu_bit_wrapper(flags, netgrant_flag::NETGRANT_QUAD))	\
-	DXX_MENUITEM(VERB, CHECK, NETFLAG_LABEL_VULCAN, opt_vulcan, menu_bit_wrapper(flags, netgrant_flag::NETGRANT_VULCAN))	\
-	DXX_MENUITEM(VERB, CHECK, NETFLAG_LABEL_SPREAD, opt_spreadfire, menu_bit_wrapper(flags, netgrant_flag::NETGRANT_SPREAD))	\
-	DXX_MENUITEM(VERB, CHECK, NETFLAG_LABEL_PLASMA, opt_plasma, menu_bit_wrapper(flags, netgrant_flag::NETGRANT_PLASMA))	\
-	DXX_MENUITEM(VERB, CHECK, NETFLAG_LABEL_FUSION, opt_fusion, menu_bit_wrapper(flags, netgrant_flag::NETGRANT_FUSION))	\
+	DXX_MENUITEM(VERB, CHECK, NETFLAG_LABEL_QUAD, opt_quad_lasers, menu_bit_wrapper<netgrant_flag::NETGRANT_QUAD>(flags))	\
+	DXX_MENUITEM(VERB, CHECK, NETFLAG_LABEL_VULCAN, opt_vulcan, menu_bit_wrapper<netgrant_flag::NETGRANT_VULCAN>(flags))	\
+	DXX_MENUITEM(VERB, CHECK, NETFLAG_LABEL_SPREAD, opt_spreadfire, menu_bit_wrapper<netgrant_flag::NETGRANT_SPREAD>(flags))	\
+	DXX_MENUITEM(VERB, CHECK, NETFLAG_LABEL_PLASMA, opt_plasma, menu_bit_wrapper<netgrant_flag::NETGRANT_PLASMA>(flags))	\
+	DXX_MENUITEM(VERB, CHECK, NETFLAG_LABEL_FUSION, opt_fusion, menu_bit_wrapper<netgrant_flag::NETGRANT_FUSION>(flags))	\
 	D2X_GRANT_POWERUP_MENU(VERB)
 
 class more_game_options_menu_items
