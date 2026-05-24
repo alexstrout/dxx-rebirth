@@ -47,14 +47,10 @@ constexpr auto operator~(const enum_type e)
 	 * to the `enum_type` that was negated to produce this result, so
 	 * return a structure containing a single data member, and a type to
 	 * remember the original `enum_type`.
-	 *
-	 * <gcc-14 need the `static_cast<result::bitnot>`
-	 * >=gcc-14 allow using a direct-list-initialization from
-	 * `underlying_type_t<enum_type>`
-	 *
-	 * For the sake of <gcc-14, give the return struct a name, so that its enum
-	 * can be referenced in the static_cast.
 	 */
+	enum class bitnot : std::underlying_type_t<enum_type>
+	{
+	};
 	struct result {
 		/* gcc-14, gcc-15 warn if this typedef is not used in a given
 		 * translation unit.  Uses in non-instantiated templates do not count.
@@ -63,11 +59,25 @@ constexpr auto operator~(const enum_type e)
 		 * the functions that consume the type alias.
 		 */
 		using original_type [[maybe_unused]] = enum_type;
-		enum class bitnot : std::underlying_type_t<enum_type>
-		{
-		} value;
+		bitnot value;
 	};
-	return result{.value{static_cast<result::bitnot>(static_cast<std::underlying_type_t<enum_type>>(~(static_cast<std::underlying_type_t<enum_type>>(e))))}};
+	return result{
+		.value{
+			/* <gcc-14 need the explicit `bitnot{}` around the underlying type
+			 * >=gcc-14 allow using an unnamed direct-list-initialization from
+			 * `underlying_type_t<enum_type>`
+			 */
+			bitnot{
+				/* Cast to an integer type to get a type that can be negated,
+				 * then bitwise negate it.  Cast again, since integer promotion
+				 * rules may cause `sizeof(~T) > sizeof(T)`, which would then
+				 * cause the construction of `bitnot` to be rejected as
+				 * narrowing.
+				 */
+				static_cast<std::underlying_type_t<enum_type>>(~(static_cast<std::underlying_type_t<enum_type>>(e)))
+			}
+		}
+	};
 }
 
 /* Take the result of the above bitwise negation, apply a bitwise negate, and
@@ -298,7 +308,7 @@ inline constexpr bool enable_bit_enum_bitnot<unit_test_detail::e16_bitand_flag>{
 
 static_assert(not std::same_as<unit_test_detail::e8_bitnot, decltype(~std::declval<unit_test_detail::e8_bitnot>())>, "bitnot should not return the original type");
 static_assert(std::same_as<unit_test_detail::e8_bitnot, decltype(~~std::declval<unit_test_detail::e8_bitnot>())>, "double-bitnot should return the original type");
-static_assert((~(unit_test_detail::e8_bitnot{2})).value == static_cast<typename decltype(~std::declval<unit_test_detail::e8_bitnot>())::bitnot>(253), "bitnot should produce the same bit pattern as using bitnot on the underlying type");
+static_assert((~(unit_test_detail::e8_bitnot{2})).value == static_cast<decltype((~std::declval<unit_test_detail::e8_bitnot>()).value)>(253), "bitnot should produce the same bit pattern as using bitnot on the underlying type");
 static_assert(~~(unit_test_detail::e8_bitnot{5}) == unit_test_detail::e8_bitnot{5}, "double-bitnot should produce the original input");
 static_assert(std::same_as<bool, decltype(!std::declval<unit_test_detail::e8_boolnot>())>, "boolnot should return bool");
 static_assert(!unit_test_detail::e8_boolnot{}, "boolnot should be true when the input is a zero value");
