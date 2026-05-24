@@ -22,7 +22,7 @@ enum class actdoornum_t : uint8_t;
 constexpr std::integral_constant<std::size_t, 255> MAX_WALLS{}; // Maximum number of walls
 constexpr std::integral_constant<std::size_t, 90> MAX_DOORS{};  // Maximum number of open doors
 struct active_door;
-class player_flags;
+enum class player_flags : uint32_t;
 }
 DXX_VALPTRIDX_DECLARE_SUBTYPE(dcx::, active_door, actdoornum_t, MAX_DOORS);
 

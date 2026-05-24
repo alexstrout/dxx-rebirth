@@ -1191,7 +1191,7 @@ static escort_goal_t escort_set_goal_object(const object &Buddy_objp, const play
 		return ESCORT_GOAL_UNSPECIFIED;
 
 	const auto need_key_and_key_exists = [&Buddy_objp, pl_flags, start_search_seg = plrobj.segnum](const player_flag flag_key, const powerup_type_t powerup_key) {
-		if (pl_flags & flag_key)
+		if (+(pl_flags & flag_key))
 			/* Player already has this key, so no need to get it again.
 			 */
 			return false;
@@ -1391,7 +1391,7 @@ void do_escort_frame(const vmobjptridx_t objp, const robot_info &robptr, const o
 	if (player_is_visible(player_visibility))
 	{
 		BuddyState.Buddy_last_seen_player = {GameTime64};
-		if (player_info.powerup_flags & player_flag::headlight_on)	//	DAMN! MK, stupid bug, fixed 12/08/95, changed player_flag::headlight to player_flag::headlight_on
+		if (+(player_info.powerup_flags & player_flag::headlight_on))	//	DAMN! MK, stupid bug, fixed 12/08/95, changed player_flag::headlight to player_flag::headlight_on
 		{
 			const auto energy = player_info.energy;
 			const auto ienergy = f2i(energy);
@@ -1749,7 +1749,7 @@ static int maybe_steal_flag_item(object &playerobj, const player_flag flagval)
 {
 	auto &ThiefUniqueState = LevelUniqueObjectState.ThiefState;
 	auto &plr_flags = playerobj.ctype.player_info.powerup_flags;
-	if (plr_flags & flagval)
+	if (+(plr_flags & flagval))
 	{
 		if (d_rand() < THIEF_PROBABILITY) {
 			powerup_type_t powerup_index;

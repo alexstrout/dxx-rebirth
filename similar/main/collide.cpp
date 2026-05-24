@@ -205,7 +205,7 @@ static void collide_robot_and_wall(fvcwallptr &vcwallptr, object &robot, const v
 					if (w.keys != wall_key::none)
 					{
 						auto &player_info = get_local_plrobj().ctype.player_info;
-						if (player_info.powerup_flags & static_cast<player_flag>(w.keys))
+						if (+(player_info.powerup_flags & static_cast<player_flag>(w.keys)))
 							wall_open_door(hitseg, hitwall);
 					}
 					else if (!(w.flags & wall_flag::door_locked))
@@ -215,7 +215,7 @@ static void collide_robot_and_wall(fvcwallptr &vcwallptr, object &robot, const v
 				if (w.keys != wall_key::none)
 				{
 					auto &player_info = get_local_plrobj().ctype.player_info;
-					if (player_info.powerup_flags & static_cast<player_flag>(w.keys))
+					if (+(player_info.powerup_flags & static_cast<player_flag>(w.keys)))
 						wall_open_door(hitseg, hitwall);
 				}
 			}
@@ -2068,31 +2068,31 @@ void drop_player_eggs(const vmobjptridx_t playerobj)
 		}
 
 		//	Drop quad laser if appropos
-		if (player_info.powerup_flags & player_flag::quad_lasers)
+		if (+(player_info.powerup_flags & player_flag::quad_lasers))
 			call_object_create_egg(playerobj, powerup_type_t::POW_QUAD_FIRE);
 
-		if (player_info.powerup_flags & player_flag::cloaked)
+		if (+(player_info.powerup_flags & player_flag::cloaked))
 			call_object_create_egg(playerobj, powerup_type_t::POW_CLOAK);
 
 #if DXX_BUILD_DESCENT == 2
-		if (player_info.powerup_flags & player_flag::map_all)
+		if (+(player_info.powerup_flags & player_flag::map_all))
 			call_object_create_egg(playerobj, powerup_type_t::POW_FULL_MAP);
 
-		if (player_info.powerup_flags & player_flag::afterburner)
+		if (+(player_info.powerup_flags & player_flag::afterburner))
 			call_object_create_egg(playerobj, powerup_type_t::POW_AFTERBURNER);
 
-		if (player_info.powerup_flags & player_flag::ammo_rack)
+		if (+(player_info.powerup_flags & player_flag::ammo_rack))
 			call_object_create_egg(playerobj, powerup_type_t::POW_AMMO_RACK);
 
-		if (player_info.powerup_flags & player_flag::converter)
+		if (+(player_info.powerup_flags & player_flag::converter))
 			call_object_create_egg(playerobj, powerup_type_t::POW_CONVERTER);
 
-		if (player_info.powerup_flags & player_flag::headlight)
+		if (+(player_info.powerup_flags & player_flag::headlight))
 			call_object_create_egg(playerobj, powerup_type_t::POW_HEADLIGHT);
 
 		// drop the other enemies flag if you have it
 
-		if (game_mode_capture_flag(Game_mode) && (player_info.powerup_flags & player_flag::has_team_flag))
+		if (game_mode_capture_flag(Game_mode) && +(player_info.powerup_flags & player_flag::has_team_flag))
 		{
 			call_object_create_egg(playerobj, multi_get_team_from_player(Netgame, get_player_id(playerobj)) == team_number::blue ? powerup_type_t::POW_FLAG_RED : powerup_type_t::POW_FLAG_BLUE);
 		}
@@ -2178,7 +2178,7 @@ void apply_damage_to_player(object &playerobj, const icobjptridx_t killer, const
 		return;
 
 	auto &player_info = playerobj.ctype.player_info;
-	if (player_info.powerup_flags & player_flag::invulnerable)
+	if (+(player_info.powerup_flags & player_flag::invulnerable))
 		return;
 
 	if (possibly_friendly != apply_damage_player::always && multi_maybe_disable_friendly_fire(static_cast<const object *>(killer)))
@@ -2264,7 +2264,7 @@ static void collide_player_and_weapon(const d_robot_info_array &Robot_info, cons
 	if (get_player_id(playerobj) == Player_num)
 	{
 		auto &player_info = playerobj->ctype.player_info;
-		multi_digi_link_sound_to_pos((player_info.powerup_flags & player_flag::invulnerable) ? sound_effect::SOUND_WEAPON_HIT_DOOR : sound_effect::SOUND_PLAYER_GOT_HIT, player_segp, sidenum_t::WLEFT, collision_point, 0, F1_0);
+		multi_digi_link_sound_to_pos(+(player_info.powerup_flags & player_flag::invulnerable) ? sound_effect::SOUND_WEAPON_HIT_DOOR : sound_effect::SOUND_PLAYER_GOT_HIT, player_segp, sidenum_t::WLEFT, collision_point, 0, F1_0);
 	}
 
 	object_create_explosion_without_damage(Vclip, player_segp, collision_point, i2f(10) / 2, vclip_index::player_hit);

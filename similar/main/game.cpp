@@ -1102,7 +1102,7 @@ static void do_cloak_stuff()
 		auto &plobj = *vmobjptr(value.objnum);
 		auto &player_info = plobj.ctype.player_info;
 		auto &pl_flags = player_info.powerup_flags;
-		if (pl_flags & player_flag::cloaked)
+		if (+(pl_flags & player_flag::cloaked))
 		{
 			if (GameTime64 > player_info.cloak_time+CLOAK_TIME_MAX)
 			{
@@ -1126,7 +1126,7 @@ static void do_cloak_stuff()
 static void do_invulnerable_stuff(player_info &player_info)
 {
 	auto &pl_flags = player_info.powerup_flags;
-	if (pl_flags & player_flag::invulnerable)
+	if (+(pl_flags & player_flag::invulnerable))
 	{
 		if (GameTime64 > player_info.invulnerable_time + INVULNERABLE_TIME_MAX)
 		{
@@ -1168,7 +1168,7 @@ static void do_afterburner_stuff(object_array &Objects)
 	static sbyte func_play = 0;
 
 	auto &player_info = get_local_plrobj().ctype.player_info;
-	const auto have_afterburner = player_info.powerup_flags & player_flag::afterburner;
+	const auto have_afterburner{player_info.powerup_flags & player_flag::afterburner};
 	if (!have_afterburner)
 		Afterburner_charge = 0;
 
@@ -1184,7 +1184,7 @@ static void do_afterburner_stuff(object_array &Objects)
 	}
 
 	if ((Controls.state.afterburner != Last_afterburner_state && Last_afterburner_charge) || (Last_afterburner_state && Last_afterburner_charge && !Afterburner_charge)) {
-		if (Afterburner_charge && Controls.state.afterburner && have_afterburner) {
+		if (Afterburner_charge && Controls.state.afterburner && +have_afterburner) {
 			digi_link_sound_to_object3(sound_effect::SOUND_AFTERBURNER_IGNITE, plobj, 1, F1_0, sound_stack::allow_stacking, vm_distance{i2f(256)}, AFTERBURNER_LOOP_START, AFTERBURNER_LOOP_END);
 			if (+(Game_mode & GM_MULTI))
 			{
@@ -1994,7 +1994,7 @@ window_event_result GameProcessFrame(const d_level_shared_robot_info_state &Leve
 	result = do_final_boss_frame();
 
 	auto &pl_flags = player_info.powerup_flags;
-	if (pl_flags & player_flag::headlight_on)
+	if (+(pl_flags & player_flag::headlight_on))
 	{
 		/* The headlight consumes energy every frame.  If the player's energy
 		 * drops to less than 10, turn off the headlight to try to avoid

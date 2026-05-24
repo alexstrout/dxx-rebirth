@@ -239,7 +239,7 @@ static int pick_up_vulcan_ammo(player_info &player_info)
 
 static int pick_up_key(const int r, const int g, const int b, player_flags &player_flags, const player_flag key_flag, const char *const key_name, const powerup_type_t id)
 {
-	if (player_flags & key_flag)
+	if (+(player_flags & key_flag))
 		return 0;
 	player_flags |= key_flag;
 	powerup_basic(r, g, b, KEY_SCORE, "%s %s", key_name, TXT_ACCESS_GRANTED);
@@ -368,7 +368,7 @@ template <player_flag player_flag, typename F>
 static int player_hit_powerup(player_info &player_info, const char *const desc_have, const F &&pickup)
 {
 	auto &powerup_flags = player_info.powerup_flags;
-	return (powerup_flags & player_flag)
+	return (+(powerup_flags & player_flag))
 		? player_has_powerup(player_info, desc_have)
 		: (pickup.template pickup<player_flag>(powerup_flags), 1);
 }
@@ -593,7 +593,7 @@ int do_powerup(const vmobjptridx_t obj)
 			used = pick_up_secondary(player_info, secondary_weapon_index::homing, 4, Controls);
 			break;
 		case	powerup_type_t::POW_CLOAK:
-			if (player_info.powerup_flags & player_flag::cloaked) {
+			if (+(player_info.powerup_flags & player_flag::cloaked)) {
 				HUD_init_message(HM_DEFAULT|HM_REDUNDANT|HM_MAYDUPL, "%s %s!",TXT_ALREADY_ARE,TXT_CLOAKED);
 				break;
 			} else {
@@ -609,7 +609,7 @@ int do_powerup(const vmobjptridx_t obj)
 		case	powerup_type_t::POW_INVULNERABILITY:
 			{
 				auto &pl_flags = player_info.powerup_flags;
-				if (pl_flags & player_flag::invulnerable) {
+				if (+(pl_flags & player_flag::invulnerable)) {
 					if (!player_info.FakingInvul)
 					{
 				HUD_init_message(HM_DEFAULT|HM_REDUNDANT|HM_MAYDUPL, "%s %s!",TXT_ALREADY_ARE,TXT_INVULNERABLE);

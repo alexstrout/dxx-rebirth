@@ -1565,7 +1565,7 @@ void DropCurrentWeapon (player_info &player_info)
 	auto weapon_name{PRIMARY_WEAPON_NAMES(Primary_weapon)};
 	if (Primary_weapon == primary_weapon_index::laser)
 	{
-		if ((player_info.powerup_flags & player_flag::quad_lasers) && !GrantedItems.has_quad_laser())
+		if (+(player_info.powerup_flags & player_flag::quad_lasers) && !GrantedItems.has_quad_laser())
 		{
 			/* Sorry, no message.  Need to fall through in case player
 			 * wanted to drop a laser powerup.

@@ -1592,7 +1592,7 @@ window_event_result ExitSecretLevel()
 void do_cloak_invul_secret_stuff(fix64 old_gametime, player_info &player_info)
 {
 	auto &pl_flags = player_info.powerup_flags;
-	if (pl_flags & player_flag::invulnerable)
+	if (+(pl_flags & player_flag::invulnerable))
 	{
 		fix64	time_used;
 
@@ -1601,7 +1601,7 @@ void do_cloak_invul_secret_stuff(fix64 old_gametime, player_info &player_info)
 		t = GameTime64 - time_used;
 	}
 
-	if (pl_flags & player_flag::cloaked)
+	if (+(pl_flags & player_flag::cloaked))
 	{
 		fix	time_used;
 

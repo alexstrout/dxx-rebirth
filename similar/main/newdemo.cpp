@@ -1130,7 +1130,7 @@ void newdemo_record_start_demo()
 
 	nd_write_byte(nd_record_v_player_energy = static_cast<int8_t>(f2ir(player_info.energy)));
 	nd_write_byte(nd_record_v_player_shields = static_cast<int8_t>(f2ir(get_local_plrobj().shields)));
-	nd_write_int(nd_record_v_player_flags = player_info.powerup_flags.get_player_flags());        // be sure players flags are set
+	nd_write_int(nd_record_v_player_flags = +player_info.powerup_flags);        // be sure players flags are set
 	nd_write_byte(static_cast<int8_t>(static_cast<primary_weapon_index>(player_info.Primary_weapon)));
 	nd_write_byte(static_cast<int8_t>(static_cast<secondary_weapon_index>(player_info.Secondary_weapon)));
 	nd_record_v_start_frame = nd_record_v_frame_number = 0;
@@ -1982,10 +1982,10 @@ static int newdemo_read_demo_start(const purpose_type purpose)
 	player_info.powerup_flags = player_flags(recorded_player_flags);
 	if (purpose == purpose_type::rewrite)
 		nd_write_int(recorded_player_flags);
-	if (player_info.powerup_flags & player_flag::cloaked) {
+	if (+(player_info.powerup_flags & player_flag::cloaked)) {
 		player_info.cloak_time = GameTime64 - (CLOAK_TIME_MAX / 2);
 	}
-	if (player_info.powerup_flags & player_flag::invulnerable)
+	if (+(player_info.powerup_flags & player_flag::invulnerable))
 		player_info.invulnerable_time = GameTime64 - (INVULNERABLE_TIME_MAX / 2);
 
 	auto &Primary_weapon = player_info.Primary_weapon;
@@ -2015,7 +2015,7 @@ static int newdemo_read_demo_start(const purpose_type purpose)
 	{
 		nd_read_byte(&c);
 		if (c != ND_EVENT_NEW_LEVEL) {
-			auto flags = player_info.powerup_flags.get_player_flags();
+			auto flags{+player_info.powerup_flags};
 			energy = shield;
 			shield = static_cast<uint8_t>(flags);
 			Primary_weapon = static_cast<primary_weapon_index>(Secondary_weapon.get_active());
@@ -2653,14 +2653,14 @@ static int newdemo_read_frame_information(int rewrite)
 				break;
 			}
 
-			const auto old_player_flags = player_flags(static_cast<unsigned>(recorded_player_flags) >> 16);
-			const auto new_player_flags = player_flags(static_cast<unsigned>(recorded_player_flags));
+			const player_flags old_player_flags{static_cast<unsigned>(recorded_player_flags) >> 16};
+			const player_flags new_player_flags{static_cast<unsigned>(recorded_player_flags)};
 
 			const auto old_cloaked = old_player_flags & player_flag::cloaked;
 			const auto new_cloaked = new_player_flags & player_flag::cloaked;
 			const auto old_invul = old_player_flags & player_flag::invulnerable;
 			const auto new_invul = new_player_flags & player_flag::invulnerable;
-			if ((Newdemo_vcr_state == ND_STATE_REWINDING) || ((Newdemo_vcr_state == ND_STATE_ONEFRAMEBACKWARD) && (old_player_flags.get_player_flags() != 0xffff)) ) {
+			if ((Newdemo_vcr_state == ND_STATE_REWINDING) || ((Newdemo_vcr_state == ND_STATE_ONEFRAMEBACKWARD) && (+old_player_flags != 0xffff)) ) {
 				auto &player_info = get_local_plrobj().ctype.player_info;
 				if (old_cloaked != new_cloaked)
 				{
@@ -3537,10 +3537,10 @@ window_event_result newdemo_goto_end(int to_rewrite)
 	int recorded_player_flags;
 	nd_read_int(&recorded_player_flags);
 	player_info.powerup_flags = player_flags(recorded_player_flags);
-	if (player_info.powerup_flags & player_flag::cloaked) {
+	if (+(player_info.powerup_flags & player_flag::cloaked)) {
 		player_info.cloak_time = GameTime64 - (CLOAK_TIME_MAX / 2);
 	}
-	if (player_info.powerup_flags & player_flag::invulnerable)
+	if (+(player_info.powerup_flags & player_flag::invulnerable))
 		player_info.invulnerable_time = GameTime64 - (INVULNERABLE_TIME_MAX / 2);
 	{
 		int8_t v;
@@ -3761,9 +3761,9 @@ window_event_result newdemo_playback_one_frame()
 	{
 		const auto &&objp = vmobjptr(i.objnum);
 		auto &player_info = objp->ctype.player_info;
-		if (player_info.powerup_flags & player_flag::cloaked)
+		if (+(player_info.powerup_flags & player_flag::cloaked))
 			player_info.cloak_time = GameTime64 - (CLOAK_TIME_MAX / 2);
-		if (player_info.powerup_flags & player_flag::invulnerable)
+		if (+(player_info.powerup_flags & player_flag::invulnerable))
 			player_info.invulnerable_time = GameTime64 - (INVULNERABLE_TIME_MAX / 2);
 	}
 
@@ -3989,7 +3989,7 @@ static void newdemo_write_end()
 		for (unsigned i = 0; i < N_players; ++i)
 		{
 			const auto &&objp = vmobjptr(vcplayerptr(i)->objnum);
-			if (objp->ctype.player_info.powerup_flags & player_flag::cloaked)
+			if (+(objp->ctype.player_info.powerup_flags & player_flag::cloaked))
 				cloaked |= (1 << i);
 		}
 		nd_write_byte(cloaked);
@@ -4007,7 +4007,7 @@ static void newdemo_write_end()
 	auto &player_info = get_local_plrobj().ctype.player_info;
 	nd_write_byte(static_cast<int8_t>(f2ir(player_info.energy)));
 	nd_write_byte(static_cast<int8_t>(f2ir(get_local_plrobj().shields)));
-	nd_write_int(player_info.powerup_flags.get_player_flags());        // be sure players flags are set
+	nd_write_int(+player_info.powerup_flags);        // be sure players flags are set
 	nd_write_byte(static_cast<int8_t>(static_cast<primary_weapon_index>(player_info.Primary_weapon)));
 	nd_write_byte(static_cast<int8_t>(static_cast<secondary_weapon_index>(player_info.Secondary_weapon)));
 	byte_count += 8;

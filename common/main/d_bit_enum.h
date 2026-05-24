@@ -264,6 +264,46 @@ constexpr lhs_type &operator|=(lhs_type &lhs, const rhs_type rhs)
 	return lhs = (lhs | rhs);
 }
 
+/* If enable_bit_enum_xor<lhs_type, rhs_type> is true, enable:
+ * - `operator^(lhs_type, rhs_type)`
+ * - `operator^=(lhs_type &, rhs_type)`.
+ */
+template <typename lhs_type, typename rhs_type = lhs_type>
+requires(
+	std::is_enum_v<lhs_type> &&
+	std::is_enum_v<rhs_type>
+)
+inline constexpr bool enable_bit_enum_xor{enable_bit_enum<lhs_type, rhs_type>};
+
+template <typename lhs_type, typename rhs_type>
+requires(
+	std::is_enum_v<lhs_type> &&
+	std::is_enum_v<rhs_type> &&
+	enable_bit_enum_xor<lhs_type, rhs_type> &&
+	requires(rhs_type rhs) {
+		lhs_type{static_cast<std::underlying_type_t<rhs_type>>(rhs)};	/* require that a value of type `rhs_type` can be stored into an enum of type `lhs_type` without loss of precision */
+	}
+)
+[[nodiscard]]
+constexpr lhs_type operator^(const lhs_type lhs, const rhs_type rhs)
+{
+	return static_cast<lhs_type>(static_cast<std::underlying_type_t<lhs_type>>(lhs) ^ static_cast<std::underlying_type_t<rhs_type>>(rhs));
+}
+
+template <typename lhs_type, typename rhs_type>
+requires(
+	std::is_enum_v<lhs_type> &&
+	std::is_enum_v<rhs_type> &&
+	enable_bit_enum_xor<lhs_type, rhs_type> &&
+	requires(lhs_type lhs, rhs_type rhs) {
+		{ lhs ^ rhs } -> std::same_as<lhs_type>;	/* require that bit-xor be defined and produce `lhs_type` so that the result can be written back */
+	}
+)
+constexpr lhs_type &operator^=(lhs_type &lhs, const rhs_type rhs)
+{
+	return lhs = (lhs ^ rhs);
+}
+
 #ifdef DXX_ENABLE_BIT_ENUM_COMPILE_TESTS
 /* Everything in this #ifdef is related to performing compile-time
  * static_assert tests of the preceding code.
@@ -279,6 +319,9 @@ enum class e32_bitand_flag : std::uint32_t {};
 enum class e16_bitor_composite : std::uint16_t {};
 enum class e16_bitor_flag : std::uint16_t {};
 enum class e32_bitor_flag : std::uint32_t {};
+enum class e16_bitxor_composite : std::uint16_t {};
+enum class e16_bitxor_flag : std::uint16_t {};
+enum class e32_bitxor_flag : std::uint32_t {};
 
 template <typename lhs_type>
 concept has_bit_not = requires(lhs_type lhs) { ~lhs; };
@@ -294,6 +337,12 @@ concept has_bit_or = requires(lhs_type lhs, rhs_type rhs) { lhs | rhs; };
 
 template <typename lhs_type, typename rhs_type>
 concept has_bit_or_assign = requires(lhs_type lhs, rhs_type rhs) { lhs |= rhs; };
+
+template <typename lhs_type, typename rhs_type>
+concept has_bit_xor = requires(lhs_type lhs, rhs_type rhs) { lhs ^ rhs; };
+
+template <typename lhs_type, typename rhs_type>
+concept has_bit_xor_assign = requires(lhs_type lhs, rhs_type rhs) { lhs ^= rhs; };
 
 }
 
@@ -335,14 +384,28 @@ template <>
 inline constexpr bool enable_bit_enum_or<unit_test_detail::e16_bitor_composite, unit_test_detail::e16_bitor_flag>{true};
 
 static_assert(not unit_test_detail::has_bit_or<unit_test_detail::e16_bitor_composite, unit_test_detail::e8_bitnot>, "bit-or should not be enabled for (e16_bitor_composite | e8_bitnot)");
-static_assert(unit_test_detail::has_bit_or<unit_test_detail::e16_bitor_composite, unit_test_detail::e16_bitor_flag>, "bit-or should be enabled for (e16_bitor_composite & e16_bitor_flag)");
+static_assert(unit_test_detail::has_bit_or<unit_test_detail::e16_bitor_composite, unit_test_detail::e16_bitor_flag>, "bit-or should be enabled for (e16_bitor_composite | e16_bitor_flag)");
 static_assert(not unit_test_detail::has_bit_or<unit_test_detail::e16_bitand_composite, decltype(~std::declval<unit_test_detail::e16_bitand_flag>())>, "bit-or should not be enabled for (e16_bitand_composite | ~e16_bitand_flag)");	/* Enabling `(a & ~b)` should not enable `(a | ~b)`, since bit-or with a negated mask is rarely useful. */
 static_assert(unit_test_detail::e16_bitor_composite{3} == (unit_test_detail::e16_bitor_composite{2} | unit_test_detail::e16_bitor_flag{1}), "bit-or should combine bits the same as underlying integer bit-or works");
 static_assert(unit_test_detail::has_bit_or_assign<unit_test_detail::e16_bitor_composite, unit_test_detail::e16_bitor_flag>, "bit-or-assign should be enabled when bit-or is enabled");
 
 template <>
 inline constexpr bool enable_bit_enum_or<unit_test_detail::e16_bitor_composite, unit_test_detail::e32_bitor_flag>{true};
-static_assert(not unit_test_detail::has_bit_or<unit_test_detail::e16_bitor_composite, unit_test_detail::e32_bitor_flag>, "bit-or should not be enabled for (e16_bitor_composite & e32_bitor_flag) due to narrowing");
+static_assert(not unit_test_detail::has_bit_or<unit_test_detail::e16_bitor_composite, unit_test_detail::e32_bitor_flag>, "bit-or should not be enabled for (e16_bitor_composite | e32_bitor_flag) due to narrowing");
+
+template <>
+inline constexpr bool enable_bit_enum_xor<unit_test_detail::e16_bitxor_composite, unit_test_detail::e16_bitxor_flag>{true};
+
+static_assert(not unit_test_detail::has_bit_xor<unit_test_detail::e16_bitxor_composite, unit_test_detail::e8_bitnot>, "bit-xor should not be enabled for (e16_bitxor_composite ^ e8_bitnot)");
+static_assert(unit_test_detail::has_bit_xor<unit_test_detail::e16_bitxor_composite, unit_test_detail::e16_bitxor_flag>, "bit-xor should be enabled for (e16_bitxor_composite ^ e16_bitxor_flag)");
+static_assert(not unit_test_detail::has_bit_xor<unit_test_detail::e16_bitand_composite, decltype(~std::declval<unit_test_detail::e16_bitand_flag>())>, "bit-xor should not be enabled for (e16_bitand_composite ^ ~e16_bitand_flag)");	/* Enabling `(a & ~b)` should not enable `(a ^ ~b)`, since bit-xor with a negated mask is rarely useful. */
+static_assert(unit_test_detail::e16_bitxor_composite{3} == (unit_test_detail::e16_bitxor_composite{2} ^ unit_test_detail::e16_bitxor_flag{1}), "bit-xor should combine bits the same as underlying integer bit-xor works");
+static_assert(unit_test_detail::e16_bitxor_composite{2} == (unit_test_detail::e16_bitxor_composite{3} ^ unit_test_detail::e16_bitxor_flag{1}), "bit-xor should combine bits the same as underlying integer bit-xor works");
+static_assert(unit_test_detail::has_bit_xor_assign<unit_test_detail::e16_bitxor_composite, unit_test_detail::e16_bitxor_flag>, "bit-xor-assign should be enabled when bit-xor is enabled");
+
+template <>
+inline constexpr bool enable_bit_enum_xor<unit_test_detail::e16_bitxor_composite, unit_test_detail::e32_bitxor_flag>{true};
+static_assert(not unit_test_detail::has_bit_xor<unit_test_detail::e16_bitxor_composite, unit_test_detail::e32_bitxor_flag>, "bit-xor should not be enabled for (e16_bitxor_composite & e32_bitxor_flag) due to narrowing");
 #endif
 
 }

@@ -781,7 +781,7 @@ void fuelcen_check_for_goal(object &plrobj, const shared_segment &segp)
 	if (multi_get_team_from_player(Netgame, Player_num) != check_team)
 		return;
 	auto &player_info = plrobj.ctype.player_info;
-	if (player_info.powerup_flags & player_flag::has_team_flag)
+	if (+(player_info.powerup_flags & player_flag::has_team_flag))
 	{
 		player_info.powerup_flags &= ~player_flag::has_team_flag;
 				multi_send_capture_bonus (Player_num);

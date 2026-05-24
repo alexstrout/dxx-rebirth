@@ -2979,7 +2979,10 @@ static std::span<const uint8_t> net_udp_prepare_heavy_game_info(const d_level_un
 	}
 	for (auto &i : Netgame.net_player_flags)
 	{
-		buf[len] = static_cast<uint8_t>(i.get_player_flags());
+		/* For historical compatibility, only the low 8 bits of `player_flags`
+		 * are sent here.
+		 */
+		buf[len] = static_cast<uint8_t>(+i);
 		len++;
 	}
 	buf[len++] = Netgame.PacketsPerSec;

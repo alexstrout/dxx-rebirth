@@ -739,9 +739,9 @@ template <auto bit_value, typename mask_type>
 struct menu_bit_wrapper_t
 {
 	mask_type &mask;
-	constexpr operator decltype(std::declval<const mask_type &>() & bit_value)() const
+	constexpr operator decltype(+(std::declval<const mask_type &>() & bit_value))() const
 	{
-		return mask & bit_value;
+		return +(mask & bit_value);
 	}
 	constexpr menu_bit_wrapper_t &operator=(const bool n)
 	{

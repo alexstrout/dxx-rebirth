@@ -616,18 +616,18 @@ kmatrix_result multi_endlevel_score()
 	 */
 	const auto clear_flags{+(Game_mode & GM_MULTI_COOP)
 		// Reset keys
-		? ~player_flags(player_flag::blue_key | player_flag::gold_key | player_flag::red_key)
-		:
+		? ~player_flags{player_flags{} | player_flag::blue_key | player_flag::gold_key | player_flag::red_key}
+		: ~player_flags{
 #if DXX_BUILD_DESCENT == 1
 		/* Nothing to clear.  Set a mask that has no effect when
 		 * applied, so that the loop does not need to retest the
 		 * conditional on each pass.
 		 */
-		player_flags(~0u)
 #elif DXX_BUILD_DESCENT == 2
 		// Clear capture flag
-		~player_flags(player_flag::has_team_flag)
+		player_flags{} | player_flag::has_team_flag
 #endif
+		}
 	};
 	range_for (auto &i, partial_const_range(Players, Netgame.max_numplayers))
 	{
@@ -1409,7 +1409,7 @@ static void multi_send_message_end(const d_robot_info_array &Robot_info, fvmobjp
 				if (vcplayerptr(i)->connected != player_connection_status::disconnected && !d_strnicmp(static_cast<const char *>(vcplayerptr(i)->callsign), &Network_message[name_index], nlen - name_index))
 				{
 #if DXX_BUILD_DESCENT == 2
-					if (game_mode_capture_flag(Game_mode) && (vmobjptr(vcplayerptr(i)->objnum)->ctype.player_info.powerup_flags & player_flag::has_team_flag))
+					if (game_mode_capture_flag(Game_mode) && +(vmobjptr(vcplayerptr(i)->objnum)->ctype.player_info.powerup_flags & player_flag::has_team_flag))
 					{
 						HUD_init_message_literal(HM_MULTI, "Can't move player because s/he has a flag!");
 						return;
@@ -2724,7 +2724,7 @@ void multi_send_player_deres(deres_type_t type)
 
 	PUT_INTEL_SHORT(&multibuf[count], player_info.vulcan_ammo);
 	count += 2;
-	PUT_INTEL_INT(&multibuf[count], player_info.powerup_flags.get_player_flags());
+	PUT_INTEL_INT(&multibuf[count], +player_info.powerup_flags);
 	count += 4;
 
 	multibuf[count++] = Net_create_loc;
@@ -2755,7 +2755,7 @@ void multi_send_player_deres(deres_type_t type)
 	}
 
 	multi_send_data(multibuf, multiplayer_data_priority::_2);
-	if (player_info.powerup_flags & player_flag::cloaked)
+	if (+(player_info.powerup_flags & player_flag::cloaked))
 		multi_send_decloak();
 	multi_strip_robots(Player_num);
 }
@@ -3398,7 +3398,7 @@ public:
 	}
 	void process(const M mask, const powerup_type_t id) const
 	{
-		if (flags & mask)
+		if (+(flags & mask))
 			++current[id];
 	}
 };
@@ -4253,7 +4253,7 @@ void multi_send_flags (const playernum_t pnum)
 	auto &vmobjptr = Objects.vmptr;
 	multi_command<multiplayer_command_t::MULTI_FLAGS> multibuf;
 	multibuf[1]=pnum;
-	PUT_INTEL_INT(&multibuf[2], vmobjptr(vcplayerptr(pnum)->objnum)->ctype.player_info.powerup_flags.get_player_flags());
+	PUT_INTEL_INT(&multibuf[2], +vmobjptr(vcplayerptr(pnum)->objnum)->ctype.player_info.powerup_flags);
  
 	multi_send_data(multibuf, multiplayer_data_priority::_2);
 }
@@ -5249,7 +5249,7 @@ void multi_send_player_inventory(const multiplayer_data_priority priority)
 
 	PUT_INTEL_SHORT(&multibuf[count], player_info.vulcan_ammo);
 	count += 2;
-	PUT_INTEL_INT(&multibuf[count], player_info.powerup_flags.get_player_flags());
+	PUT_INTEL_INT(&multibuf[count], +player_info.powerup_flags);
 	count += 4;
 
 	multi_send_data(multibuf, priority);
@@ -5442,7 +5442,7 @@ static void MultiLevelInv_CountPlayerInventory()
 						powerup_flags.process(player_flag::ammo_rack, powerup_type_t::POW_AMMO_RACK);
 						powerup_flags.process(player_flag::afterburner, powerup_type_t::POW_AFTERBURNER);
 						powerup_flags.process(player_flag::headlight, powerup_type_t::POW_HEADLIGHT);
-                        if (+(Game_mode & GM_CAPTURE) && (player_info.powerup_flags & player_flag::has_team_flag))
+                        if (+(Game_mode & GM_CAPTURE) && +(player_info.powerup_flags & player_flag::has_team_flag))
                         {
 							++Current[(multi_get_team_from_player(Netgame, i) == team_number::blue) ? powerup_type_t::POW_FLAG_RED : powerup_type_t::POW_FLAG_BLUE];
                         }

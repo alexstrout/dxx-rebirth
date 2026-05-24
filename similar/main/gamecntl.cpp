@@ -387,7 +387,7 @@ static void do_weapon_n_item_stuff(object_array &Objects, control_info &Controls
 		Controls.state.toggle_bomb = 0;
 	}
 
-	if (Controls.state.energy_to_shield && (player_info.powerup_flags & player_flag::converter))
+	if (Controls.state.energy_to_shield && +(player_info.powerup_flags & player_flag::converter))
 		transfer_energy_to_shield(plrobj);
 #endif
 }
@@ -1427,7 +1427,7 @@ static window_event_result HandleTestKey(const d_level_shared_robot_info_state &
 			auto &player_info = get_local_plrobj().ctype.player_info;
 			auto &pl_flags = player_info.powerup_flags;
 			pl_flags ^= player_flag::cloaked;
-			if (pl_flags & player_flag::cloaked) {
+			if (+(pl_flags & player_flag::cloaked)) {
 				if (+(Game_mode & GM_MULTI))
 					multi_send_cloak();
 				ai_do_cloak_stuff();
@@ -1870,7 +1870,7 @@ static window_event_result FinalCheats(const d_level_shared_robot_info_state &Le
 		player_info.invulnerable_time = GameTime64+i2f(1000);
 		auto &pl_flags = player_info.powerup_flags;
 		pl_flags ^= player_flag::invulnerable;
-		HUD_init_message(HM_DEFAULT, "%s %s!", TXT_INVULNERABILITY, (pl_flags & player_flag::invulnerable) ? (player_info.FakingInvul = 0, TXT_ON) : TXT_OFF);
+		HUD_init_message(HM_DEFAULT, "%s %s!", TXT_INVULNERABILITY, +(pl_flags & player_flag::invulnerable) ? (player_info.FakingInvul = 0, TXT_ON) : TXT_OFF);
 	}
 
 	if (gotcha == &game_cheats::shields)
@@ -1887,9 +1887,9 @@ static window_event_result FinalCheats(const d_level_shared_robot_info_state &Le
 	{
 		auto &pl_flags = player_info.powerup_flags;
 		pl_flags ^= player_flag::cloaked;
-		const auto have_cloaked = pl_flags & player_flag::cloaked;
-		HUD_init_message(HM_DEFAULT, "%s %s!", TXT_CLOAK, have_cloaked ? TXT_ON : TXT_OFF);
-		if (have_cloaked)
+		const auto have_cloaked{pl_flags & player_flag::cloaked};
+		HUD_init_message(HM_DEFAULT, "%s %s!", TXT_CLOAK, +have_cloaked ? TXT_ON : TXT_OFF);
+		if (+have_cloaked)
 		{
 			ai_do_cloak_stuff();
 			player_info.cloak_time = {GameTime64};

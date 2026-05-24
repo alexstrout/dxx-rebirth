@@ -1105,7 +1105,7 @@ static void compute_lead_component(fix vms_vector::*const m, vms_vector &out, co
 static int lead_player(const object_base &objp, const vms_vector &fire_point, const vms_vector &believed_player_pos, const robot_gun_number gun_num, vms_vector &fire_vec)
 {
 	const auto &plrobj = *ConsoleObject;
-	if (plrobj.ctype.player_info.powerup_flags & player_flag::cloaked)
+	if (+(plrobj.ctype.player_info.powerup_flags & player_flag::cloaked))
 		return 0;
 
 	const auto &velocity = plrobj.mtype.phys_info.velocity;
@@ -1219,7 +1219,7 @@ static void ai_fire_laser_at_player(const d_robot_info_array &Robot_info, const 
 #endif
 
 	//	If player is cloaked, maybe don't fire based on how long cloaked and randomness.
-	if (powerup_flags & player_flag::cloaked) {
+	if (+(powerup_flags & player_flag::cloaked)) {
 		fix64	cloak_time = Ai_cloak_info[static_cast<imobjptridx_t::index_type>(obj) % MAX_AI_CLOAK_INFO].last_time;
 
 		if (GameTime64 - cloak_time > CLOAK_TIME_MAX/4)
@@ -1681,7 +1681,7 @@ static void do_firing_stuff(object &obj, const player_flags powerup_flags, const
 	{
 		//	Now, if in robot's field of view, lock onto player
 		const fix dot = vm_vec_build_dot(obj.orient.fvec, player_visibility.vec_to_player);
-		if ((dot >= 7*F1_0/8) || (powerup_flags & player_flag::cloaked)) {
+		if ((dot >= 7*F1_0/8) || +(powerup_flags & player_flag::cloaked)) {
 			ai_static *const aip = &obj.ctype.ai_info;
 			ai_local *const ailp = &obj.ctype.ai_info.ail;
 
@@ -1790,7 +1790,7 @@ static void compute_vis_and_vec(const d_robot_info_array &Robot_info, const vmob
 		return;
 	const auto Difficulty_level = GameUniqueState.Difficulty_level;
 	const auto powerup_flags = player_info.powerup_flags;
-		if (powerup_flags & player_flag::cloaked)
+	if (+(powerup_flags & player_flag::cloaked))
 		{
 			const unsigned cloak_index = (objp) % MAX_AI_CLOAK_INFO;
 			const fix delta_time = GameTime64 - Ai_cloak_info[cloak_index].last_time;
@@ -2003,7 +2003,7 @@ int ai_door_is_openable(
 			case wall_key::gold:
 			case wall_key::red:
 				{
-					return powerup_flags & static_cast<player_flag>(wall_keys);
+					return +(powerup_flags & static_cast<player_flag>(wall_keys));
 				}
 			default:
 				break;
@@ -2066,7 +2066,7 @@ int ai_door_is_openable(
 				return wt;
 			}
 			else if (wall.keys != wall_key::none) {	//	Allow bots to open doors to which player has keys.
-				return powerup_flags & static_cast<player_flag>(wall.keys);
+				return +(powerup_flags & static_cast<player_flag>(wall.keys));
 			}
 		}
 	}
@@ -3108,8 +3108,8 @@ void init_ai_frame(const player_flags powerup_flags, const control_info &Control
 	Dist_to_last_fired_upon_player_pos = vm_vec_dist_quick(Last_fired_upon_player_pos, Believed_player_pos);
 
 	if (!(powerup_flags & player_flag::cloaked) ||
-		(powerup_flags & player_flag::headlight_on) ||
-		(Afterburner_charge && Controls.state.afterburner && (powerup_flags & player_flag::afterburner)))
+		+(powerup_flags & player_flag::headlight_on) ||
+		(Afterburner_charge && Controls.state.afterburner && +(powerup_flags & player_flag::afterburner)))
 	{
 		ai_do_cloak_stuff();
 	}
@@ -3475,7 +3475,7 @@ _exit_cheat:
 			auto dtp = dist_to_player/4;
 			
 			// If player cloaked, visibility is screwed up and superboss will gate in robots when not supposed to.
-			if (player_info.powerup_flags & player_flag::cloaked) {
+			if (+(player_info.powerup_flags & player_flag::cloaked)) {
 				pv = player_visibility_state::no_line_of_sight;
 				dtp = vm_vec_dist_quick(ConsoleObject->pos, obj->pos)/4;
 			}
@@ -3502,7 +3502,7 @@ _exit_cheat:
 #if DXX_BUILD_DESCENT == 2
 			auto pv = player_visibility.visibility;
 			// If player cloaked, visibility is screwed up and superboss will gate in robots when not supposed to.
-			if (player_info.powerup_flags & player_flag::cloaked) {
+			if (+(player_info.powerup_flags & player_flag::cloaked)) {
 				pv = player_visibility_state::no_line_of_sight;
 			}
 
@@ -3696,7 +3696,7 @@ _exit_cheat:
 		rval = d_rand();
 		sval = (dist_to_player * (static_cast<int>(Difficulty_level) + 1)) / 64;
 
-		if ((fixmul(rval, sval) < FrameTime) || (player_info.powerup_flags & player_flag::headlight_on)) {
+		if ((fixmul(rval, sval) < FrameTime) || +(player_info.powerup_flags & player_flag::headlight_on)) {
 			ailp.player_awareness_type = player_awareness_type_t::PA_PLAYER_COLLISION;
 			ailp.player_awareness_time = F1_0*3;
 			compute_vis_and_vec(Robot_info, obj, player_info, vis_vec_pos, ailp, player_visibility, robptr);

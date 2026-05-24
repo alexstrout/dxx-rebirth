@@ -7,9 +7,9 @@
 
 #pragma once
 
-#include <cstdint>
-
 #ifdef DXX_BUILD_DESCENT
+#include "d_bit_enum.h"
+
 namespace dcx {
 
 // Values for special flags
@@ -50,70 +50,36 @@ constexpr player_flag operator~(const player_flag a)
 	return static_cast<player_flag>(~static_cast<uint32_t>(a));
 }
 
-constexpr player_flag operator|(const player_flag a, const player_flag b)
-{
-	return static_cast<player_flag>(static_cast<uint32_t>(a) | static_cast<uint32_t>(b));
-}
+template <>
+inline constexpr bool enable_bit_enum_bitnot<player_flag>{true};
 
-class player_flags
+template <>
+inline constexpr bool enable_bit_enum_or<player_flag>{true};
+
+enum class player_flags : uint32_t
 {
-	uint32_t flags;
-public:
-	void operator&() const = delete;
-	player_flags() = default;
-	explicit player_flags(const uint32_t &f) : flags(f)
-	{
-	}
-	explicit player_flags(player_flag f) : flags(static_cast<uint32_t>(f))
-	{
-	}
-	uint32_t get_player_flags() const
-	{
-		return flags;
-	}
-	player_flags &operator&=(const player_flags &rhs)
-	{
-		flags &= rhs.flags;
-		return *this;
-	}
-	player_flags &operator|=(const player_flags &rhs)
-	{
-		flags |= rhs.flags;
-		return *this;
-	}
-	player_flags &operator|=(const uint32_t &rhs)
-	{
-		flags |= rhs;
-		return *this;
-	}
-	player_flags operator|(const player_flags &rhs) const
-	{
-		return player_flags(flags | rhs.flags);
-	}
-	player_flags operator~() const
-	{
-		return player_flags(~flags);
-	}
-	uint32_t operator&(const player_flag value) const
-	{
-		return flags & static_cast<uint32_t>(value);
-	}
-	player_flags &operator^=(const player_flag value)
-	{
-		flags ^= static_cast<uint32_t>(value);
-		return *this;
-	}
-	player_flags &operator&=(const player_flag value)
-	{
-		flags &= static_cast<uint32_t>(value);
-		return *this;
-	}
-	player_flags &operator|=(const player_flag value)
-	{
-		flags |= static_cast<uint32_t>(value);
-		return *this;
-	}
 };
+
+template <>
+inline constexpr bool enable_bit_enum_bitnot<player_flags>{true};
+
+template <>
+inline constexpr bool enable_bit_enum_boolnot<player_flags>{true};
+
+template <>
+inline constexpr bool enable_bit_enum_and<player_flags, player_flag>{true};
+
+template <>
+inline constexpr bool enable_bit_enum_and<player_flags, player_flags>{true};
+
+template <>
+inline constexpr bool enable_bit_enum_or<player_flags, player_flag>{true};
+
+template <>
+inline constexpr bool enable_bit_enum_or<player_flags>{true};
+
+template <>
+inline constexpr bool enable_bit_enum_xor<player_flags, player_flag>{true};
 
 }
 #endif

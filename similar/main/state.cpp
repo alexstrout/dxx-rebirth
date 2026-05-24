@@ -781,7 +781,7 @@ static void state_player_to_player_rw(const relocated_player_data &rpd, const pl
 	pl_rw->objnum                    = pl->objnum;
 	pl_rw->n_packets_got             = 0;
 	pl_rw->n_packets_sent            = 0;
-	pl_rw->flags                     = pl_info.powerup_flags.get_player_flags();
+	pl_rw->flags                     = +pl_info.powerup_flags;
 	pl_rw->energy                    = pl_info.energy;
 	pl_rw->shields                   = rpd.shields;
 	/*

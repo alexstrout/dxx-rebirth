@@ -955,7 +955,7 @@ public:
 protected:
 	void draw_one_key(const unsigned x, const unsigned y, const unsigned gauge, const player_flag flag) const
 	{
-		hud_gauge_bitblt(hudctx, x, y, (player_key_flags & flag) ? gauge : (gauge + 3));
+		hud_gauge_bitblt(hudctx, x, y, +(player_key_flags & flag) ? gauge : (gauge + 3));
 	}
 };
 
@@ -1237,7 +1237,7 @@ static void hud_show_keys(const hud_draw_context_mr hudctx, const hud_ar_scale_f
 	const unsigned blue_bitmap_width = blue->bm_w;
 	const auto &&fspacx2 = FSPACX(2);
 	auto &canvas = hudctx.canvas;
-	if (player_key_flags & player_flag::blue_key)
+	if (+(player_key_flags & player_flag::blue_key))
 		hud_bitblt_free(canvas, fspacx2, y, hud_scale_ar(blue_bitmap_width), hud_scale_ar(blue->bm_h), blue);
 
 	if (!(player_key_flags & (player_flag::gold_key | player_flag::red_key)))
@@ -1248,10 +1248,10 @@ static void hud_show_keys(const hud_draw_context_mr hudctx, const hud_ar_scale_f
 #endif
 	};
 	const unsigned yellow_bitmap_width = yellow->bm_w;
-	if (player_key_flags & player_flag::gold_key)
+	if (+(player_key_flags & player_flag::gold_key))
 		hud_bitblt_free(canvas, fspacx2 + hud_scale_ar(blue_bitmap_width + 3), y, hud_scale_ar(yellow_bitmap_width), hud_scale_ar(yellow->bm_h), yellow);
 
-	if (player_key_flags & player_flag::red_key)
+	if (+(player_key_flags & player_flag::red_key))
 	{
 		const gauge_key red{KEY_ICON_RED
 #if DXX_BUILD_DESCENT == 2
@@ -1301,7 +1301,7 @@ static void hud_show_orbs(grs_canvas &canvas, const player_info &player_info, co
 
 static void hud_show_flag(grs_canvas &canvas, const player_info &player_info, const local_multires_gauge_graphic multires_gauge_graphic)
 {
-	if (game_mode_capture_flag(Game_mode) && (player_info.powerup_flags & player_flag::has_team_flag))
+	if (game_mode_capture_flag(Game_mode) && +(player_info.powerup_flags & player_flag::has_team_flag))
 	{
 		int x, y = GameBitmaps[ GET_GAUGE_INDEX(GAUGE_LIVES) ].bm_h + 2, icon;
 		const auto &&fspacy1 = FSPACY(1);
@@ -1626,7 +1626,7 @@ static void hud_show_primary_weapons_mode(grs_canvas &canvas, const player_info 
 			{
 				case primary_weapon_index::laser:
 					{
-						snprintf(weapon_str, sizeof(weapon_str), "%c%u", (player_info.powerup_flags & player_flag::quad_lasers) ? 'Q' : 'L', static_cast<unsigned>(player_info.laser_level) + 1);
+						snprintf(weapon_str, sizeof(weapon_str), "%c%u", +(player_info.powerup_flags & player_flag::quad_lasers) ? 'Q' : 'L', static_cast<unsigned>(player_info.laser_level) + 1);
 					txtweapon = weapon_str;
 					}
 					break;
@@ -1859,7 +1859,7 @@ static void hud_show_weapons(grs_canvas &canvas, const object &plrobj, const grs
 			case primary_weapon_index::laser:
 				{
 					const auto level = static_cast<unsigned>(player_info.laser_level) + 1;
-				if (player_info.powerup_flags & player_flag::quad_lasers)
+				if (+(player_info.powerup_flags & player_flag::quad_lasers))
 					snprintf(weapon_str, sizeof(weapon_str), "%s %s %u", TXT_QUAD, weapon_name, level);
 				else
 					snprintf(weapon_str, sizeof(weapon_str), "%s %u", weapon_name, level);
@@ -1941,7 +1941,7 @@ static void hud_show_cloak_invuln(grs_canvas &canvas, const player_flags player_
 			gr_string(canvas, *canvas.cv_font, fspacx1, y, txt);
 	};
 
-	if (player_flags & player_flag::cloaked)
+	if (+(player_flags & player_flag::cloaked))
 	{
 		const fix64 effect_end = cloak_time + CLOAK_TIME_MAX - gametime64;
 		if (effect_end > F1_0*3 || gametime64 & 0x8000)
@@ -1950,7 +1950,7 @@ static void hud_show_cloak_invuln(grs_canvas &canvas, const player_flags player_
 		}
 	}
 
-	if (player_flags & player_flag::invulnerable)
+	if (+(player_flags & player_flag::invulnerable))
 	{
 		const fix64 effect_end = invulnerable_time + INVULNERABLE_TIME_MAX - gametime64;
 		if (effect_end > F1_0*4 || gametime64 & 0x8000)
@@ -2560,12 +2560,12 @@ namespace dsx {
 
 namespace {
 
-static void draw_player_ship(const hud_draw_context_hs_mr hudctx, const player_info &player_info, const int cloak_state, const int x, const int y)
+static void draw_player_ship(const hud_draw_context_hs_mr hudctx, const player_info &player_info, const player_flags cloak_state, const int x, const int y)
 {
 	static fix cloak_fade_timer=0;
 	static int8_t cloak_fade_value = GR_FADE_LEVELS - 1;
 
-	if (cloak_state)
+	if (+cloak_state)
 	{
 		static int step = 0;
 		const auto cloak_time = player_info.cloak_time;
@@ -2732,7 +2732,7 @@ static void draw_weapon_info_sub(const hud_draw_context_hs_mr hudctx, const play
 		{
 			const auto &&line_spacing = LINE_SPACING(*canvas.cv_font, *GAME_FONT);
 			gr_printf(canvas, *canvas.cv_font, text_x, text_y + line_spacing, "%s: %u", TXT_LVL, static_cast<unsigned>(player_info.laser_level) + 1);
-			if (player_info.powerup_flags & player_flag::quad_lasers)
+			if (+(player_info.powerup_flags & player_flag::quad_lasers))
 				gr_string(canvas, *canvas.cv_font, text_x, text_y + (line_spacing * 2), TXT_QUAD);
 		}
 	}
@@ -3141,7 +3141,7 @@ static void sb_draw_afterburner(const hud_draw_context_hs_mr hudctx, const playe
 
 	//draw legend
 	unsigned r, g, b;
-	if (player_info.powerup_flags & player_flag::afterburner)
+	if (+(player_info.powerup_flags & player_flag::afterburner))
 		r = 90, g = b = 0;
 	else
 		r = g = b = 24;
@@ -3307,7 +3307,7 @@ void show_reticle(grs_canvas &canvas, const player_info &player_info, enum retic
 	auto &Secondary_weapon = player_info.Secondary_weapon;
 	secondary_bm_num = (missile_ready && has_all(player_has_secondary_weapon(player_info, Secondary_weapon)));
 
-	if (primary_bm_num && Primary_weapon == primary_weapon_index::laser && (player_info.powerup_flags & player_flag::quad_lasers))
+	if (primary_bm_num && Primary_weapon == primary_weapon_index::laser && +(player_info.powerup_flags & player_flag::quad_lasers))
 		primary_bm_num++;
 
 	const auto opt_secondary_weapon_num{Secondary_weapon_to_gun_num.valid_index(Secondary_weapon)};
@@ -3714,7 +3714,7 @@ void show_HUD_names(const d_robot_info_array &Robot_info, grs_canvas &canvas, co
 #if DXX_BUILD_DESCENT == 1
 			is_bounty_target;
 #elif DXX_BUILD_DESCENT == 2
-			(is_bounty_target || ((game_mode_capture_flag(Game_mode) || game_mode_hoard(Game_mode)) && (pl_flags & player_flag::has_team_flag)));
+			(is_bounty_target || ((game_mode_capture_flag(Game_mode) || game_mode_hoard(Game_mode)) && +(pl_flags & player_flag::has_team_flag)));
 #endif
 
 		if ((show_name || show_typing || show_indi) && see_object(Robot_info, vcobjptridx, objp))
@@ -3931,7 +3931,7 @@ void draw_hud(const d_robot_info_array &Robot_info, grs_canvas &canvas, const ob
 			hud_show_cloak_invuln(canvas, player_info.powerup_flags, player_info.cloak_time, player_info.invulnerable_time, current_y);
 
 			if (Newdemo_state==ND_STATE_RECORDING)
-				newdemo_record_player_flags(player_info.powerup_flags.get_player_flags());
+				newdemo_record_player_flags(+player_info.powerup_flags);
 		}
 
 #ifndef RELEASE
@@ -3981,7 +3981,7 @@ void render_gauges(grs_canvas &canvas, const game_mode_flags Game_mode)
 	auto &player_info = plrobj.ctype.player_info;
 	const auto energy = f2ir(player_info.energy);
 	auto &pl_flags = player_info.powerup_flags;
-	const auto cloak = (pl_flags & player_flag::cloaked);
+	const auto cloak{(pl_flags & player_flag::cloaked)};
 
 	assert(PlayerCfg.CockpitMode[1] == cockpit_mode_t::full_cockpit || PlayerCfg.CockpitMode[1] == cockpit_mode_t::status_bar);
 
@@ -4016,7 +4016,7 @@ void render_gauges(grs_canvas &canvas, const game_mode_flags Game_mode)
 		show_bomb_count(hudctx.canvas, player_info, hudctx.xscale(BOMB_COUNT_X), hudctx.yscale(BOMB_COUNT_Y), gr_find_closest_color(0, 0, 0), 0, 0);
 		draw_player_ship(hudctx, player_info, cloak, SHIP_GAUGE_X, SHIP_GAUGE_Y);
 
-		if (player_info.powerup_flags & player_flag::invulnerable)
+		if (+(player_info.powerup_flags & player_flag::invulnerable))
 			draw_invulnerable_ship(hudctx, plrobj);
 		else
 			draw_shield_bar(hudctx, shields);
@@ -4025,7 +4025,7 @@ void render_gauges(grs_canvas &canvas, const game_mode_flags Game_mode)
 		if (Newdemo_state==ND_STATE_RECORDING)
 		{
 			newdemo_record_player_shields(shields);
-			newdemo_record_player_flags(player_info.powerup_flags.get_player_flags());
+			newdemo_record_player_flags(+player_info.powerup_flags);
 		}
 		draw_keys_state(hudctx, player_info.powerup_flags).draw_all_cockpit_keys();
 
@@ -4051,7 +4051,7 @@ void render_gauges(grs_canvas &canvas, const game_mode_flags Game_mode)
 
 		draw_player_ship(hudctx, player_info, cloak, SB_SHIP_GAUGE_X, SB_SHIP_GAUGE_Y);
 
-		if (player_info.powerup_flags & player_flag::invulnerable)
+		if (+(player_info.powerup_flags & player_flag::invulnerable))
 			draw_invulnerable_ship(hudctx, plrobj);
 		else
 			sb_draw_shield_bar(hudctx, shields);
@@ -4060,7 +4060,7 @@ void render_gauges(grs_canvas &canvas, const game_mode_flags Game_mode)
 		if (Newdemo_state==ND_STATE_RECORDING)
 		{
 			newdemo_record_player_shields(shields);
-			newdemo_record_player_flags(player_info.powerup_flags.get_player_flags());
+			newdemo_record_player_flags(+player_info.powerup_flags);
 		}
 		draw_keys_state(hudctx, player_info.powerup_flags).draw_all_statusbar_keys();
 

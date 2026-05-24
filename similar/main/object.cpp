@@ -511,7 +511,7 @@ static void draw_polygon_object(grs_canvas &canvas, const d_level_unique_light_s
 			return -3;	// Hide headlight during end-level sequence
 		if (!(o.ctype.player_info.powerup_flags & player_flag::headlight))
 			return -3;	// Hide headlight if powerup not present
-		if (o.ctype.player_info.powerup_flags & player_flag::headlight_on) [[unlikely]]
+		if (+(o.ctype.player_info.powerup_flags & player_flag::headlight_on)) [[unlikely]]
 			return -2;	// Draw headlight in white when headlight is on
 		return base_headlight_value;	// Draw headlight in grey if present but not on
 	}(obj)
@@ -535,7 +535,7 @@ static void draw_polygon_object(grs_canvas &canvas, const d_level_unique_light_s
 	else {
 		std::pair<fix64, fix> cloak_duration;
 		std::pair<fix, fix> cloak_fade;
-		if (obj->type==object_type::OBJ_PLAYER && (obj->ctype.player_info.powerup_flags & player_flag::cloaked))
+		if (obj->type==object_type::OBJ_PLAYER && +(obj->ctype.player_info.powerup_flags & player_flag::cloaked))
 		{
 			auto &cloak_time = obj->ctype.player_info.cloak_time;
 			cloak_duration = {cloak_time, CLOAK_TIME_MAX};
