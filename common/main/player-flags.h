@@ -11,6 +11,17 @@
 
 #ifdef DXX_BUILD_DESCENT
 // Values for special flags
+/* Only the low 16 bits are used, so this could be switched to `uint16_t`.
+ * However, that generates worse code due to passing 16-bit values wherever
+ * `player_flag` is used as an argument to a function.
+ *
+ * Descent 1 uses few enough distinct values that it could be reduced to
+ * `uint8_t`.  However, some of its values are currently above UINT8_MAX, so
+ * they would need to be renumbered.  That would require special code in the
+ * save/load paths to map between the historical values written to disk and the
+ * renumbered values used in memory.  The savings is not sufficient to justify
+ * the complexity.
+ */
 enum class player_flag : uint32_t
 {
 	None = 0,
