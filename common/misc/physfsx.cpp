@@ -292,10 +292,9 @@ static PHYSFSX_uncounted_list PHYSFSX_findPredicateFiles(const char *path, auto 
 // The extension list exts must be NULL-terminated, with each ext beginning with a '.'
 PHYSFSX_uncounted_list PHYSFSX_findFiles(const char *path, const std::ranges::subrange<const file_extension_t *> exts)
 {
-	const auto predicate = [&](const char *i) {
+	return PHYSFSX_findPredicateFiles(path, /* predicate = */ [exts](const char *i) {
 		return PHYSFSX_checkMatchingExtension(i, exts);
-	};
-	return PHYSFSX_findPredicateFiles(path, predicate);
+	});
 }
 
 // Same function as above but takes a real directory as second argument, only adding files originating from this directory.
