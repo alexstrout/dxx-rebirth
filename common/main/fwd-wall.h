@@ -22,6 +22,7 @@ enum class actdoornum_t : uint8_t;
 constexpr std::integral_constant<std::size_t, 255> MAX_WALLS{}; // Maximum number of walls
 constexpr std::integral_constant<std::size_t, 90> MAX_DOORS{};  // Maximum number of open doors
 struct active_door;
+class player_flags;
 }
 DXX_VALPTRIDX_DECLARE_SUBTYPE(dcx::, active_door, actdoornum_t, MAX_DOORS);
 
@@ -181,7 +182,6 @@ enum class wall_hit_process_t : unsigned
 
 // Determines what happens when a wall is shot
 //obj is the object that hit...either a weapon or the player himself
-class player_flags;
 namespace dsx {
 void wall_init(d_level_unique_wall_subsystem_state &LevelUniqueWallSubsystemState);
 wall_hit_process_t wall_hit_process(player_flags, vmsegptridx_t seg, sidenum_t side, fix damage, unsigned playernum, const object &obj);

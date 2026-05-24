@@ -10,6 +10,8 @@
 #include <cstdint>
 
 #ifdef DXX_BUILD_DESCENT
+namespace dcx {
+
 // Values for special flags
 /* Only the low 16 bits are used, so this could be switched to `uint16_t`.
  * However, that generates worse code due to passing 16-bit values wherever
@@ -32,7 +34,7 @@ enum class player_flag : uint32_t
 	map_all = 64,		// Player can see unvisited areas on map
 	quad_lasers = 1024,	// Player shoots 4 at once
 	cloaked = 2048,		// Player is cloaked for awhile
-#if DXX_BUILD_DESCENT == 2
+	/* DXX_BUILD_DESCENT == 2 */
 	has_team_flag = 16,			// Player has his team's flag
 	ammo_rack = 128,	// Player has ammo rack
 	converter = 256,	// Player has energy->shield converter
@@ -40,7 +42,7 @@ enum class player_flag : uint32_t
 	headlight = 8192,	// Player has headlight boost
 	headlight_on = 16384,	// is headlight on or off?
 	headlight_present_and_on = headlight | headlight_on,	// required for thief
-#endif
+	/* endif */
 };
 
 constexpr player_flag operator~(const player_flag a)
@@ -112,4 +114,6 @@ public:
 		return *this;
 	}
 };
+
+}
 #endif
