@@ -125,7 +125,7 @@
 #define false 0
 #endif
 
-#ifdef DECLARE_VARS
+#ifdef DXX_OPENGL_DECLARE_GL_VARIABLES
 #define DEFVAR
 #else
 #define DEFVAR	OEXTERN
@@ -275,7 +275,7 @@ DEFVAR glTranslatef_fp dglTranslatef;
 DEFVAR glVertexPointer_fp dglVertexPointer;
 DEFVAR glViewport_fp dglViewport;
 
-#ifdef DECLARE_VARS
+#ifdef DXX_OPENGL_DECLARE_GL_VARIABLES
 
 // Dynamic module load functions
 #ifdef _WIN32
@@ -337,12 +337,12 @@ static void *dll_GetSymbol(void *dllhandle,const char *symname)
 }
 #endif
 
-#endif //DECLARE_VARS
+#endif // DXX_OPENGL_DECLARE_GL_VARIABLES
 
 // pass true to load the library
 // pass false to unload it
 bool OpenGL_LoadLibrary(bool load, const char *OglLibPath);//load=true removed because not c++
-#ifdef DECLARE_VARS
+#ifdef DXX_OPENGL_DECLARE_GL_VARIABLES
 static void OpenGL_SetFuncsToNull(void);
 
 void *OpenGLModuleHandle=NULL;

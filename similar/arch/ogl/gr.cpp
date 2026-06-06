@@ -10,7 +10,7 @@
  *
  */
 
-#define DECLARE_VARS
+#define DXX_OPENGL_DECLARE_GL_VARIABLES
 
 #ifdef RPI
 // extra libraries for the Raspberry Pi
