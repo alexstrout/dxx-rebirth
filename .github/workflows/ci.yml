@@ -10,6 +10,9 @@ on:
       - '**/contrib/gentoo/**'
       - '**/contrib/rpm/**'
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 jobs:
   linux:
     name: Package Linux
