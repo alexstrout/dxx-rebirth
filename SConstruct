@@ -47,6 +47,7 @@ host_platform = enum.Enum('host_platform', (
 	'linux',
 	'openbsd',
 	'win32',
+	'win64',
 	))
 
 class StaticSubprocess:
@@ -135,7 +136,7 @@ class ToolchainInformation(StaticSubprocess):
 			(
 				'RC',
 				'RCFLAGS',
-			) if user_settings._enumerated_host_platform == host_platform.win32 else (
+			) if user_settings._enumerated_host_platform in (host_platform.win32, host_platform.win64) else (
 				'FRAMEWORKPATH',
 				'FRAMEWORKS',
 			) if user_settings._enumerated_host_platform == host_platform.darwin else (
@@ -485,7 +486,7 @@ class ConfigureTests:
 	expect_sconf_failure = 'failure'
 	_implicit_test = Collector()
 	_custom_test = Collector()
-	_guarded_test_windows = GuardedCollector(_custom_test, lambda user_settings: user_settings._enumerated_host_platform == host_platform.win32)
+	_guarded_test_windows = GuardedCollector(_custom_test, lambda user_settings: user_settings._enumerated_host_platform in (host_platform.win32, host_platform.win64))
 	_guarded_test_darwin = GuardedCollector(_custom_test, lambda user_settings: user_settings._enumerated_host_platform == host_platform.darwin)
 	implicit_tests = _implicit_test.tests
 	custom_tests = _custom_test.tests
@@ -1080,7 +1081,7 @@ void test_virtual_function_supported::a() {}
 				self._show_tool_version(context, use_distcc, 'distcc', False)
 			if use_ccache:
 				self._show_tool_version(context, use_ccache, 'ccache', False)
-			if user_settings._enumerated_host_platform == host_platform.win32:
+			if user_settings._enumerated_host_platform in (host_platform.win32, host_platform.win64):
 				self._show_tool_version(context, cenv['RC'], 'Windows Resource Compiler', False)
 		# Use C++ single line comment so that it is guaranteed to extend
 		# to the end of the line.  repr ensures that embedded newlines
@@ -1740,7 +1741,7 @@ static void terminate_handler()
 		# use Redbook if at least one of the following applies
 		#    1. we are on SDL1
 		#    2. we are building for a platform for which we have a custom CD implementation (currently only win32)
-		use_redbook = int(not sdl2 or user_settings._enumerated_host_platform == host_platform.win32)
+		use_redbook = int(not sdl2 or user_settings._enumerated_host_platform in (host_platform.win32, host_platform.win64))
 		CPPDEFINES.extend((
 			('DXX_MAX_JOYSTICKS', user_settings.max_joysticks),
 			('DXX_MAX_AXES_PER_JOYSTICK', user_settings.max_axes_per_joystick),
@@ -2608,7 +2609,7 @@ where the cast is useless.
 	(void)i;
 	freeaddrinfo(res);
 	return 0;
-''', msg='for getaddrinfo', successflags=(_successflags_windows if self.user_settings._enumerated_host_platform == host_platform.win32 else {})):
+''', msg='for getaddrinfo', successflags=(_successflags_windows if self.user_settings._enumerated_host_platform in (host_platform.win32, host_platform.win64) else {})):
 			raise SCons.Errors.StopError("getaddrinfo support is required, but was not found: upgrade headers and libraries to support getaddrinfo.")
 
 	@_guarded_test_windows
@@ -3828,10 +3829,17 @@ class DXXCommon(LazyObjectConstructor):
 			expect_sconf_tuple = ('0', '1', conftests.expect_sconf_success, conftests.expect_sconf_failure)
 			sconf_tuple = ('0', '1', '2', conftests.sconf_force_failure, conftests.sconf_force_success, conftests.sconf_assume_success)
 			sys_platform = sys.platform
-			for platform in ('linux', 'freebsd', 'openbsd'):
-				if sys_platform.startswith(platform):
-					sys_platform = platform
-					break
+			if sys.maxsize > 0x100000000 and sys_platform in (host_platform.win32.name, 'msys'):
+				# `sys.platform` is `win32` even when run on a Windows 64 bit
+				# system.  Use `sys.maxsize` to recognize that this is a 64-bit
+				# interpreter, and therefore must be on a Windows 64 bit
+				# system.
+				sys_platform = host_platform.win64.name
+			else:
+				for platform in ('linux', 'freebsd', 'openbsd'):
+					if sys_platform.startswith(platform):
+						sys_platform = platform
+						break
 			return (
 			{
 				'variable': EnumVariable,
@@ -4751,7 +4759,7 @@ class DXXCommon(LazyObjectConstructor):
 				return cls.HaikuPlatformSettings
 			case host_platform.linux | host_platform.freebsd | host_platform.openbsd:
 				return cls.LinuxPlatformSettings
-			case host_platform.win32:
+			case host_platform.win32 | host_platform.win64:
 				return cls.Win32PlatformSettings
 			case _:
 				raise SCons.Errors.StopError(f'Invalid value for platform name option.  SCons enum variable logic should have constrained this to {host_platform.__members__.keys()}, but got: {platform_name=}.')
