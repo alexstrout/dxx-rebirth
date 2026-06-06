@@ -9,6 +9,7 @@ from dataclasses import dataclass
 import base64
 import binascii
 import errno
+import enum
 import itertools
 import shlex
 import subprocess
@@ -38,6 +39,15 @@ def get_Werror_sequence(active_cxxflags: list[str], warning_flags: collections.a
 	# When an option is converted to `-Werror=foo` form, the leading `-W` from
 	# the caller must be stripped off to avoid producing `-Werror=-Wfoo`.
 	return [f'-Werror={warning[2:]}' for warning in warning_flags]
+
+host_platform = enum.Enum('host_platform', (
+	'darwin',
+	'freebsd',
+	'haiku1',
+	'linux',
+	'openbsd',
+	'win32',
+	))
 
 class StaticSubprocess:
 	# This class contains utility functions for calling subprocesses
@@ -125,10 +135,10 @@ class ToolchainInformation(StaticSubprocess):
 			(
 				'RC',
 				'RCFLAGS',
-			) if user_settings.host_platform == 'win32' else (
+			) if user_settings._enumerated_host_platform == host_platform.win32 else (
 				'FRAMEWORKPATH',
 				'FRAMEWORKS',
-			) if user_settings.host_platform == 'darwin' else (
+			) if user_settings._enumerated_host_platform == host_platform.darwin else (
 			)
 		):
 			f(f'{msgprefix}: {v}: {(env.get(v, None))!r}{append_newline}')
@@ -475,8 +485,8 @@ class ConfigureTests:
 	expect_sconf_failure = 'failure'
 	_implicit_test = Collector()
 	_custom_test = Collector()
-	_guarded_test_windows = GuardedCollector(_custom_test, lambda user_settings: user_settings.host_platform == 'win32')
-	_guarded_test_darwin = GuardedCollector(_custom_test, lambda user_settings: user_settings.host_platform == 'darwin')
+	_guarded_test_windows = GuardedCollector(_custom_test, lambda user_settings: user_settings._enumerated_host_platform == host_platform.win32)
+	_guarded_test_darwin = GuardedCollector(_custom_test, lambda user_settings: user_settings._enumerated_host_platform == host_platform.darwin)
 	implicit_tests = _implicit_test.tests
 	custom_tests = _custom_test.tests
 	comment_not_supported = '/* not supported */'
@@ -1070,7 +1080,7 @@ void test_virtual_function_supported::a() {}
 				self._show_tool_version(context, use_distcc, 'distcc', False)
 			if use_ccache:
 				self._show_tool_version(context, use_ccache, 'ccache', False)
-			if user_settings.host_platform == 'win32':
+			if user_settings._enumerated_host_platform == host_platform.win32:
 				self._show_tool_version(context, cenv['RC'], 'Windows Resource Compiler', False)
 		# Use C++ single line comment so that it is guaranteed to extend
 		# to the end of the line.  repr ensures that embedded newlines
@@ -1679,7 +1689,7 @@ static void terminate_handler()
 	@GuardedCollector(_custom_test, lambda user_settings: user_settings.opengl and not user_settings.opengles)
 	def check_glu(self,context):
 		ogllibs = self.platform_settings.ogllibs
-		self._check_system_library(context, header=['OpenGL/glu.h' if self.user_settings.host_platform == 'darwin' else 'GL/glu.h'], main='''
+		self._check_system_library(context, header=['OpenGL/glu.h' if self.user_settings._enumerated_host_platform == host_platform.darwin else 'GL/glu.h'], main='''
 	gluPerspective(90.0,1.0,0.1,5000.0);
 	gluBuild2DMipmaps (GL_TEXTURE_2D, 0, 1, 1, 1, GL_UNSIGNED_BYTE, nullptr);
 ''', lib=ogllibs, testflags={'LIBS': ogllibs})
@@ -1730,7 +1740,7 @@ static void terminate_handler()
 		# use Redbook if at least one of the following applies
 		#    1. we are on SDL1
 		#    2. we are building for a platform for which we have a custom CD implementation (currently only win32)
-		use_redbook = int(not sdl2 or user_settings.host_platform == 'win32')
+		use_redbook = int(not sdl2 or user_settings._enumerated_host_platform == host_platform.win32)
 		CPPDEFINES.extend((
 			('DXX_MAX_JOYSTICKS', user_settings.max_joysticks),
 			('DXX_MAX_AXES_PER_JOYSTICK', user_settings.max_axes_per_joystick),
@@ -1828,7 +1838,7 @@ static void terminate_handler()
 			'LIBS' : [library_name] if sys.platform != 'darwin' else [],
 		}
 		successflags = self.pkgconfig.merge(context, self.msgprefix, user_settings, library_name, library_name, guess_flags)
-		if user_settings.host_platform == 'darwin' and user_settings.macos_add_frameworks:
+		if user_settings._enumerated_host_platform == host_platform.darwin and user_settings.macos_add_frameworks:
 			successflags = successflags.copy()
 			successflags['FRAMEWORKS'] = [library_name]
 			relative_headers = f'Library/Frameworks/{library_name}.framework/Headers'
@@ -2598,7 +2608,7 @@ where the cast is useless.
 	(void)i;
 	freeaddrinfo(res);
 	return 0;
-''', msg='for getaddrinfo', successflags=(_successflags_windows if self.user_settings.host_platform == 'win32' else {})):
+''', msg='for getaddrinfo', successflags=(_successflags_windows if self.user_settings._enumerated_host_platform == host_platform.win32 else {})):
 			raise SCons.Errors.StopError("getaddrinfo support is required, but was not found: upgrade headers and libraries to support getaddrinfo.")
 
 	@_guarded_test_windows
@@ -2828,7 +2838,7 @@ constexpr std::bitset<4> f()
 		_mangle_compiler_option_name=__mangle_compiler_option_name,
 		_mangle_linker_option_name=__mangle_linker_option_name
 	):
-		if self.user_settings.host_platform == 'win32':
+		if self.user_settings._enumerated_host_platform == host_platform.win32:
 			ldopts = self.__preferred_win32_linker_options
 		Compile = self.Compile
 		Link = self.Link
@@ -3732,7 +3742,7 @@ class DXXCommon(LazyObjectConstructor):
 				return True
 			return False
 		def default_sdl2(self):
-			if self.raspberrypi in ('mesa',) or self.host_platform == 'darwin':
+			if self.raspberrypi in ('mesa',) or self.host_platform == host_platform.darwin.name:
 				return True
 			return False
 		@classmethod
@@ -3752,7 +3762,9 @@ class DXXCommon(LazyObjectConstructor):
 				return True
 			return False
 		def default_use_stereo_render(self):
-			if self.host_platform != 'linux':
+			# This method is called before `self._enumerated_host_platform` is
+			# set, so the comparison must be based on `self.host_platform`.
+			if self.host_platform != host_platform.linux.name:
 				return False
 			return self.opengl and not self.opengles
 		def selected_OGLES_LIB(self):
@@ -3769,7 +3781,7 @@ class DXXCommon(LazyObjectConstructor):
 			return self.adlmidi != 'none'
 
 		def __default_DATA_DIR(self):
-			platform_settings_type = self._program.get_platform_settings_type(self.host_platform)
+			platform_settings_type = self._program.get_platform_settings_type(self._enumerated_host_platform)
 			sharepath = platform_settings_type.sharepath
 			if sharepath is None:
 				return None
@@ -3848,8 +3860,8 @@ class DXXCommon(LazyObjectConstructor):
 						sys_platform,
 						'cross-compile to specified platform',
 						{
-							'map': {'msys':'win32'},
-							'allowed_values' : ('darwin', 'linux', 'freebsd', 'openbsd', 'win32', 'haiku1'),
+							'map': {'msys': host_platform.win32},
+							'allowed_values' : tuple(host_platform.__members__.keys()),
 							}
 						),
 					('raspberrypi', None, 'build for Raspberry Pi (automatically selects opengles)', {'ignorecase': 2, 'map': {'1':'yes', 'true':'yes', '0':'no', 'false':'no'}, 'allowed_values': ('yes', 'no', 'mesa')}),
@@ -3953,11 +3965,6 @@ class DXXCommon(LazyObjectConstructor):
 					# Only applicable if show_tool_version=True
 					('show_assembler_version', True, None),
 					('show_linker_version', True, None),
-				),
-			},
-			{
-				'variable': BoolVariable,
-				'arguments': (
 					('use_stereo_render', self.default_use_stereo_render, 'enable stereoscopic rendering'),
 				),
 			},
@@ -4143,6 +4150,7 @@ class DXXCommon(LazyObjectConstructor):
 				setattr(self, cname, value)
 			if self.builddir != '' and self.builddir[-1:] != '/':
 				self.builddir += '/'
+			self._enumerated_host_platform = host_platform[self.host_platform]
 		def clone(self):
 			clone = DXXCommon.UserBuildSettings(None)
 			for grp in clone._options():
@@ -4150,6 +4158,7 @@ class DXXCommon(LazyObjectConstructor):
 					name = o[0]
 					value = getattr(self, name)
 					setattr(clone, name, value)
+			clone._enumerated_host_platform = self._enumerated_host_platform
 			return clone
 	class UserInstallSettings:
 		def _options(self):
@@ -4353,7 +4362,7 @@ class DXXCommon(LazyObjectConstructor):
 			# directories.  Files in those directories assume they are only
 			# ever built on OS X, so they unconditionally include headers
 			# specific to OS X.
-			osx_excluded_directories = () if self.user_settings.host_platform == 'darwin' else (
+			osx_excluded_directories = () if self.user_settings._enumerated_host_platform == host_platform.darwin else (
 				'common/arch/cocoa/',
 			)
 			# Use `.extend()` instead of assignment because
@@ -4724,29 +4733,28 @@ class DXXCommon(LazyObjectConstructor):
 	@cached_property
 	def platform_settings(self):
 		# windows or *nix?
-		platform_name = self.user_settings.host_platform
 		try:
 			machine = os.uname()[4]
 		except AttributeError:
 			machine = None
-		message(self, f'compiling on {sys.platform!r}/{machine!r} for {platform_name!r} into {self.user_settings.builddir or "."}{f" with prefix list {self._argument_prefix_list}" if self._argument_prefix_list else ""}')
-		return self.get_platform_settings_type(platform_name)(self, self.user_settings)
+		message(self, f'compiling on {sys.platform!r}/{machine!r} for {self.user_settings.host_platform!r} into {self.user_settings.builddir or "."}{f" with prefix list {self._argument_prefix_list}" if self._argument_prefix_list else ""}')
+		return self.get_platform_settings_type(self.user_settings._enumerated_host_platform)(self, self.user_settings)
 
 	@classmethod
 	def get_platform_settings_type(cls,platform_name):
 		# By happy accident, LinuxPlatformSettings produces the desired
 		# result on *BSD.
 		match platform_name:
-			case 'darwin':
+			case host_platform.darwin:
 				return cls.DarwinPlatformSettings
-			case 'haiku1':
+			case host_platform.haiku1:
 				return cls.HaikuPlatformSettings
-			case 'linux' | 'freebsd' | 'openbsd':
+			case host_platform.linux | host_platform.freebsd | host_platform.openbsd:
 				return cls.LinuxPlatformSettings
-			case 'win32':
+			case host_platform.win32:
 				return cls.Win32PlatformSettings
 			case _:
-				raise SCons.Errors.StopError(f'Invalid value for platform name option, which should have been rejected by the SCons enum variable logic: {platform_name=}.')
+				raise SCons.Errors.StopError(f'Invalid value for platform name option.  SCons enum variable logic should have constrained this to {host_platform.__members__.keys()}, but got: {platform_name=}.')
 
 	@cached_property
 	def env(self):
@@ -5626,7 +5634,7 @@ Failed command list:
 
 	def _register_install(self,dxxstr,exe_node):
 		env = self.env
-		if self.user_settings.host_platform != 'darwin':
+		if self.user_settings._enumerated_host_platform != host_platform.darwin:
 				install_dir = self.user_settings.BIN_DIR
 				env.Install(install_dir, exe_node)
 				env.Alias('install', install_dir)
@@ -5664,7 +5672,7 @@ Failed command list:
 			return bundledir
 
 	def _macos_sign_and_notarize_bundle(self,dxxstr,bundledir):
-		if self.user_settings.host_platform != 'darwin' or bundledir is None:
+		if self.user_settings._enumerated_host_platform != host_platform.darwin or bundledir is None:
 			return
 		env = self.env
 		compressed_bundle = env.File(os.path.join(self.user_settings.builddir, f'{self.PROGRAM_NAME}.zip'))
