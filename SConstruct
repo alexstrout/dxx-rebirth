@@ -4735,15 +4735,18 @@ class DXXCommon(LazyObjectConstructor):
 	@classmethod
 	def get_platform_settings_type(cls,platform_name):
 		# By happy accident, LinuxPlatformSettings produces the desired
-		# result on OpenBSD, so there is no need for specific handling
-		# of `platform_name == 'openbsd'`.
-		return (
-			cls.Win32PlatformSettings if platform_name == 'win32' else (
-				cls.DarwinPlatformSettings if platform_name == 'darwin' else
-				cls.HaikuPlatformSettings if platform_name == 'haiku1' else
-				cls.LinuxPlatformSettings
-			)
-		)
+		# result on *BSD.
+		match platform_name:
+			case 'darwin':
+				return cls.DarwinPlatformSettings
+			case 'haiku1':
+				return cls.HaikuPlatformSettings
+			case 'linux' | 'freebsd' | 'openbsd':
+				return cls.LinuxPlatformSettings
+			case 'win32':
+				return cls.Win32PlatformSettings
+			case _:
+				raise SCons.Errors.StopError(f'Invalid value for platform name option, which should have been rejected by the SCons enum variable logic: {platform_name=}.')
 
 	@cached_property
 	def env(self):
