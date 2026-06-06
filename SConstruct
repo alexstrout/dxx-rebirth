@@ -957,6 +957,7 @@ help:assume C++ compiler works
 		# the next stage compiler (or wrapper) worked when a prior run
 		# performed the test, but is now broken.
 		CCACHE_RECACHE = penv.get('CCACHE_RECACHE', None)
+		cenv["rebirth_environment_variables_shown"].add('CCACHE_RECACHE')
 		penv['CCACHE_RECACHE'] = '1'
 		most_recent_error = self._check_cxx_works(context)
 		if most_recent_error is not None:
@@ -1096,6 +1097,7 @@ void test_virtual_function_supported::a() {}
 				# Disable distcc so that the next call to self.Link tests only
 				# ccache+linker.
 				del cenv['ENV']['CCACHE_PREFIX']
+				cenv["rebirth_environment_variables_shown"].add('CCACHE_PREFIX')
 			if Link(context, text=text, msg='whether ccache, C++ compiler, and linker work', calling_function='ccache_ld_works'):
 				return most_recent_error
 			most_recent_error = 'C++ linker works, but ccache does not work.'
@@ -4549,11 +4551,62 @@ class DXXCommon(LazyObjectConstructor):
 			.replace('=', 'z')	\
 			)
 
+	@staticmethod
+	def _format_environment_qualified_comstr(target, source, env, for_signature, comstr_placeholder: str, _os_environ_get = os.environ.get):
+		# Prepare the string that SCons would have used if this function were
+		# not interposed.
+		comstr = env.subst(comstr_placeholder, target=target, source=source)
+		keys_to_print = env['rebirth_environment_variables_shown']
+		if not keys_to_print:
+			# If `keys_to_print` is empty, the below loop will leave
+			# `environment_assignments` and `environment_removals` empty.
+			# Return the same result early.
+			return comstr
+		environment_assignments = []
+		environment_removals = []
+		penv = env['ENV']
+		for k in keys_to_print:
+			v = penv.get(k)
+			if v == _os_environ_get(k):
+				# If the value in the local environment is the same as in the
+				# SCons process environment, skip showing it.  This suppresses
+				# showing variables that could have been overridden with the
+				# right SConstruct option, but were not overridden for this
+				# build.
+				continue
+			if v is None:
+				environment_removals.append(k)
+			else:
+				# Try to quote the value so that the user can reuse it without
+				# manual editing.  This is printed to stdout, but never
+				# consumed directly by SCons or a shell, so an imperfect quote
+				# is not automatically a security issue.  A user might manually
+				# paste this into a shell.
+				environment_assignments.append(f'{k}={shlex.quote(v)} ')
+		# If both lists are empty, then the formatted string would degenerate
+		# to a bare `comstr`.  Return it directly to avoid evaluating the
+		# format string.
+		#
+		# If `environment_removals` is non-empty, provide a leading `(unset `
+		# and a matching trailing `)`.  Otherwise, leave both of those blank.
+		return (f'''{f"(unset {' '.join(environment_removals)};" if environment_removals else ""}{
+			''.join(environment_assignments)}{comstr}{
+			")" if environment_removals else ""}''') if (environment_assignments or environment_removals) else comstr
+
+	@classmethod
+	def _format_environment_qualified_cxxcomstr(cls, target, source, env, for_signature):
+		return cls._format_environment_qualified_comstr(target, source, env, for_signature, '${CXXCOM}')
+
+	@classmethod
+	def _format_environment_qualified_linkcomstr(cls, target, source, env, for_signature):
+		return cls._format_environment_qualified_comstr(target, source, env, for_signature, '${LINKCOM}')
+
 	def prepare_environment(self):
 		# Prettier build messages......
 		# Move target to end of C++ source command
 		target_string = ' -o $TARGET'
 		env = self.env
+		env["rebirth_environment_variables_shown"] = rebirth_environment_variables_shown = set()
 		user_settings = self.user_settings
 		# Expand $CXX immediately.
 		# $CCFLAGS is never used.  Remove it.
@@ -4576,6 +4629,7 @@ class DXXCommon(LazyObjectConstructor):
 					penv['CCACHE_PREFIX'] = distcc_path
 				elif distcc_path is not None:
 					penv.pop('CCACHE_PREFIX', None)
+				rebirth_environment_variables_shown.add('CCACHE_PREFIX')
 		elif distcc_path:
 			cxxcom = distcc_cxxcom
 		# Expand $LINK immediately.
@@ -4596,9 +4650,14 @@ class DXXCommon(LazyObjectConstructor):
 		distcc_hosts = user_settings.distcc_hosts
 		if distcc_hosts is not None:
 			env['ENV']['DISTCC_HOSTS'] = distcc_hosts
+			rebirth_environment_variables_shown.add('DISTCC_HOSTS')
 		if user_settings.verbosebuild:
 			env.__header_check_output_COMSTR	= None
 			env.__generate_cpp_output_COMSTR	= None
+			env.Replace(
+				CXXCOMSTR						= self._format_environment_qualified_cxxcomstr,
+				LINKCOMSTR						= self._format_environment_qualified_linkcomstr,
+				)
 		else:
 			target = self.target[:3]
 			nonblank_builddir = user_settings.builddir or '.'
@@ -5477,11 +5536,13 @@ class DXXProgram(DXXCommon):
 			'git_diffstat',
 		))
 		versid_cppdefines.append(('DXX_RBE"(A)"', f'"{"".join([f"A({k})" for k in versid_build_environ])}"'))
-		versid_environ = self.env['ENV'].copy()
+		versid_environ = env['ENV'].copy()
 		# Direct mode conflicts with __TIME__
-		versid_environ['CCACHE_NODIRECT'] = 1
+		versid_environ['CCACHE_NODIRECT'] = '1'
 		versid_cpp = 'similar/main/vers_id.cpp'
-		versid_obj = env.StaticObject(target=f'{user_settings.builddir}{self._apply_target_name(versid_cpp)}{self.env["OBJSUFFIX"]}', source=versid_cpp, CPPDEFINES=versid_cppdefines, ENV=versid_environ)
+		rebirth_environment_variables_shown = env['rebirth_environment_variables_shown'].copy()
+		rebirth_environment_variables_shown.add('CCACHE_NODIRECT')
+		versid_obj = env.StaticObject(target=f'{user_settings.builddir}{self._apply_target_name(versid_cpp)}{self.env["OBJSUFFIX"]}', source=versid_cpp, CPPDEFINES=versid_cppdefines, ENV=versid_environ, rebirth_environment_variables_shown=rebirth_environment_variables_shown)
 		Depends = env.Depends
 		# If $SOURCE_DATE_EPOCH is set, add its value as a shadow
 		# dependency to ensure that vers_id.cpp is rebuilt if
