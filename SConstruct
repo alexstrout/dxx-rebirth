@@ -2808,14 +2808,12 @@ constexpr std::bitset<4> f()
 	)
 	__preferred_win32_linker_options = (
 		'-Wl,--large-address-aware',
+	)
+	__preferred_microsoft_windows_linker_options = (
 		'-Wl,--dynamicbase',
+		'-Wl,--insert-timestamp',
 		'-Wl,--nxcompat',
 	)
-	# No build directives can modify the process environment, so
-	# modifying this at class scope is safe.  Either every build will
-	# have $SOURCE_DATE_EPOCH set or every build will have it clear.
-	if os.getenv('SOURCE_DATE_EPOCH') is None:
-		__preferred_win32_linker_options += ('-Wl,--insert-timestamp',)
 	def __mangle_compiler_option_name(opt):
 		return f'check_compiler_option{opt.replace("-", "_").replace("=", "_")}'
 	def __mangle_linker_option_name(opt):
@@ -2839,8 +2837,10 @@ constexpr std::bitset<4> f()
 		_mangle_compiler_option_name=__mangle_compiler_option_name,
 		_mangle_linker_option_name=__mangle_linker_option_name
 	):
-		if self.user_settings._enumerated_host_platform == host_platform.win32:
-			ldopts = self.__preferred_win32_linker_options
+		if self.user_settings._enumerated_host_platform in (host_platform.win32, host_platform.win64):
+			ldopts = self.__preferred_microsoft_windows_linker_options
+			if self.user_settings._enumerated_host_platform == host_platform.win32:
+				ldopts += self.__preferred_win32_linker_options
 		Compile = self.Compile
 		Link = self.Link
 		f, desc = (Link, 'linker') if ldopts else (Compile, 'compiler')
@@ -2862,7 +2862,7 @@ constexpr std::bitset<4> f()
 		ccopts = ('-Wextra',) + __preferred_compiler_options,
 		# Always register target-specific tests on the class.  Individual
 		# targets will decide whether to run the tests.
-		ldopts = __preferred_win32_linker_options,
+		ldopts = __preferred_microsoft_windows_linker_options + __preferred_win32_linker_options,
 		RecordedTest = Collector.RecordedTest,
 		record = implicit_tests.append,
 		_mangle_compiler_option_name=__mangle_compiler_option_name,
