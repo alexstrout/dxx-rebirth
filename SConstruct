@@ -190,12 +190,19 @@ class Git(StaticSubprocess):
 		c = cls.__computed_extra_version
 		if c is None:
 			v = cls.__compute_extra_version()
-			cls.__computed_extra_version = c = cls.ComputedExtraVersion(
-				v,
-				_spcall(cls, ['status', '--short', '--branch']).decode(),
-				_spcall(cls, ['diff', '--stat', 'HEAD']).decode(),
-				_spcall(cls, ['rev-parse', 'HEAD']).rstrip().decode(),
-			) if v is not None else cls.UnknownExtraVersion
+			if v is None:
+				c = cls.UnknownExtraVersion
+			else:
+				status_sb = _spcall(cls, ['status', '--short', '--branch'])
+				diffstat_HEAD = _spcall(cls, ['diff', '--stat', 'HEAD'])
+				revparse_HEAD = _spcall(cls, ['rev-parse', 'HEAD'])
+				c = cls.ComputedExtraVersion(
+					v,
+					None if status_sb is None else status_sb.decode(),
+					None if diffstat_HEAD is None else diffstat_HEAD.decode(),
+					None if revparse_HEAD is None else revparse_HEAD.rstrip().decode(),
+				)
+			cls.__computed_extra_version = c
 		return c
 	# Run `git describe --tags --abbrev=12`.
 	# On failure, return None.
