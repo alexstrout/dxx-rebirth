@@ -4694,7 +4694,7 @@ class DXXCommon(LazyObjectConstructor):
 		tools = platform_settings.tools + ('textfile',)
 		if user_settings.register_runtime_test_link_targets:
 			tools += 'ar',
-		env = Environment(ENV = os.environ, tools = tools, **kw)
+		env = Environment(ENV = os.environ.copy(), tools = tools, **kw)
 		CHOST = user_settings.CHOST
 		if CHOST:
 			denv = None
