@@ -32,8 +32,7 @@ jobs:
             mingw-w64-x86_64-physfs
 
       - name: Clone Repository
-        # checkout@v6.0.2
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           persist-credentials: false
           path: src
@@ -62,8 +61,7 @@ jobs:
 
       - name: Upload SConf log
         if: ${{ !cancelled() }}
-        # upload-artifact@v7.0.1
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: "SConf-Windows-${{ steps.architecture.outputs.uname_m }}"
           path: 'src/build/config.log'
@@ -73,8 +71,7 @@ jobs:
         run: ./contrib/packaging/windows/build_package.sh -o .. -z ''
 
       - name: Upload Artifact
-        # upload-artifact@v7.0.1
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: "DXX-Rebirth-Windows-${{ steps.architecture.outputs.uname_m }}"
           path: 'D*X-Rebirth/'
