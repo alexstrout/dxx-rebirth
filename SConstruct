@@ -236,6 +236,7 @@ class Git(StaticSubprocess):
 			(b'*' if _pcall(['diff', '--quiet']).returncode else b'') +	\
 			(b'+' if _pcall(['diff', '--quiet', '--cached']).returncode else b'')
 		).decode()
+	spcall = classmethod(spcall)
 
 class ConfigureTests:
 	@dataclass(eq=False)
@@ -3974,6 +3975,21 @@ class DXXCommon(LazyObjectConstructor):
 					('show_assembler_version', True, None),
 					('show_linker_version', True, None),
 					('use_stereo_render', self.default_use_stereo_render, 'enable stereoscopic rendering'),
+					# If True and all the following are satisfied:
+					# - $SOURCE_DATE_EPOCH is not set in the process environment
+					# - `git` is available
+					# - the working copy is available
+					# - the working copy has no uncommitted changes
+					# then export to the compiler process environment:
+					# `SOURCE_DATE_EPOCH=$(git log --no-walk --pretty='%ct')`
+					# Users who build from an exported archive will not get an
+					# automatic SOURCE_DATE_EPOCH, because the working copy may
+					# have been patched after export, and without an available
+					# `git` and associated working copy, that cannot be readily
+					# detected.  Anyone, including users of exported archives,
+					# can still set $SOURCE_DATE_EPOCH before calling scons,
+					# and that value will be passed through.
+					('set_default_SOURCE_DATE_EPOCH', True, "set default value of $SOURCE_DATE_EPOCH=`git log --no-walk --pretty='%ct'` (automatically disabled if explicit SOURCE_DATE_EPOCH set, git is missing, git history is unavailable, or working copy has uncommitted changes)"),
 				),
 			},
 			{
@@ -5048,6 +5064,17 @@ class DXXArchive(DXXCommon):
 			builddir = env.Dir(builddir)
 		except TypeError as e:
 			raise SCons.Errors.StopError(e.args[0])
+		if user_settings.set_default_SOURCE_DATE_EPOCH:
+			penv = env['ENV']
+			# If the caller did not set $SOURCE_DATE_EPOCH and there are
+			# no pending changes, try to compute a value from the commit time
+			# of the HEAD commit.
+			if penv.get('SOURCE_DATE_EPOCH') is None and Git.compute_extra_version().diffstat_HEAD == '':
+				commit_timestamp = Git.spcall(['log', '--no-walk', '--pretty=%ct'])
+				if commit_timestamp is not None:
+					penv['SOURCE_DATE_EPOCH'] = SOURCE_DATE_EPOCH = commit_timestamp.decode().rstrip()
+					env["rebirth_environment_variables_shown"].add('SOURCE_DATE_EPOCH')
+					message(self, f'setting $SOURCE_DATE_EPOCH to guessed value {SOURCE_DATE_EPOCH}')
 		tests = ConfigureTests(self.program_message_prefix, user_settings, self.platform_settings)
 		log_file = builddir.File('config.log')
 		conf = env.Configure(custom_tests = {
@@ -5449,6 +5476,13 @@ class DXXProgram(DXXCommon):
 		super().prepare_environment()
 		env = self.env
 		env.MergeFlags(archive.configure_added_environment_flags)
+		archive_penv = archive.env['ENV']
+		SOURCE_DATE_EPOCH = archive_penv.get('SOURCE_DATE_EPOCH')
+		if SOURCE_DATE_EPOCH is not None:
+			penv = env['ENV']
+			penv['SOURCE_DATE_EPOCH'] = SOURCE_DATE_EPOCH
+			rebirth_environment_variables_shown = env['rebirth_environment_variables_shown']
+			rebirth_environment_variables_shown.add('SOURCE_DATE_EPOCH')
 		self.create_special_target_nodes(archive)
 		sharepath = self.user_settings.sharepath
 		env.__dxx_CPPDEFINE_SHAREPATH = (
@@ -5486,6 +5520,7 @@ class DXXProgram(DXXCommon):
 
 	def _register_program(self,exe_target):
 		env = self.env
+		penv = env['ENV']
 		user_settings = self.user_settings
 		static_archive_construction = self.static_archive_construction[user_settings.builddir]
 		objects = static_archive_construction.get_objects_common()
@@ -5555,7 +5590,7 @@ class DXXProgram(DXXCommon):
 			'git_diffstat',
 		))
 		versid_cppdefines.append(('DXX_RBE"(A)"', f'"{"".join([f"A({k})" for k in versid_build_environ])}"'))
-		versid_environ = env['ENV'].copy()
+		versid_environ = penv.copy()
 		# Direct mode conflicts with __TIME__
 		versid_environ['CCACHE_NODIRECT'] = '1'
 		versid_cpp = 'similar/main/vers_id.cpp'
@@ -5571,12 +5606,13 @@ class DXXProgram(DXXCommon):
 		# unset means that vers_id.cpp will not be rebuilt for this
 		# dependency if $SOURCE_DATE_EPOCH was previously unset and is
 		# currently unset, regardless of when it was most recently
-		# built, but vers_id.cpp will be rebuilt if the user changes
-		# $SOURCE_DATE_EPOCH and reruns scons.
+		# built, but vers_id.cpp will be rebuilt if the value of
+		# $SOURCE_DATE_EPOCH changes, either from user input or from a new
+		# guessed value.
 		#
 		# The process environment is not modified, so the default None
 		# is never seen by tools that would reject it.
-		Depends(versid_obj, env.Value(os.getenv('SOURCE_DATE_EPOCH')))
+		Depends(versid_obj, env.Value(penv.get('SOURCE_DATE_EPOCH')))
 		if user_settings.versid_depend_all:
 			# Optional fake dependency to force vers_id to rebuild so
 			# that it picks up the latest timestamp.
