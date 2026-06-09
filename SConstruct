@@ -3783,7 +3783,9 @@ class DXXCommon(LazyObjectConstructor):
 			return self.adlmidi != 'none'
 
 		def __default_DATA_DIR(self):
-			platform_settings_type = self._program.get_platform_settings_type(self._enumerated_host_platform)
+			# This method is called before `self._enumerated_host_platform` is
+			# set.
+			platform_settings_type = self._program.get_platform_settings_type(host_platform[self.host_platform])
 			sharepath = platform_settings_type.sharepath
 			if sharepath is None:
 				return None
@@ -4765,7 +4767,7 @@ class DXXCommon(LazyObjectConstructor):
 		return self.get_platform_settings_type(self.user_settings._enumerated_host_platform)(self, self.user_settings)
 
 	@classmethod
-	def get_platform_settings_type(cls,platform_name):
+	def get_platform_settings_type(cls, platform_name: host_platform):
 		# By happy accident, LinuxPlatformSettings produces the desired
 		# result on *BSD.
 		match platform_name:
